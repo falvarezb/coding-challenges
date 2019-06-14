@@ -7,6 +7,9 @@ import org.scalatest.prop.PropertyChecks
 
 class MissingNumberOnArrayTest extends FunSpec with PropertyChecks{
 
+
+  //==== PROPERTY-BASED TESTING ======
+
   /*
     Shrinking ignores restrictions of the generator, e.g. shrinking a Gen.choose(1, 10) might try to falsify the
     property with values such as 0, and -1
@@ -36,6 +39,9 @@ class MissingNumberOnArrayTest extends FunSpec with PropertyChecks{
     assert((arr ++ solutionN(arr, n)).toList.sorted == (1 to n).toList)
     assert(solutionNOptimised(arr, n) == solutionN(arr, n))
   }
+
+
+  //==== FUNCTIONAL TESTING ======
 
   describe("one missing element") {
     describe("given the array of integers [1,3,2,5] with elements between 1 and 5") {
