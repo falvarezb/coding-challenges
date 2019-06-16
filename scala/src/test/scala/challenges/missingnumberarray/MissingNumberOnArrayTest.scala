@@ -19,14 +19,14 @@ class MissingNumberOnArrayTest extends FunSpec with PropertyChecks{
   import org.scalacheck.Shrink.shrinkAny
 
   /**
-    * Generator of arrays of integers "i" of length "l" such that:
-    * 0 < i <= maxLength
-    * 0 < l <= maxLength
+    * Generator of arrays of integers "i" of length "k" such that:
+    * 0 < k <= n
+    * 0 < i <= n
     *
-    * For instance, given maxLength=6:
-    * + l=5 -> [1,2,3,4,5], missing value=[6]
-    * + l=5 -> [1,2,3,4,6], missing value=[5]
-    * + l=6 -> [1,2,3,4,5,6], missing value=[]
+    * For instance, given n=6:
+    * + k=5 -> [1,2,3,4,5], missing value=[6]
+    * + k=5 -> [1,2,3,4,6], missing value=[5]
+    * + k=6 -> [1,2,3,4,5,6], missing value=[]
     *
     */
   def missingNumbersOnArrayGen(n: Int): Gen[Array[Int]] = for {
