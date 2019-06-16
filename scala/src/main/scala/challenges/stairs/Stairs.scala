@@ -1,55 +1,67 @@
 package challenges.stairs
 
+import scala.util.Try
+
+/**
+  * Number of ways to climb 'n' stairs combining steps of different 'values' OR
+  * Number of ways to provide change for an amount 'n' by using coins of different 'values'
+  */
 object Stairs extends App {
 
-  /*
-    Number of ways to climb 'n' stairs combining steps of different 'values'
-    Number of ways to provide change for an amount 'n' by using coins of different 'values'
-   */
+  /**
+    * Counts all combinations, including permutations.
+    * For instance, if n=5 and values=[2,3], there are 2 combinations: [2,3] and [3,2]
+    */
   def countAllCombinations(n: Int, values: List[Int]): Int = n match {
     case 0 => 1
     case x => values.filter(_ <= x).map(step => countAllCombinations(x - step, values)).sum
   }
 
+  /**
+    * Finds all combinations, including permutations.
+    * For instance, if n=5 and values=[2,3], there are 2 combinations: [2,3] and [3,2]
+    *
+    * If no combination exists, returns an empty list
+    */
   def enumerateAllCombinations(n: Int, values: List[Int]): List[List[Int]] = n match {
     case 0 => List(Nil)
     case x => values.filter(_ <= x).flatMap(step => enumerateAllCombinations(x - step, values).map(comb => step :: comb))
   }
 
-  def enumerateAllOptimalCombinations(n: Int, values: List[Int]): List[List[Int]] = enumerateAllCombinations(n, values).groupBy(l => l.length).toSeq.minBy(_._1)._2
+  /**
+    * Out of all possible combinations, takes the shortest ones (including permutations)
+    * If no combination exists, returns an empty list
+    */
+  def enumerateAllOptimalCombinations(n: Int, values: List[Int]): List[List[Int]] = Try {
+    enumerateAllCombinations(n, values).groupBy(l => l.length).toSeq.minBy(_._1)._2
+  }.getOrElse(List())
 
-  def enumerateAnyOptimalCombination(n: Int, steps: List[Int]): List[Int] = n match {
-    case 0 => Nil
-    case x => values.filter(_ <= x).map(step => step :: enumerateAnyOptimalCombination(x - step, steps)).minBy(_.length)
-  }
+  /**
+    * Finds an optimal combination.
+    * If there are more than one candidate, returns any one of them.
+    * If no combination exists, returns an empty list
+    */
+  def enumerateAnyOptimalCombination(n: Int, values: List[Int]): List[Int] = Try {
+    n match {
+      case 0 => Nil
+      case x => values.filter(_ <= x).map(step => step :: enumerateAnyOptimalCombination(x - step, values)).filter(_.sum == n).minBy(_.length)
+    }
+  }.getOrElse(Nil)
 
-  def lengthOfOptimalCombination(n: Int, values: List[Int]): Int = n match {
-    case 0 => 0
-    case x => values.filter(_ <= x).map(step => 1 + lengthOfOptimalCombination(x - step, values)).min
-  }
-
-  def enumerateAnyOptimalCombinationGreedy(n: Int, values: List[Int]): List[Int] = n match {
-    case 0 => Nil
-    case x =>
-      val greatestCandidate = values.filter(_ <= x).max
-      greatestCandidate :: enumerateAnyOptimalCombinationGreedy(x - greatestCandidate, values)
-  }
-
-  def lengthOfOptimalCombinationGreedy(n: Int, values: List[Int]): Int = n match {
-    case 0 => 0
-    case x =>
-      val greatestCandidate = values.filter(_ <= n).max
-      1 + lengthOfOptimalCombinationGreedy(x - greatestCandidate, values)
-  }
-
-  val n = 9
-  val values = List(1, 4, 5)
-  println(s"countAllCombinations: ${countAllCombinations(n, values)}")
-  println(s"enumerateAllCombinations: ${enumerateAllCombinations(n, values)}")
-  println(s"enumerateAllOptimalCombinations: ${enumerateAllOptimalCombinations(n, values)}")
-  println(s"enumerateAnyOptimalCombination: ${enumerateAnyOptimalCombination(n, values)}")
-  println(s"lengthOfOptimalCombination: ${lengthOfOptimalCombination(n, values)}")
-  println(s"enumerateAnyOptimalCombinationGreedy: ${enumerateAnyOptimalCombinationGreedy(n, values)}")
-  println(s"lengthOfOptimalCombinationGreedy: ${lengthOfOptimalCombinationGreedy(n, values)}")
+  /**
+    * Finds the greedy combination
+    * If no greedy combination exists, returns an empty list
+    */
+  def greedyCombination(n: Int, values: List[Int]): List[Int] = Try {
+    n match {
+      case 0 => Nil
+      case x =>
+        val greatestCandidate = values.filter(_ <= x).max
+        greatestCandidate :: greedyCombination(x - greatestCandidate, values) match {
+          case solution if solution.sum == n => solution
+          case _ => Nil
+        }
+    }
+  }.getOrElse(Nil)
 
 }
