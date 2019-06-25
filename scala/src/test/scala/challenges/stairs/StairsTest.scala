@@ -13,50 +13,58 @@ class StairsTest extends FunSpec with PropertyChecks{
   describe("step values: 1, 4, 5") {
     val values = List(1, 4, 5)
 
-    describe("4 steps") {
+    describe("4 stairs") {
       val n = 4
 
-      it("should countAllCombinations") {
+      it("countAllCombinations") {
         assert(countAllCombinations(n, values) == 2)
       }
 
-      it("should enumerateAllCombinations") {
+      it("enumerateAllCombinations") {
         assert(enumerateAllCombinations(n, values) == List(List(1,1,1,1), List(4)))
       }
 
-      it("should enumerateAllOptimalCombinations") {
+      it("enumerateAllOptimalCombinations") {
         assert(enumerateAllOptimalCombinations(n, values) == List(List(4)))
       }
 
-      it("should enumerateAnyOptimalCombination") {
+      it("enumerateAllOptimalCombinationsWithoutPermutation") {
+        assert(enumerateAllOptimalCombinationsWithoutPermutation(n, values) == List(List(4)))
+      }
+
+      it("enumerateAnyOptimalCombination") {
         assert(enumerateAnyOptimalCombination(n, values) == List(4))
       }
 
-      it("should enumerateAnyOptimalCombinationGreedy") {
+      it("greedyCombination") {
         assert(greedyCombination(n, values) == List(4))
       }
     }
 
-    describe("8 steps") {
+    describe("8 stairs") {
       val n = 8
 
-      it("should countAllCombinations") {
+      it("countAllCombinations") {
         assert(countAllCombinations(n, values) == 11)
       }
 
-      it("should enumerateAllCombinations") {
+      it("enumerateAllCombinations") {
         assert(enumerateAllCombinations(n, values) == List(List(1,1,1,1,1,1,1,1), List(1,1,1,1,4), List(1,1,1,4,1), List(1,1,1,5), List(1,1,4,1,1), List(1,1,5,1), List(1,4,1,1,1), List(1,5,1,1), List(4,1,1,1,1), List(4,4), List(5,1,1,1)))
       }
 
-      it("should enumerateAllOptimalCombinations") {
+      it("enumerateAllOptimalCombinations") {
         assert(enumerateAllOptimalCombinations(n, values) == List(List(4,4)))
       }
 
-      it("should enumerateAnyOptimalCombination") {
+      it("enumerateAllOptimalCombinationsWithoutPermutation") {
+        assert(enumerateAllOptimalCombinationsWithoutPermutation(n, values) == List(List(4,4)))
+      }
+
+      it("enumerateAnyOptimalCombination") {
         assert(enumerateAnyOptimalCombination(n, values) == List(4,4))
       }
 
-      it("should enumerateAnyOptimalCombinationGreedy") {
+      it("greedyCombination") {
         assert(greedyCombination(n, values) == List(5,1,1,1))
       }
     }
@@ -66,7 +74,7 @@ class StairsTest extends FunSpec with PropertyChecks{
   describe("step values: 5") {
     val values = List(5)
 
-    describe("6 steps") {
+    describe("6 stairs") {
       val n = 6
 
       it("should countAllCombinations") {
@@ -90,7 +98,7 @@ class StairsTest extends FunSpec with PropertyChecks{
       }
     }
 
-    describe("2 steps") {
+    describe("2 stairs") {
       val n = 2
 
       it("should countAllCombinations") {
@@ -111,6 +119,27 @@ class StairsTest extends FunSpec with PropertyChecks{
 
       it("should enumerateAnyOptimalCombinationGreedy") {
         assert(greedyCombination(n, values) == List())
+      }
+    }
+
+  }
+
+  describe("step values: 1, 2, 3") {
+    val values = List(1,2,3)
+
+    describe("8 stairs") {
+      val n = 8
+
+      it("should countAllCombinations") {
+        assert(countAllCombinations(n, values) == 81)
+      }
+
+      it("should enumerateAllOptimalCombinations") {
+        assert(enumerateAllOptimalCombinations(n, values) == List(List(2, 3, 3), List(3, 2, 3), List(3, 3, 2)))
+      }
+
+      it("enumerateAllOptimalCombinationsWithoutPermutation") {
+        assert(enumerateAllOptimalCombinationsWithoutPermutation(n, values) == List(List(2,3,3)))
       }
     }
 

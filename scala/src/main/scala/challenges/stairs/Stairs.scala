@@ -14,7 +14,7 @@ object Stairs extends App {
     */
   def countAllCombinations(n: Int, values: List[Int]): Int = n match {
     case 0 => 1
-    case x => values.filter(_ <= x).map(step => countAllCombinations(x - step, values)).sum
+    case `n` => values.filter(_ <= n).map(step => countAllCombinations(n - step, values)).sum
   }
 
   /**
@@ -25,7 +25,11 @@ object Stairs extends App {
     */
   def enumerateAllCombinations(n: Int, values: List[Int]): List[List[Int]] = n match {
     case 0 => List(Nil)
-    case x => values.filter(_ <= x).flatMap(step => enumerateAllCombinations(x - step, values).map(comb => step :: comb))
+    case `n` => values.filter(_ <= n).flatMap(step => enumerateAllCombinations(n - step, values).map(comb => step :: comb))
+  }
+
+  def enumerateAllCombinationsWithoutPermutation(n: Int, values: List[Int]): List[List[Int]] = {
+    enumerateAllCombinations(n, values).map(_.sorted).distinct
   }
 
   /**
@@ -36,6 +40,10 @@ object Stairs extends App {
     enumerateAllCombinations(n, values).groupBy(l => l.length).toSeq.minBy(_._1)._2
   }.getOrElse(List())
 
+  def enumerateAllOptimalCombinationsWithoutPermutation(n: Int, values: List[Int]): List[List[Int]] = Try {
+    enumerateAllCombinationsWithoutPermutation(n, values).groupBy(l => l.length).toSeq.minBy(_._1)._2
+  }.getOrElse(List())
+
   /**
     * Finds an optimal combination.
     * If there are more than one candidate, returns any one of them.
@@ -44,7 +52,7 @@ object Stairs extends App {
   def enumerateAnyOptimalCombination(n: Int, values: List[Int]): List[Int] = Try {
     n match {
       case 0 => Nil
-      case x => values.filter(_ <= x).map(step => step :: enumerateAnyOptimalCombination(x - step, values)).filter(_.sum == n).minBy(_.length)
+      case `n` => values.filter(_ <= n).map(step => step :: enumerateAnyOptimalCombination(n - step, values)).filter(_.sum == n).minBy(_.length)
     }
   }.getOrElse(Nil)
 
@@ -55,13 +63,26 @@ object Stairs extends App {
   def greedyCombination(n: Int, values: List[Int]): List[Int] = Try {
     n match {
       case 0 => Nil
-      case x =>
-        val greatestCandidate = values.filter(_ <= x).max
-        greatestCandidate :: greedyCombination(x - greatestCandidate, values) match {
+      case `n` =>
+        val greatestCandidate = values.filter(_ <= n).max
+        greatestCandidate :: greedyCombination(n - greatestCandidate, values) match {
           case solution if solution.sum == n => solution
           case _ => Nil
         }
     }
   }.getOrElse(Nil)
 
+}
+
+object StairsBenchmark extends App {
+  import challenges.stairs.Stairs._
+
+  val n = 60
+  val values = List(2,5,8)
+
+  println(countAllCombinations(n, values))
+  println(enumerateAllOptimalCombinations(n, values).length)
+  println(enumerateAllOptimalCombinationsWithoutPermutation(n, values).length)
+  println(enumerateAllOptimalCombinationsWithoutPermutation(n, values))
+  //println(enumerateAnyOptimalCombination(n, values))
 }
