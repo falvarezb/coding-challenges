@@ -1,6 +1,6 @@
 package challenges.countdigits
 
-import org.scalameter.{Key, Warmer}
+import org.scalameter.{Aggregator, Measurer, Quantity}
 
 import scala.annotation.tailrec
 
@@ -33,26 +33,35 @@ object CountDigitsBenchmark extends App {
   val standardConfig = config(
     Key.exec.minWarmupRuns -> 10,
     Key.exec.maxWarmupRuns -> 20,
-    Key.exec.benchRuns -> 50,
-    Key.verbose -> true
-  ) withWarmer(new Warmer.Default)
+    Key.exec.benchRuns -> 50
+  )
 
-  val figure = 1234567890
+  val amount = 1234567890
 
-  val countDigitsTime = standardConfig.measure {
-    countDigits(figure)
+  def executionTime(f: Int => Int): Quantity[Double] = standardConfig withWarmer new Warmer.Default measure {
+    f(amount)
   }
 
-  val countDigitsRecursiveTime = standardConfig.measure {
-    countDigitsRecursive(figure)
+  def memoryFootprint(f: Int => Int): Quantity[Double] = standardConfig withWarmer new Warmer.Default withMeasurer new Measurer.MemoryFootprint measure {
+    f(amount)
   }
 
-  val countDigitsTailRecursiveTime = standardConfig.measure {
-    countDigitsTailRecursive(figure)
+  def gcCycles(f: Int => Int): Quantity[Int] = standardConfig withWarmer new Warmer.Default withMeasurer(new Measurer.GarbageCollectionCycles, Aggregator.median[Int]) measure {
+    f(amount)
   }
 
-  println(s"countDigitsTime: $countDigitsTime")
-  println(s"countDigitsRecursiveTime: $countDigitsRecursiveTime")
-  println(s"countDigitsTailRecursiveTime: $countDigitsTailRecursiveTime")
+  println(s"countDigits time: ${executionTime(countDigits)}")
+  println(s"countDigitsRecursive time: ${executionTime(countDigitsRecursive)}")
+  println(s"countDigitsTailRecursive time: ${executionTime(countDigitsTailRecursive)}")
+
+  println(s"countDigits memory: ${memoryFootprint(countDigits)}")
+  println(s"countDigitsRecursive memory: ${memoryFootprint(countDigitsRecursive)}")
+  println(s"countDigitsTailRecursive memory: ${memoryFootprint(countDigitsTailRecursive)}")
+
+  println(s"countDigits gc cycles: ${gcCycles(countDigits)}")
+  println(s"countDigitsRecursive gc cycles: ${gcCycles(countDigitsRecursive)}")
+  println(s"countDigitsTailRecursive gc cycles: ${gcCycles(countDigitsTailRecursive)}")
+
+
 
 }
