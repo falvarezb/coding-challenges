@@ -80,45 +80,42 @@ def enumerate_combinations_dp(n):
     return results[n-1]
 
 
-def enumerate_optimal_combinations_dp(n):
+def enumerate_optimal_combinations_dp(n, values):
     """
     dynamic programming solution with bottom-up memoisation
     """
 
-    results = [[[1]], [[2]], [[3]]]
-    for j in range(3, n):
-        x = j % 3
-        results.append(([i+[1] for i in results[j-1]] if x == 0 else []) + ([i+[2] for i in results[j-2]] if x < 2 else []) + [i+[3] for i in results[j-3]])
+    results = []
+
+    for j in range(1, n + 1):
+        if j in values:
+            results.append([[j]])
+        else:
+            new_combination = []
+            for k in values:
+                if k < j:
+                    for i in results[j - k - 1]:
+                        new_combination.append(i+[k])
+            if len(new_combination) > 0:
+                min_length = min([len(x) for x in new_combination])
+                optimal_new_combination = []
+                for arr in new_combination:
+                    if len(arr) == min_length:
+                        optimal_new_combination.append(arr)
+                results.append(optimal_new_combination)
+            else:
+                results.append([])
     return results[n-1]
 
 
-def count_optimal_combinations_recursive(n):
-    """
-    recursive solution
-    """
-
-    if n == 1:
-        return 1  # (1)
-    elif n == 2:
-        return 1  # (2)
-    elif n == 3:
-        return 1  # (3)
-    x = n % 3
-    return (count_optimal_combinations_recursive(n-1) if x == 1 else 0) + (count_optimal_combinations_recursive(n-2) if x > 0 else 0) + count_optimal_combinations_recursive(n-3)
-
-
-def count_optimal_combinations_dp_bottom_up(n):
-    """
-    dynamic programming solution with bottom-up memoisation
-    """
-    results = [0] * n
-    results[0] = 1
-    results[1] = 1
-    results[2] = 1
-    for i in range(3, n):
-        x = i % 3
-        results[i] = (results[i-1] if x == 0 else 0) + (results[i-2] if x < 2 else 0) + results[i-3]
-    return results[n-1]
+def enumerate_optimal_combinations_dp_without_permutation(n, values):
+    result = enumerate_optimal_combinations_dp(n, values)
+    new_list = []
+    for x in result:
+        x = sorted(x)
+        if x not in new_list:
+            new_list.append(x)
+    return new_list
 
 
 if __name__ == '__main__':
