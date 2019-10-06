@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Number of ways to climb n stairs when it is possible to take 1,2 or 3 steps at a time
+Number of ways to climb n > 0 stairs when it is possible to take 1,2 or 3 steps at a time
 """
-
-import timeit
 
 
 def count_combinations_recursive_generic(n, values):
@@ -34,8 +32,11 @@ def count_combinations_dp_bottom_up(n):
     """
     results = [0] * n
     results[0] = 1
-    results[1] = 2
-    results[2] = 4
+    if n >= 2:
+        results[1] = 2
+    if n >= 3:
+        results[2] = 4
+    
     for i in range(3, n):
         results[i] = results[i-1] + results[i-2] + results[i-3]
     return results[n-1]
@@ -153,6 +154,7 @@ def enumerate_optimal_combinations_dp_without_permutation(n, values):
 
 
 if __name__ == '__main__':
+    import timeit
     n = 30
     values = [1, 2, 3]
 
