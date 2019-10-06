@@ -105,3 +105,4 @@ project/plugins/project/
 /project/target/
 
 .spyproject/
+python/coding-challenges.code-workspace
