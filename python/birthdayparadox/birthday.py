@@ -2,10 +2,17 @@
 # -*- coding: utf-8 -*-
 
 """
-Calculate probability of 'num_people_same_bday' people having the same birthday in a group of 'num_people' people
+1. Probability of 'num_people_same_bday' people having the same birthday in a group of 'num_people' people
+2. Probability of someone in a group of 'num_people' having the same birthday as you
+
+These examples can be applied to many other contexts: 
+- probability of someone choosing the same number as you in a game
+- probability of 2 random numbers clashing in cryptography
+
+With these examples of mind, 'days_in_year' can be interpreted just as number of items
 """
 
-from random import choices
+from random import choices, choice
 from collections import Counter
 days_in_year = 365
 
@@ -39,7 +46,20 @@ def generic_simulation_solution(num_people_same_bday, num_people):
     trial = lambda: Counter(choices(range(days_in_year), k=num_people)).most_common(1)[0][1] >= num_people_same_bday
     return sum(trial() for i in range(num_trials)) / num_trials
 
+
+def same_bday_as_you(num_people):
+    """
+    Probability that someone in a group of num_people has the same birthday as you
+    """
+
+    your_bday = choice(range(days_in_year))
+    num_trials = 100000
+    trial = lambda: your_bday in choices(range(days_in_year), k=num_people)
+    return sum(trial() for i in range(num_trials)) / num_trials
+
+
 if __name__ == '__main__':
     print(analytical_solution(38))
     print(simulation_solution(38))
     print(generic_simulation_solution(2, 38))
+    print(same_bday_as_you(253))
