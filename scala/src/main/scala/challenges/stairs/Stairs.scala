@@ -11,7 +11,10 @@ object Stairs extends App {
 
   /**
     * Counts all combinations, including permutations.
-    * e.g.: if n=5 and values=[2,3], there are 2 combinations: [2,3] and [3,2]
+    *
+    * n=5
+    * values=[2,3]
+    * combinations: [2,3] and [3,2]
     */
   def countAllCombinations(n: Int, steps: List[Int]): Int = n match {
     case 0 => 1
@@ -20,7 +23,10 @@ object Stairs extends App {
 
   /**
     * Finds all combinations, including permutations.
-    * e.g.: if n=5 and steps=[2,3], there are 2 combinations: [2,3] and [3,2]
+    *
+    * n=5
+    * values=[2,3]
+    * combinations: [2,3] and [3,2]
     *
     * If no combination exists, returns an empty list
     */
@@ -32,7 +38,10 @@ object Stairs extends App {
   /**
     * Like 'enumerateAllCombinations' but excluding permutations.
     * 'canonical combination' is defined as the only representative of a list of steps and all its permutations
-    * e.g.: if n=5 and steps=[2,3], canonical combination is: [2,3]
+    *
+    * n=5
+    * values=[2,3]
+    * canonical combination: [2,3]
     *
     * If no combination exists, returns an empty list
     */
@@ -44,7 +53,10 @@ object Stairs extends App {
     * Like 'enumerateAllCombinations' but taking only the shortest combinations.
     * 'optimal combination' is defined as the shortest one.
     * There may be more than one optimal combination
-    * e.g.: if n=5 and steps=[2,3], there are 2 optimal combinations: [2,3] and [3,2]
+    *
+    * n=5
+    * values=[2,3]
+    * combinations: [2,3] and [3,2]
     *
     * If no combination exists, returns an empty list
     */
@@ -53,7 +65,9 @@ object Stairs extends App {
   }.getOrElse(List())
 
   /**
-    * e.g.: if n=5 and steps=[2,3], there is 1 optimal canonical combination: [2,3]
+    * n=5
+    * values=[2,3]
+    * canonical combination: [2,3] and [3,2]
     *
     * If no combination exists, returns an empty list
     */
