@@ -125,5 +125,5 @@ def test_list():
 def test_hypothesis(t):
     assert count_combinations_recursive_generic(t[0], t[1]) == len(enumerate_combinations_recursive_generic(t[0], t[1]))
     assert enumerate_combinations_dp_bottom_up_generic(t[0], t[1]) == enumerate_combinations_recursive_generic(t[0], t[1])
-    assert len(enumerate_optimal_combinations_dp_bottom_up_generic(t[0], t[1])) <= len(enumerate_combinations_dp_bottom_up_generic(t[0], t[1]))
     assert list1_subset_list2(enumerate_optimal_combinations_dp_bottom_up_generic(t[0], t[1]), enumerate_combinations_dp_bottom_up_generic(t[0], t[1]))
+    assert list1_subset_list2(enumerate_optimal_combinations_dp_without_permutation(t[0], t[1]), enumerate_optimal_combinations_dp_bottom_up_generic(t[0], t[1]))
