@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-"""
-    Given an array 'arr' containing k distinct numbers taken from 1,2 ... n with k < n, 
-    find the n - k missing numbers
-"""
+
+# Given an array 'arr' containing k distinct numbers taken from 1,2 ... n with k < n,
+# find the n - k missing numbers
 
 
 def solution1(arr, n):
@@ -38,18 +37,21 @@ def solution_n_optimised(arr, n):
 
 if __name__ == '__main__':
 
-    import timeit
+    def main():
+        import timeit
 
-    n = 10000000
-    # By construction, the missing number is max/2+1
-    test_data = list(range(1, int(n / 2))) + list(range(int(n / 2) + 1, n + 1))
-    print(solution1(test_data, n))
-    print(solution_n(test_data, n))
-    print(solution_n_optimised(test_data, n))
+        n = 10000000
+        # By construction, the missing number is max/2+1
+        test_data = list(range(1, int(n / 2))) + list(range(int(n / 2) + 1, n + 1))
+        print(solution1(test_data, n))
+        print(solution_n(test_data, n))
+        print(solution_n_optimised(test_data, n))
 
-    t1 = timeit.repeat(lambda: solution1(test_data, n), repeat=3, number=1)
-    print(f't1: {t1} sec') # [0.05796466600440908, 0.058634756998799276, 0.05945016899931943]
-    tn = timeit.repeat(lambda: solution_n(test_data, n), repeat=3, number=1)
-    print(f'tn: {tn} sec')  # [1.6984177570047905, 1.6123321470004157, 1.627043018997938]
-    tn_optimised = timeit.repeat(lambda: solution_n_optimised(test_data, n), repeat=3, number=1)
-    print(f'tn_optimised: {tn_optimised} sec')  # [1.7067252099950565, 1.6756674749995, 1.654086376001942]
+        t1 = timeit.repeat(lambda: solution1(test_data, n), repeat=3, number=1)
+        print(f't1: {t1} sec')  # [0.05796466600440908, 0.058634756998799276, 0.05945016899931943]
+        tn = timeit.repeat(lambda: solution_n(test_data, n), repeat=3, number=1)
+        print(f'tn: {tn} sec')  # [1.6984177570047905, 1.6123321470004157, 1.627043018997938]
+        tn_optimised = timeit.repeat(lambda: solution_n_optimised(test_data, n), repeat=3, number=1)
+        print(f'tn_optimised: {tn_optimised} sec')  # [1.7067252099950565, 1.6756674749995, 1.654086376001942]
+
+    main()

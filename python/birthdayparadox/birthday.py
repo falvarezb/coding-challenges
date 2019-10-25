@@ -9,7 +9,7 @@ These examples can be applied to many other contexts:
 - probability of someone choosing the same number as you in a game
 - probability of 2 random numbers clashing in cryptography
 
-With these examples of mind, 'days_in_year' can be interpreted just as number of items
+With these examples in mind, 'days_in_year' can be interpreted just as number of items
 """
 
 from random import choices, choice

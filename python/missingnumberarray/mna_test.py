@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import random
 from mna_solution import solution1, solution_n, solution_n_optimised
 from hypothesis import given
 import hypothesis.strategies as st
-import random
 
 
 # ==== FUNCTIONAL TESTING ======
