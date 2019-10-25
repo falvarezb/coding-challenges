@@ -36,7 +36,7 @@ def count_combinations_dp_bottom_up(n):
         results[1] = 2
     if n >= 3:
         results[2] = 4
-    
+
     for i in range(3, n):
         results[i] = results[i-1] + results[i-2] + results[i-3]
     return results[n-1]
@@ -131,7 +131,7 @@ def enumerate_optimal_combinations_dp_bottom_up_generic(n, values):
             for k in allowed_values:
                 for i in results[j - k - 1]:
                     new_combination.append(i+[k])
-            if len(new_combination) > 0:
+            if new_combination:
                 min_length = min([len(x) for x in new_combination])
                 optimal_new_combination = []
                 for arr in new_combination:
@@ -146,22 +146,25 @@ def enumerate_optimal_combinations_dp_bottom_up_generic(n, values):
 def enumerate_optimal_combinations_dp_without_permutation(n, values):
     result = enumerate_optimal_combinations_dp_bottom_up_generic(n, values)
     new_list = []
-    for x in result:
-        x = sorted(x)
-        if x not in new_list:
-            new_list.append(x)
+    for j in result:
+        j = sorted(j)
+        if j not in new_list:
+            new_list.append(j)
     return new_list
 
 
 if __name__ == '__main__':
-    import timeit
-    n = 30
-    values = [1, 2, 3]
 
-    print(timeit.repeat(lambda: count_combinations_recursive_generic(
-        n, values), repeat=1, number=1))
-    print(timeit.repeat(lambda: count_combinations_dp_bottom_up(n), repeat=3, number=1))
-    print(timeit.repeat(lambda: count_combinations_dp_top_down(n), repeat=3, number=1))
+    def main():
+        import timeit
+        n = 30
+        values = [1, 2, 3]
+
+        print(timeit.repeat(lambda: count_combinations_recursive_generic(n, values), repeat=1, number=1))
+        print(timeit.repeat(lambda: count_combinations_dp_bottom_up(n), repeat=3, number=1))
+        print(timeit.repeat(lambda: count_combinations_dp_top_down(n), repeat=3, number=1))
+
+    main()
 
 # print(count_combinations_dp_bottom_up(n))
 # print(count_combinations_dp_top_down(n))
