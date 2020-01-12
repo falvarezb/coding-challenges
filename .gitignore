@@ -6,7 +6,8 @@
 .idea/
 __pycache__/
 .hypothesis/
-
+.pytest_cache/
+*.pyc
 
 # Log file
 *.log
