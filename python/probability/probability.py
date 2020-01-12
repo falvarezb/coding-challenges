@@ -13,41 +13,6 @@ Therefore, according to the frequency interpretation of probability, an event's 
 frequency of the event as the number of trials approaches infinity.
 """
 
-from experiments import dice_roll
-
-def freq_prob2(convergence_tolerance, initial_num_trials, next_num_trials, max_num_trials, random_experiment, wanted_result):
-
-    """
-    Calculates the frequentist probability by simulating trials of a random experiment until the relative frequency converges.
-
-    The first simulation calculates the relative frequency resulting from running 'initial_num_trials' trials of the experiment.
-
-    Each succesive simulation runs a number of trials equal to the previous number of trials plus `next_num_trials`.
-
-    The function keeps on running simulations until the resulting series of relative frequencies converges or the maximum number of trials
-    is reached.
-
-    "random_experiment" is a function that takes as parameters:
-        - the number of trials to simulate
-        - the wanted result
-    and returns the relative frequency of the wanted result
-
-    """
-
-    num_trials = initial_num_trials
-    last_result = random_experiment(num_trials, wanted_result)
-
-    while True:
-        num_trials = num_trials + next_num_trials
-        new_result = random_experiment(num_trials, wanted_result)
-        if abs(new_result - last_result) <= convergence_tolerance:
-            print(f"convergence reached with {num_trials} trials")
-            return new_result
-        elif num_trials >= max_num_trials:
-            raise Exception('series of relative frequencies failed to converge after {num_trials} trials') 
-        last_result = new_result
-
-
 def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_experiment, wanted_result):
 
     """
