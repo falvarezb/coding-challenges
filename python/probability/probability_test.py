@@ -14,7 +14,6 @@ def test_freq_generator():
 
 
 def test_freq_prob():
-
     result = freq_prob(0.0001, 1000, 1000, dice_roll, 1)
     assert abs(result[0] - 1/6) < 0.01
 
