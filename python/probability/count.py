@@ -2,7 +2,7 @@
                                     Without repetition                                    With Repetition
     Ordered (Permutations)          n * (n - 1) * ... * (n - r + 1) = n! / (n - r)!       n^r
 
-    Non-ordered (Combinations)      n! / (n - r)! / r!                                  (n + r - 1)! / (n - 1)! / r!
+    Non-ordered (Combinations)      n! / (n - r)! / r!  (n k)                             (n + r - 1)! / (n - 1)! / r! (r+n-1 n-1)
 
 """
 
@@ -15,7 +15,7 @@ PERMUTATIONS
 
 
 def count_permutations_without_repetition(n, r):
-    return int(factorial(n) / factorial(n - r))
+    return factorial(n) // factorial(n - r)
 
 
 def enumerate_permutations_without_repetition(elements, r):
@@ -36,7 +36,7 @@ COMBINATIONS
 
 
 def count_combinations_without_repetition(n, r):
-    return int(factorial(n) / factorial(n - r) / factorial(r))
+    return factorial(n) // (factorial(n - r) * factorial(r))
 
 
 def enumerate_combinations_without_repetition(elements, r):
@@ -44,7 +44,7 @@ def enumerate_combinations_without_repetition(elements, r):
 
 
 def count_combinations_with_repetition(n, r):
-    return int(factorial(n + r - 1) / factorial(n - 1) / factorial(r))
+    return factorial(n + r - 1) // (factorial(n - 1) * factorial(r))
 
 
 def enumerate_combinations_with_repetition(elements, r):
