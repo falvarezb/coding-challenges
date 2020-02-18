@@ -115,7 +115,7 @@ object Primes {
 
   /**
     * Extended Euclidean algorithm to express the gcd of a and b as linear combination of a and b
-    * for a ≥ b, if d = gcd(a, b) then there are integers x and y such that: ax + by = d
+    * for a ≥ b, if d = gcd(a, b) then there are integers x and y such that: ax + by = d (Bezout's identity)
     *
     * By the Euclidean algorithm, d = gcd(b, a mod b), so if we know how to express d as linear combination of
     * b and (a mod b), d = bp + (a mod b)q, then d as linear combination of a and b is:
@@ -123,7 +123,7 @@ object Primes {
     *
     * @param a
     * @param b
-    * @return (d, x, y)
+    * @return (d, x, y) d = gcd(a, b), x and y are called Bezout's coefficients
     */
   def extendedEuclideanAlgorithm(a: Int, b: Int): (Int, Int, Int) = {
     assert(a >= b)
@@ -134,6 +134,34 @@ object Primes {
       val (d, p, q) = extendedEuclideanAlgorithm(b, a%b)
       (d, q, p - math.floor(a/b).toInt * q)
     }
+  }
+
+  /**
+    * return (x, y) such that a * x + b * y = c
+    *
+    * THEOREM
+    * Given integers a, b, c (at least one of a and b ̸= 0), the Diophantine equation ax+by = c
+    * has a solution (where x and y are integers) if and only if gcd(a, b) | c
+    *
+    * The proof of this theorem also provides a method to construct the solutions x and y:
+    *
+    * x = c/gcd(a,b) * x'
+    * y = c/gcd(a,b) * y'
+    *
+    * where x' and y' are Bezout's coefficients given by the extended Euclid's algorithm:
+    *
+    * ax'+by' = gcd(a,b)
+    *
+    * @param a
+    * @param b
+    * @param c
+    * @return
+    */
+  def diophantineEquation(a: Int, b: Int, c: Int): (Int, Int) = {
+    val (d, x, y) = extendedEuclideanAlgorithm(List(a,b).max, List(a,b).min)
+    assert(c%d == 0)
+    if(a > b) (c/d*x, c/d*y)
+    else (c/d*y, c/d*x)
   }
 
   def primesSet(n: Int): Set[BigInt] = primeNumbersGenerator take(n) toSet

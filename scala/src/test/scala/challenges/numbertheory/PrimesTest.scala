@@ -69,6 +69,16 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
       }
     }
 
+    describe("Diophantine equation") {
+      it("10x+6y=14, x=-7,y=14"){
+        assert(diophantineEquation(10,6,14) == (-7,14))
+      }
+
+      it("6x+10y=14, x=14,y=-7"){
+        assert(diophantineEquation(6,10,14) == (14,-7))
+      }
+    }
+
   }
 
 
