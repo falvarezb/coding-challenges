@@ -164,6 +164,17 @@ object Primes {
     else (c/d*y, c/d*x)
   }
 
+  /**
+    * returns least common multiple of a and b
+    *
+    * lcm(a,b) * gcd(a,b) = a*b
+    *
+    * @param a
+    * @param b
+    * @return
+    */
+  def lcm(a: Int, b: Int): Int = a*b/euclideanAlgorithm(List(a,b).max, List(a,b).min)
+
   def primesSet(n: Int): Set[BigInt] = primeNumbersGenerator take(n) toSet
   def primesList(n: Int): List[BigInt] = primeNumbersGenerator take(n) toList
 

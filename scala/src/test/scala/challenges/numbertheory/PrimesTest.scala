@@ -79,6 +79,12 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
       }
     }
 
+    describe("least common multiple") {
+      it("lcm(2,3)=6"){
+        assert(lcm(2,3) == 6)
+      }
+    }
+
   }
 
 
