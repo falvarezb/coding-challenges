@@ -2,7 +2,6 @@ package challenges.numbertheory
 
 import org.scalatest.{FunSpec, Matchers}
 import Primes._
-import com.typesafe.scalalogging.LazyLogging
 import org.scalatest.prop.PropertyChecks
 import org.scalacheck.Gen
 
@@ -55,13 +54,21 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
       assert(euclideanAlgorithm(10,6) == 2)
     }
 
-    it("gcd(28,63) = 3"){
+    it("gcd(10,6) = gcd(6,10)"){
+      assert(euclideanAlgorithm(10,6) == euclideanAlgorithm(6,10))
+    }
+
+    it("gcd(63,28) = 7"){
       assert(euclideanAlgorithm(63,28) == 7)
     }
 
     describe("Extended Euclidean algorithm") {
       it("gcd(10,6) = 2 = 10*(-1) + 6*2"){
         assert(extendedEuclideanAlgorithm(10,6) == (2,-1,2))
+      }
+
+      it("gcd(6,10) = 2 = 6*2 + 10*(-1)"){
+        assert(extendedEuclideanAlgorithm(6,10) == (2,2,-1))
       }
 
       it("gcd(239,201) = 1 = 239*(-37) + 201*44"){
@@ -71,11 +78,15 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
 
     describe("Diophantine equation") {
       it("10x+6y=14, x=-7,y=14"){
-        assert(diophantineEquation(10,6,14) == (-7,14))
+        assert(diophantineEquation(10,6,14).contains(-7,14))
       }
 
       it("6x+10y=14, x=14,y=-7"){
-        assert(diophantineEquation(6,10,14) == (14,-7))
+        assert(diophantineEquation(6,10,14).contains(14,-7))
+      }
+
+      it("8x+4y=7 has no solution"){
+        assert(diophantineEquation(8,4,7).isEmpty)
       }
     }
 
@@ -85,7 +96,63 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
       }
     }
 
+    describe("Modular division"){
+      it("2/5 ≡ 4 (mod 6)"){
+        assert(modularDivisionBruteForce(5, 2, 6).contains(4))
+        assert(modularDivision(5, 2, 6).contains(4))
+      }
+
+      it("1/3 (mod 6) does not exist"){
+        assert(modularDivisionBruteForce(3, 1, 6).isEmpty)
+        assert(modularDivision(3, 1, 6).isEmpty)
+      }
+
+      it("7/2 ≡ 8 (mod 9) "){
+        assert(modularDivisionBruteForce(2, 7, 9).contains(8))
+        assert(modularDivision(2, 7, 9).contains(8))
+      }
+
+      it("1/7 ≡ 1 (mod 6) "){
+        assert(modularDivisionBruteForce(7, 1, 6).contains(1))
+        assert(modularDivision(7, 1, 6).contains(1))
+      }
+
+      it("multiplicative inverse of 5 mod 6 is 5"){
+        assert(multiplicativeInverseBruteForce(5, 6).contains(5))
+      }
+      it("multiplicative inverse of 2 mod 6 does not exist"){
+        assert(multiplicativeInverseBruteForce(2, 6).isEmpty)
+      }
+      it("xxx"){
+        assert(multiplicativeInverseBruteForce(7, 5).isEmpty)
+      }
+    }
+
   }
+
+  describe("Modular exponentiation"){
+    it("7^4 (mod 11) = 3"){
+      assert(modularExponentiationBruteForce(7, 4, 11) == 3)
+      assert(modularExponentiation(7, 4, 11) == 3)
+      assert(fastModularExponentiation(7, 4, 11) == 3)
+      assert(fastModularExponentiation2(7, 4, 11) == 3)
+    }
+
+    it("7^128 (mod 11) = 9"){
+      assert(modularExponentiationBruteForce(7, 128, 11) == 9)
+      assert(modularExponentiation(7, 128, 11) == 9)
+      assert(fastModularExponentiation(7, 128, 11) == 9)
+      assert(fastModularExponentiation2(7, 128, 11) == 9)
+    }
+
+    it("7^13 (mod 11) = 2"){
+      assert(modularExponentiationBruteForce(7, 13, 11) == 2)
+      assert(modularExponentiation(7, 13, 11) == 2)
+      //assert(fastModularExponentiation(7, 13, 11) == 2)
+      assert(fastModularExponentiation2(7, 13, 11) == 2)
+    }
+  }
+
 
 
   //==== PROPERTY-BASED TESTING ======

@@ -14,6 +14,10 @@ class NegaBinaryTest extends FunSpec with PropertyChecks{
       it("-12 == -12"){
         assert(fromBase10ToTargetBase(-12, 10) == "-12")
       }
+
+      it("312 == 312"){
+        assert(fromBase10ToTargetBase(312, 10) == "312")
+      }
     }
 
     describe("to base -10"){
@@ -56,6 +60,13 @@ class NegaBinaryTest extends FunSpec with PropertyChecks{
 
       it("9 -> 11001"){
         assert(fromBase10ToTargetBase(9, targetBase) == "11001")
+      }
+    }
+
+    describe("to base 2"){
+      val targetBase = 2
+      it("10 -> 1010"){
+        assert(fromBase10ToTargetBase(10, targetBase) == "1010")
       }
     }
   }

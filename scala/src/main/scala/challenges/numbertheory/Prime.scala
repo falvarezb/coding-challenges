@@ -109,7 +109,6 @@ object Primes {
     */
   @tailrec
   def euclideanAlgorithm(a: Int, b: Int): Int = {
-    assert(a >= b)
     if(b == 0) a else euclideanAlgorithm(b, a % b)
   }
 
@@ -126,7 +125,6 @@ object Primes {
     * @return (d, x, y) d = gcd(a, b), x and y are called Bezout's coefficients
     */
   def extendedEuclideanAlgorithm(a: Int, b: Int): (Int, Int, Int) = {
-    assert(a >= b)
     if(b == 0){
       (a, 1, 0)
     }
@@ -157,11 +155,9 @@ object Primes {
     * @param c
     * @return
     */
-  def diophantineEquation(a: Int, b: Int, c: Int): (Int, Int) = {
+  def diophantineEquation(a: Int, b: Int, c: Int): Option[(Int, Int)] = {
     val (d, x, y) = extendedEuclideanAlgorithm(List(a,b).max, List(a,b).min)
-    assert(c%d == 0)
-    if(a > b) (c/d*x, c/d*y)
-    else (c/d*y, c/d*x)
+    if (c%d == 0) Some(if(a > b) (c/d*x, c/d*y) else (c/d*y, c/d*x)) else None
   }
 
   /**
@@ -174,6 +170,178 @@ object Primes {
     * @return
     */
   def lcm(a: Int, b: Int): Int = a*b/euclideanAlgorithm(List(a,b).max, List(a,b).min)
+
+
+  /**
+    * Given a ̸= 0 and b, there exists x (not always) such that a × x ≡ b (mod m), therefore
+    * x plays the role of modular division x = b/a (mod m)
+    *
+    * Example:
+    *
+    * 2/5 ≡ 4 (mod 6) as 4×5≡2 (mod 6)
+    *
+    * Modular division is not always possible. In the following example, there is no x such that:
+    *
+    * 3×x≡1 (mod 6)
+    *
+    * In reality, the modular division consists in solving the equation:
+    *
+    * a*x % m = b (among all possible solutions, by convention we take the solution satisfying the constraint x < m)
+    *
+    * @param a
+    * @param b
+    * @param mod
+    * @return
+    */
+  def modularDivisionBruteForce(a: Int, b: Int, m: Int): Option[Int] = {
+    assert(a > 0  && b < m)
+
+    for(x <- 1 to m)
+      if (x*a%m == b)
+        return Some(x)
+
+    None
+  }
+
+  /**
+    * A multiplicative inverse of a mod m is a' such that: a×a'≡1 (mod m), in other words, the solution of the equation
+    *
+    * a*x % m = 1 (x < m)
+    *
+    * @param a
+    * @param m
+    * @return
+    */
+  def multiplicativeInverseBruteForce(a: Int, m: Int): Option[Int] = {
+    modularDivisionBruteForce(a, 1, m)
+  }
+
+
+  /**
+    * Given that congruence is preserved under multiplication, it's easy to prove that b/a ≡ b*a' (mod m), where a' is
+    * the multiplicative inverse modulo m of a
+    *
+    * Also, it's possible to prove that a has a multiplicative inverse modulo m iff gcd(a, m) = 1 and the
+    * multiplicative inverse is given by the solution s of the Diophantine equation in the variables s and t:
+    *
+    * as + mt = 1
+    *
+    * So finally, b/a ≡ b×s (mod m)
+    *
+    * @param a
+    * @param b
+    * @param m
+    * @return
+    */
+  def modularDivision(a: Int, b: Int, m: Int): Option[Int] = {
+    assert(a > 0 && b < m)
+
+    diophantineEquation(a, m, 1).map{
+      case (s, t) => Math.floorMod(b*s,m)
+    }
+  }
+
+  /**
+    * Returns b^e (mod m)
+    * @param b
+    * @param e
+    * @param m
+    */
+  def modularExponentiationBruteForce(b: Int, e: Int, m: Int): Int = {
+    BigInt(b).pow(e) % m toInt
+  }
+
+  /**
+    * Implementation based on the property that congruence is preserved under multiplication:
+    * (a ⋅ b) mod m = [(a mod m) ⋅ (b mod m)] mod m
+    *
+    * The process takes e steps
+    *
+    * @param b
+    * @param e
+    * @param m
+    * @return
+    */
+  def modularExponentiation(b: Int, e: Int, m: Int): Int = {
+
+    def aux(e: Int): Int = {
+      if(e == 1)
+        b%m
+      else
+        ((b%m) * aux(e - 1))%m
+    }
+
+    aux(e)
+  }
+
+  /**
+    * Similar to the previous one but using exponentiation by squaring (aka binary exponentiation)
+    *
+    * Useful when e is a power of 2, e=2^k, the process takes k steps
+    *
+    * @param b
+    * @param e
+    * @param m
+    * @return
+    */
+  def fastModularExponentiation(b: Int, e: Int, m: Int): Int = {
+
+    def aux(e: Int): Int = {
+      if(e == 1)
+        b%m
+      else
+        Math.pow(aux(e/2),2).toInt %m
+    }
+
+    aux(e)
+  }
+
+  /**
+    * Similar to the previous one but using exponentiation by squaring (aka binary exponentiation)
+    *
+    * b^e = b^(a1*2^0 + a2*2^1 + ... aN*2*N) = b^(a1*2^0) * .... * b^(aN*2^N) where a1, a2 ... aN take the values 0 or 1
+    *
+    * Steps:
+    * 1. Rewrite e in binary form
+    * 2. Compute b^(2^k) mod m for each element of the binary representation of the exponent
+    * 3. Multiply the results of previous step
+    *
+    * @param b
+    * @param e
+    * @param m
+    * @return
+    */
+  def fastModularExponentiation2(b: Int, e: Int, m: Int): Int = {
+
+    def aux(e: Int): Int = {
+      if(e == 0)
+        1
+      else if(e == 1)
+        b%m
+      else
+        Math.pow(aux(e/2),2).toInt %m
+    }
+
+    val binaryE = binaryRepresentation(e)
+    binaryE.zipWithIndex.map {
+      case (digit, position) => aux(digit * Math.pow(2, position).toInt)
+    }.reduceLeft((acc, x) => acc * x % m)
+  }
+
+  /**
+    * Leading digit is in the rightmost position
+    * @param n
+    * @return
+    */
+  def binaryRepresentation(n: Int): List[Int] = {
+
+    val base = 2
+    val q = n/base
+    val r = n%base
+
+    if(q == 0) r :: Nil
+    else r :: binaryRepresentation(q)
+  }
 
   def primesSet(n: Int): Set[BigInt] = primeNumbersGenerator take(n) toSet
   def primesList(n: Int): List[BigInt] = primeNumbersGenerator take(n) toList
