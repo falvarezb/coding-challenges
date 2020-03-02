@@ -7,7 +7,7 @@ def extended_euclid_gcd(a, b):
     b and (a mod b), d = bp + (a mod b)q, then d as linear combination of a and b is:
     d = aq + b(p - floor(a/b)q)
     """
-    
+
     if b == 0:
         d, x, y = a, 1, 0
     else:
@@ -51,18 +51,18 @@ def euclid_gcd(a, b):
 def diophantine(a, b, c):
     """
     Returns (x, y) such that a * x + b * y = c
-    
+
     THEOREM
     Given integers a, b, c (at least one of a and b ̸= 0), the Diophantine equation ax+by = c
     has a solution (where x and y are integers) if and only if gcd(a, b) | c
-    
+
     The proof of this theorem also provides a method to construct the solutions x and y:
-    
+
     x = c/gcd(a,b) * x'
     y = c/gcd(a,b) * y'
-    
+
     where x' and y' are Bezout's coefficients given by the extended Euclid's algorithm:
-    
+
     ax'+by' = gcd(a,b)
     """
 
@@ -74,12 +74,35 @@ def diophantine(a, b, c):
     return None
 
 
-def divide(a, b, n):
-    assert n > 1 and a > 0 and euclid_gcd(a, n) == 1
+def modular_division(a, b, m):
+    """
+    Given a ̸= 0 and b, there exists x (not always) such that a * x ≡ b (mod m), therefore
+    x plays the role of modular division x = b/a (mod m)
 
-    # return the number x s.t. x = b / a (mod n) and 0 <= x <= n-1.
-    s, t = diophantine(a, n, 1)
-    return s*b % n
+    Example:
+
+    2/5 ≡ 4 (mod 6) as 4*5≡2 (mod 6)
+
+    Modular division is not always possible. In the following example, there is no x such that:
+
+    3*x ≡ 1 (mod 6)
+
+    Given that congruence is preserved under multiplication, it's easy to prove that b/a ≡ b*a' (mod m), where a' is
+    the multiplicative inverse modulo m of a
+
+    Also, it's possible to prove that a has a multiplicative inverse modulo m iff gcd(a, m) = 1 and the
+    multiplicative inverse is given by the solution s of the Diophantine equation in the variables s and t:
+
+    as + mt = 1
+
+    So finally, b/a ≡ b*s (mod m)
+    """
+    assert a != 0
+
+    solution = diophantine(a, m, 1)
+    if solution is not None:
+        return solution[0]*b % m
+    return None
 
 
 def ChineseRemainderTheorem(n1, r1, n2, r2):
@@ -89,56 +112,54 @@ def ChineseRemainderTheorem(n1, r1, n2, r2):
     return (r2*n1*y + r1*n2*x) % (n1*n2)
 
 
-'''
-computes b^2k mod m
-'''
+def modular_exponentiation(b, e, m):
+    """
+    Returns b^e (mod m)
+    The process takes e steps
+    """
+    result = 1
+    for _ in range(e):
+        result = (result * b) % m
+    return result
 
 
-def FastModularExponentiation(b, k, m):
-    # your code here
+def fast_modular_exponentiation_by_squaring(b, k, m):
+    """
+    Returns b^e (mod m) where the exponent e is a power of 2: e=2^k
+    The process takes k steps by doing exponentiation by squaring
+    """
     result = b % m
     for _ in range(k):
         result = (result * result) % m
     return result
 
 
-'''
-generalisation of previous function when e != 2^k
-'''
+def fast_modular_exponentiation_by_squaring_gen(b, e, m):
+    """
+    Generalisation of exponentiation by squaring when the exponent e is not a power of 2
 
-
-def FastModularExponentiation2(b, e, m):
-    binary_e = binary(e)
+    Steps:
+    1. Rewrite e in binary form
+    2. Compute b^(2^k) mod m for each element of the binary representation of the exponent
+    3. Multiply the results of previous step
+    """
+    binary_e = binary_expansion(e)
 
     result = 1
     position = 0
     for position, digit in enumerate(binary_e):
         if digit == 1:
-            result = result * FastModularExponentiation(b, position, m) % m
+            result = result * fast_modular_exponentiation_by_squaring(b, position, m) % m
     return result
 
 
-'''
-Leading digit is in the rightmost position
-'''
-
-
-def binary(n):
+def binary_expansion(n):
+    """
+    Returns binary representation of n
+    Leading digit is in the rightmost position
+    """
     result = []
     while n > 0:
         result.append(n % 2)
         n = n//2
     return result
-
-
-print(binary(10))
-print(FastModularExponentiation(7, 2, 11))
-print(FastModularExponentiation(7, 7, 11))
-print(FastModularExponentiation2(7, 13, 11))
-# print(lcm(2, 3))
-# print(diophantine(10, 6, 14))
-# print(diophantine(6, 10, 14))
-# print(divide(5, 2, 6))
-# print(ChineseRemainderTheorem(5, 2, 7, 3))
-# print(ChineseRemainderTheorem(686579304, 295310485, 26855093, 8217207))
-# print(extended_gcd(10, 6))

@@ -1,4 +1,4 @@
-from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine
+from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine, modular_division, binary_expansion, fast_modular_exponentiation_by_squaring, modular_exponentiation, fast_modular_exponentiation_by_squaring_gen
 
 
 def test_euclid_gcd():
@@ -49,6 +49,39 @@ def test_diophantine_equation_order_does_matter():
     assert solution1[0] == solution2[1]
     assert solution1[1] == solution2[0]
 
+
 def test_diophantine_equation_with_no_solution():
     # 8x+4y=7
-    assert diophantine(8, 4, 7) == None
+    assert diophantine(8, 4, 7) is None
+
+
+def test_modular_division():
+    # 2/5 ≡ 4 mod 6
+    assert modular_division(5, 2, 6) == 4
+
+
+def test_modular_division2():
+    # 6/4 ≡ 5 (mod 7)
+    assert modular_division(4, 6, 7) == 5
+
+
+def test_modular_division_not_possible():
+    # 4/8 mod 6 is not possible
+    assert modular_division(8, 4, 6) is None
+
+
+def test_binary_expansion():
+    assert binary_expansion(10) == [0, 1, 0, 1]
+
+
+def test_modular_exponentiation_exp_power_of_2():
+    # 7^4 (mod 11) = 3
+    assert modular_exponentiation(7, 4, 11) == 3
+    assert fast_modular_exponentiation_by_squaring(7, 2, 11) == 3
+    assert fast_modular_exponentiation_by_squaring_gen(7, 4, 11) == 3
+
+
+def test_modular_exponentiation_exp_not_power_of_2():
+    # 7^13 (mod 11) = 2
+    assert modular_exponentiation(7, 13, 11) == 2
+    assert fast_modular_exponentiation_by_squaring_gen(7, 13, 11) == 2
