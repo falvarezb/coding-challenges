@@ -103,7 +103,7 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
       }
 
       it("1/3 (mod 6) does not exist"){
-        assert(modularDivisionBruteForce(3, 1, 6).isEmpty)
+        assert(multiplicativeInverseBruteForce(3, 6).isEmpty)
         assert(modularDivision(3, 1, 6).isEmpty)
       }
 
@@ -113,18 +113,23 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
       }
 
       it("1/7 ≡ 1 (mod 6) "){
-        assert(modularDivisionBruteForce(7, 1, 6).contains(1))
+        assert(multiplicativeInverseBruteForce(7, 6).contains(1))
         assert(modularDivision(7, 1, 6).contains(1))
       }
 
-      it("multiplicative inverse of 5 mod 6 is 5"){
+      it("1/5 ≡ 5 (mod 6)"){
         assert(multiplicativeInverseBruteForce(5, 6).contains(5))
+        assert(modularDivision(5, 1, 6).contains(5))
       }
-      it("multiplicative inverse of 2 mod 6 does not exist"){
+
+      it("1/2 (mod 6) does not exist"){
         assert(multiplicativeInverseBruteForce(2, 6).isEmpty)
+        assert(modularDivision(2, 1, 6).isEmpty)
       }
-      it("xxx"){
-        assert(multiplicativeInverseBruteForce(7, 5).isEmpty)
+
+      it("6/4 ≡ 5 (mod 7)"){
+        assert(modularDivisionBruteForce(4, 6, 7).contains(5))
+        assert(modularDivision(4, 6, 7).contains(5))
       }
     }
 
@@ -148,7 +153,6 @@ class PrimesTest extends FunSpec with Matchers with PropertyChecks {
     it("7^13 (mod 11) = 2"){
       assert(modularExponentiationBruteForce(7, 13, 11) == 2)
       assert(modularExponentiation(7, 13, 11) == 2)
-      //assert(fastModularExponentiation(7, 13, 11) == 2)
       assert(fastModularExponentiation2(7, 13, 11) == 2)
     }
   }

@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.math.BigInt
 import scala.math.{sqrt, ceil}
+import Math.floorMod
 
 object Primes {
 
@@ -173,40 +174,33 @@ object Primes {
 
 
   /**
-    * Given a ̸= 0 and b, there exists x (not always) such that a × x ≡ b (mod m), therefore
+    * Given a ̸= 0 and b, there exists x (not always) such that a * x ≡ b (mod m), therefore
     * x plays the role of modular division x = b/a (mod m)
     *
     * Example:
     *
-    * 2/5 ≡ 4 (mod 6) as 4×5≡2 (mod 6)
+    * 2/5 ≡ 4 (mod 6) as 4*5≡2 (mod 6)
     *
     * Modular division is not always possible. In the following example, there is no x such that:
     *
-    * 3×x≡1 (mod 6)
-    *
-    * In reality, the modular division consists in solving the equation:
-    *
-    * a*x % m = b (among all possible solutions, by convention we take the solution satisfying the constraint x < m)
+    * 3*x ≡ 1 (mod 6)
     *
     * @param a
     * @param b
-    * @param mod
+    * @param m
     * @return
     */
   def modularDivisionBruteForce(a: Int, b: Int, m: Int): Option[Int] = {
-    assert(a > 0  && b < m)
+    assert(a != 0)
 
     for(x <- 1 to m)
-      if (x*a%m == b)
+      if (floorMod(x*a,m) == floorMod(b,m))
         return Some(x)
-
     None
   }
 
   /**
-    * A multiplicative inverse of a mod m is a' such that: a×a'≡1 (mod m), in other words, the solution of the equation
-    *
-    * a*x % m = 1 (x < m)
+    * A multiplicative inverse of a mod m is a' such that: a*a' ≡ 1 (mod m)
     *
     * @param a
     * @param m
@@ -226,7 +220,7 @@ object Primes {
     *
     * as + mt = 1
     *
-    * So finally, b/a ≡ b×s (mod m)
+    * So finally, b/a ≡ b*s (mod m)
     *
     * @param a
     * @param b
@@ -234,10 +228,10 @@ object Primes {
     * @return
     */
   def modularDivision(a: Int, b: Int, m: Int): Option[Int] = {
-    assert(a > 0 && b < m)
+    assert(a != 0)
 
     diophantineEquation(a, m, 1).map{
-      case (s, t) => Math.floorMod(b*s,m)
+      case (s, _) => floorMod(b*s,m)
     }
   }
 
