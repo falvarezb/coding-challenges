@@ -1,3 +1,4 @@
+from prime import is_prime
 from math import sqrt, log
 from random import sample, randint
 
@@ -68,45 +69,13 @@ def convert_to_str(n):
     return res[::-1]
 
 
-def is_prime(n):
-    if n % 2 == 0:
-        return False
-
-    for j in range(3, int(sqrt(n))+2, 2):
-        if n % j == 0:
-            return False
-    return True
-
-
-def num_primes_approx(n):
-    return int(n//log(n))
-
-
-def num_primes_exact(n):
-    count = 0
-    for j in range(2, n):
-        if is_prime(j):
-            count += 1
-    return count
-
-
-def generate_prime(seed):
-    num_samples = int(log(seed)//2)
-    candidates = sample(range(3, seed, 2), k=num_samples)
-    for j in candidates:
-        if is_prime(j):
-            return j
-    print("no prime was found")
-    return None
-
-
 def fermat_primality_test(n):
     '''
     Probabilistic test to determine whether a number is a probable prime
 
     It's based on Fermat's little theorem:
 
-    if prime p does not divide integer a, then a^(p-1) = 1 mod p
+    if p is prime and a is an integer not divisible by p, then a^(p-1) = 1 mod p
 
     For the test, we try all values 2 .... p-1 < p. 
     If the congruence holds for all possible values, then we consider n as prime.
@@ -208,7 +177,7 @@ if __name__ == '__main__':
     # print(num_primes_exact(n))
     # print(num_primes_approx(n)/num_primes_exact(n))
     # print(1/log(n))
-    # print(generate_prime(1000))
+    print(generate_prime(1000))
     # potential_prime = 919
     # print(is_prime(potential_prime))
     # print(fermat_primality_test(potential_prime))

@@ -76,7 +76,7 @@ def diophantine(a, b, c):
 
 def modular_division(a, b, m):
     """
-    Given a ̸= 0 and b, there exists x (not always) such that a * x ≡ b (mod m), therefore
+    Given a != 0 and b, there exists x (not always) such that a * x ≡ b (mod m), therefore
     x plays the role of modular division x = b/a (mod m)
 
     Example:
@@ -90,8 +90,8 @@ def modular_division(a, b, m):
     Given that congruence is preserved under multiplication, it's easy to prove that b/a ≡ b*a' (mod m), where a' is
     the multiplicative inverse modulo m of a
 
-    Also, it's possible to prove that a has a multiplicative inverse modulo m iff gcd(a, m) = 1 and the
-    multiplicative inverse is given by the solution s of the Diophantine equation in the variables s and t:
+    Also, it's possible to prove that a' exists iff gcd(a, m) = 1 and its value is given by the solution s of 
+    the Diophantine equation in the variables s and t:
 
     as + mt = 1
 
