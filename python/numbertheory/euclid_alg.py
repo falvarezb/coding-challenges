@@ -1,3 +1,5 @@
+from util import binary_expansion
+
 def extended_euclid_gcd(a, b):
     """
     Extended Euclidean algorithm to express the gcd of a and b as linear combination of a and b
@@ -153,13 +155,4 @@ def fast_modular_exponentiation_by_squaring_gen(b, e, m):
     return result
 
 
-def binary_expansion(n):
-    """
-    Returns binary representation of n
-    Leading digit is in the rightmost position
-    """
-    result = []
-    while n > 0:
-        result.append(n % 2)
-        n = n//2
-    return result
+

@@ -1,4 +1,4 @@
-from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine, modular_division, binary_expansion, fast_modular_exponentiation_by_squaring, modular_exponentiation, fast_modular_exponentiation_by_squaring_gen
+from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine, modular_division, fast_modular_exponentiation_by_squaring, modular_exponentiation, fast_modular_exponentiation_by_squaring_gen
 
 
 def test_euclid_gcd():
@@ -68,10 +68,6 @@ def test_modular_division2():
 def test_modular_division_not_possible():
     # 4/8 mod 6 is not possible
     assert modular_division(8, 4, 6) is None
-
-
-def test_binary_expansion():
-    assert binary_expansion(10) == [0, 1, 0, 1]
 
 
 def test_modular_exponentiation_exp_power_of_2():
