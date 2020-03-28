@@ -2,7 +2,6 @@ from math import sqrt, log, ceil
 from random import sample, randint
 from euclid_alg import fast_modular_exponentiation_by_squaring_gen
 from util import even_as_power_of_2, random_n_bit_long_odd_integer
-from datetime import datetime as dt
 
 
 def is_prime(p):
@@ -25,9 +24,12 @@ def next_prime(n):
     Example:
     n=4 returns 5
     """
-    n += 1
-    while not is_prime(n):
+    if n%2 == 0:
         n += 1
+    else:
+        n += 2
+    while not is_prime(n):
+        n += 2
     return n
 
 
@@ -158,14 +160,14 @@ def miller_rabin_primality_test(p, repetitions):
     to gain confidence in the result.
     '''
 
-    def is_potential_prime(p, s, d):        
-        a = pow(randint(2, p-1), d, p)
-        if a in (1, p-1):  # Python % operator is based on floor division, thus we need to compare to n-1 instead to -1
+    def is_potential_prime(p, s, d):
+        a = fast_modular_exponentiation_by_squaring_gen(randint(2, p-1), d, p)
+        if a in (1, p-1):  # Python % operator is based on floor division, thus we need to compare to n-1 instead of -1
             return True
         for _ in range(s):
-            a = pow(a, 2, p)
-            if a == p-1:  # Python % operator is based on floor division, thus we need to compare to n-1 instead to -1                
-                return True        
+            a = fast_modular_exponentiation_by_squaring_gen(a, 2, p)
+            if a == p-1:  # Python % operator is based on floor division, thus we need to compare to n-1 instead to -1
+                return True
         return False
 
     assert p > 1, "the argument must be a positive integer greater than 1 as 0 and 1 are neither prime nor composite"
@@ -173,12 +175,13 @@ def miller_rabin_primality_test(p, repetitions):
         return True
     if p % 2 == 0:
         return False
-    
-    s, d = even_as_power_of_2(p-1)    
+
+    s, d = even_as_power_of_2(p-1)
     for _ in range(repetitions):
-        if not is_potential_prime(p, s, d):            
-            return False    
+        if not is_potential_prime(p, s, d):
+            return False
     return True
+
 
 def random_n_bit_long_prime(n):
     '''
@@ -188,7 +191,7 @@ def random_n_bit_long_prime(n):
 
     num_repetitions_for_primality_test = 5
     p = random_n_bit_long_odd_integer(n)
-    while not miller_rabin_primality_test(p, num_repetitions_for_primality_test):        
+    while not miller_rabin_primality_test(p, num_repetitions_for_primality_test):
         p = random_n_bit_long_odd_integer(n)
     return p
 

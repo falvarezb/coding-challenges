@@ -1,6 +1,7 @@
 from math import log10, ceil
 from random import getrandbits
 
+
 def even_as_power_of_2(n):
     """
     Returns the representation as a power of 2 of an even number n.
@@ -27,8 +28,8 @@ def convert_to_int(message_str):
     Converts any string into an int
     """
     res = 0
-    for i in range(len(message_str)):
-        res = res * 256 + ord(message_str[i])
+    for c in message_str:
+        res = res * 256 + ord(c)
     return res
 
 
@@ -71,6 +72,7 @@ def num_digits_exp(n, e):
     '''
     return ceil(e*log10(n))
 
+
 def num_digits_of_n_bit_long_integer(n):
     return num_digits_exp(2, n)
 
@@ -80,7 +82,7 @@ def random_n_bit_long_odd_integer(n):
     Returns a random n-bit long odd integer
     '''
     # apply a mask to set MSB and LSB to 1
-    mask = (1 << n - 1) | 1 # 100...001
+    # MSB must be 1 to ensure it is a n-bit long integer
+    # LSB must be 1 to ensure it is odd
+    mask = (1 << n - 1) | 1  # 100..(n)..001
     return getrandbits(n) | mask
-
-

@@ -1,9 +1,10 @@
 from util import binary_expansion
 
+
 def extended_euclid_gcd(a, b):
     """
     Extended Euclidean algorithm to express the gcd of a and b as linear combination of a and b
-    for a ≥ b, if d = gcd(a, b) then there are integers x and y such that: ax + by = d (Bezout's identity)
+    if d = gcd(a, b) then there are integers x and y such that: ax + by = d (Bezout's identity)
 
     By the Euclidean algorithm, d = gcd(b, a mod b), so if we know how to express d as linear combination of
     b and (a mod b), d = bp + (a mod b)q, then d as linear combination of a and b is:
@@ -44,10 +45,10 @@ def euclid_gcd(a, b):
     https://en.wikipedia.org/wiki/Euclidean_algorithm
 
     The following two formulations are equivalent:
-    - for a ≥ b, gcd(a, b) = gcd(b, a mod b) (where a mod b represents the remainder of the division a/b)
-    - for a ≥ b, d|a and d|b iff d|a-b (where d|a means d divides a)
+    - gcd(a, b) = gcd(b, a mod b) (where a mod b represents the remainder of the division a/b)
+    - d|a and d|b iff d|a-b (where d|a means d divides a)
     """
-    return a if b == 0 else euclid_gcd(b, a % b)
+    return euclid_gcd(b, a % b) if b else a
 
 
 def diophantine(a, b, c):
@@ -55,7 +56,7 @@ def diophantine(a, b, c):
     Returns (x, y) such that a * x + b * y = c
 
     THEOREM
-    Given integers a, b, c (at least one of a and b ̸= 0), the Diophantine equation ax+by = c
+    Given integers a, b, c (at least one of a and b != 0), the Diophantine equation ax+by = c
     has a solution (where x and y are integers) if and only if gcd(a, b) | c
 
     The proof of this theorem also provides a method to construct the solutions x and y:
@@ -66,6 +67,9 @@ def diophantine(a, b, c):
     where x' and y' are Bezout's coefficients given by the extended Euclid's algorithm:
 
     ax'+by' = gcd(a,b)
+
+    Furthermore, if (x0, y0) is a solution, then the other solutions have the form (x0 + k * b/gcd(a,b), y0 − k * a/gcd(a,b))
+    where k is an arbitrary integer
     """
 
     d, x, y = extended_euclid_gcd(max(a, b), min(a, b))
@@ -75,10 +79,46 @@ def diophantine(a, b, c):
         return (c//d*y, c//d*x)
     return None
 
+def sum_as_multiple_3_and_5(n):
+    '''
+    Any integer can be written as sum of multiples of 3 and 5.
+
+    Proof
+    =====
+
+    We know that given integer n, the linear diophantine equation
+
+    3 * x + 5 * y = n
+
+    has solution iff gcd(3,5) divides n.
+
+    And since gcd(3,5) = 1 then gcd(3,5) divides n
+
+    Furthermore, if (x0, y0) is a solution, then the other solutions have the form (x0 + 5k, y0 − 3k)
+    where k is an arbitrary integer.
+
+    This property can be exploited to return solutions in a specific range.
+    Concretely, this function returns x0 and y0 such that:
+
+    * 0 <= |x0| < 5
+    * n//5-3 <= y0 <= n//5 (// denotes the floor division)
+
+
+    Note: another way to prove that any integer can be written as sum of multiples of 3 and 5 is
+    based on the fact that 3Z + 5Z = Z, where 3Z and 5Z are principal ideals and Z is the set of
+    the integer numbers
+    '''
+    x0, y0 = diophantine(3, 5, n)
+
+    # push x0 to the range [0, 5) and update y0 accordingly
+    k, x0 = divmod(x0, 5)
+
+    return (x0, y0 + 3*k)
+
 
 def modular_division(a, b, m):
     """
-    Given a != 0 and b, there exists x (not always) such that a * x ≡ b (mod m), therefore
+    Given a != 0 and b, if exists x such that a * x ≡ b (mod m), then
     x plays the role of modular division x = b/a (mod m)
 
     Example:
@@ -92,7 +132,7 @@ def modular_division(a, b, m):
     Given that congruence is preserved under multiplication, it's easy to prove that b/a ≡ b*a' (mod m), where a' is
     the multiplicative inverse modulo m of a
 
-    Also, it's possible to prove that a' exists iff gcd(a, m) = 1 and its value is given by the solution s of 
+    Also, it's possible to prove that a' exists iff gcd(a, m) = 1 and its value is given by the solution s of
     the Diophantine equation in the variables s and t:
 
     as + mt = 1
@@ -119,6 +159,7 @@ def modular_exponentiation(b, e, m):
     Returns b^e (mod m)
     The process takes e steps
     """
+    b = b%m
     result = 1
     for _ in range(e):
         result = (result * b) % m
@@ -129,10 +170,12 @@ def fast_modular_exponentiation_by_squaring(b, k, m):
     """
     Returns b^e (mod m) where the exponent e is a power of 2: e=2^k
     The process takes k steps by doing exponentiation by squaring
+
+    Note: b^(2^k) = (((b^2)^2)^2)^ ..(k times)..
     """
     result = b % m
     for _ in range(k):
-        result = (result * result) % m
+        result = result * result % m
     return result
 
 
@@ -140,19 +183,39 @@ def fast_modular_exponentiation_by_squaring_gen(b, e, m):
     """
     Generalisation of exponentiation by squaring when the exponent e is not a power of 2
 
+    b^e = b^(a1*2^0 + a2*2^1 + ... aN*2*N) = b^(a1*2^0) * .... * b^(aN*2^N) where a1, a2 ... aN take the values 0 or 1
+
     Steps:
     1. Rewrite e in binary form
-    2. Compute b^(2^k) mod m for each element of the binary representation of the exponent
+    2. Compute each of the factors b^(2^k) mod m for each element of the binary representation of the exponent
     3. Multiply the results of previous step
+
+    Note: b^(2^k) = (((b^2)^2)^2)^ ..(k times)..
     """
     binary_e = binary_expansion(e)
 
-    result = 1
-    position = 0
-    for position, digit in enumerate(binary_e):
+    factor = b%m
+    result = factor if binary_e[0] else 1
+    for digit in binary_e[1:]:
+        factor = factor * factor % m
         if digit == 1:
-            result = result * fast_modular_exponentiation_by_squaring(b, position, m) % m
+            result = result * factor % m
     return result
 
 
+def timing_fast_exp():
+    import timeit
 
+    b = 2
+    e = 2**100
+    m = 5
+    number = 1000
+    # print(timeit.timeit(lambda: b**e % m, number=1000))
+    # print(timeit.timeit(lambda: modular_exponentiation(b, e, m), number=number))
+    print(timeit.timeit(lambda: fast_modular_exponentiation_by_squaring(b, 100, m), number=number))
+    print(timeit.timeit(lambda: fast_modular_exponentiation_by_squaring_gen(b, e, m), number=number))
+    print(timeit.timeit(lambda: pow(b, e, m), number=number))
+
+
+if __name__ == "__main__":
+    timing_fast_exp()

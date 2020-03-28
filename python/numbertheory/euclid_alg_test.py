@@ -1,4 +1,6 @@
-from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine, modular_division, fast_modular_exponentiation_by_squaring, modular_exponentiation, fast_modular_exponentiation_by_squaring_gen
+from hypothesis import given
+import hypothesis.strategies as st
+from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine, modular_division, fast_modular_exponentiation_by_squaring, modular_exponentiation, fast_modular_exponentiation_by_squaring_gen, sum_as_multiple_3_and_5
 
 
 def test_euclid_gcd():
@@ -81,3 +83,31 @@ def test_modular_exponentiation_exp_not_power_of_2():
     # 7^13 (mod 11) = 2
     assert modular_exponentiation(7, 13, 11) == 2
     assert fast_modular_exponentiation_by_squaring_gen(7, 13, 11) == 2
+
+
+def test_sum_as_multiple_3_and_5_12():
+    a, b = sum_as_multiple_3_and_5(12)
+    assert (a, b) == (4, 0)
+
+
+def test_sum_as_multiple_3_and_5_23():
+    a, b = sum_as_multiple_3_and_5(23)
+    assert (a, b) == (1, 4)
+
+
+def test_sum_as_multiple_3_and_5_7():
+    a, b = sum_as_multiple_3_and_5(7)
+    assert (a, b) == (4, -1)
+
+
+def test_sum_as_multiple_3_and_5_3():
+    a, b = sum_as_multiple_3_and_5(3)
+    assert (a, b) == (1, 0)
+
+
+@given(st.integers(-100000, 100000))
+def test_sum_as_multiple_3_and_5(n):
+    a, b = sum_as_multiple_3_and_5(n)
+    assert a*3 + b*5 == n
+    assert abs(a) < 5
+    assert n//5-3 <= b <= n//5
