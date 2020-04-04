@@ -1,6 +1,13 @@
-from hypothesis import given
 import hypothesis.strategies as st
-from euclid_alg import euclid_gcd, euclid_lcm, extended_euclid_gcd, diophantine, modular_division, fast_modular_exponentiation_by_squaring, modular_exponentiation, fast_modular_exponentiation_by_squaring_gen, sum_as_multiple_3_and_5
+from hypothesis import given
+
+from euclid_alg import (chinese_remainder_theorem_2,
+                        chinese_remainder_theorem_n, diophantine, euclid_gcd,
+                        euclid_lcm, extended_euclid_gcd,
+                        fast_modular_exponentiation_by_squaring,
+                        fast_modular_exponentiation_by_squaring_gen,
+                        modular_division, modular_exponentiation,
+                        sum_as_multiple_3_and_5)
 
 
 def test_euclid_gcd():
@@ -83,6 +90,23 @@ def test_modular_exponentiation_exp_not_power_of_2():
     # 7^13 (mod 11) = 2
     assert modular_exponentiation(7, 13, 11) == 2
     assert fast_modular_exponentiation_by_squaring_gen(7, 13, 11) == 2
+
+
+def test_chinese_remainder_theorem():
+    '''
+    x = 2 (mod 3)
+    x = 3 (mod 5)
+    '''
+    assert chinese_remainder_theorem_2(3, 2, 5, 3) == (15, 8)
+
+
+def test_chinese_remainder_theorem_n():
+    '''
+    x = 0 (mod 3)
+    x = 3 (mod 4)
+    x = 4 (mod 5)
+    '''
+    assert chinese_remainder_theorem_n([3, 4, 5], [0, 3, 4]) == (60, 39)
 
 
 def test_sum_as_multiple_3_and_5_12():

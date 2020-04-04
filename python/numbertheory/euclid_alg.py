@@ -21,11 +21,6 @@ def extended_euclid_gcd(a, b):
     return (d, x, y)
 
 
-def squares(n, m):
-    d = euclid_gcd(max(n, m), min(n, m))
-    return n//d * m//d
-
-
 def euclid_lcm(a, b):
     """
     least common multiple calculated with Euclid's algorithm:
@@ -78,6 +73,7 @@ def diophantine(a, b, c):
             return (c//d*x, c//d*y)
         return (c//d*y, c//d*x)
     return None
+
 
 def sum_as_multiple_3_and_5(n):
     '''
@@ -147,11 +143,54 @@ def modular_division(a, b, m):
     return None
 
 
-def ChineseRemainderTheorem(n1, r1, n2, r2):
+def chinese_remainder_theorem_2(n1, r1, n2, r2):
+    '''
+    We want to solve the following 2-equation system, where n1 and n2 are coprime
+    x = r1 (mod n1)
+    x = r2 (mod n2)
+
+    Solution:
+    x = (r2*m1*n1 + r1*m2*n2) mod (n1*n2), where m1 and m2 are Bezout coefficients of the Bezout's identity: m1*n1+m2*n2 = 1
+    '''
+
     d, x, y = extended_euclid_gcd(max(n1, n2), min(n1, n2))
+
+    print(d)
+    if d > 1:
+        raise ValueError(f"{n1} and {n2} must be coprime")
+
     if n1 > n2:
-        return (r2*n1*x + r1*n2*y) % (n1*n2)
-    return (r2*n1*y + r1*n2*x) % (n1*n2)
+        return (n1*n2, (r2*n1*x + r1*n2*y) % (n1*n2))
+    return (n1*n2, (r2*n1*y + r1*n2*x) % (n1*n2))
+
+
+def chinese_remainder_theorem_n(n, r):
+    '''
+    This is the generalisation to n equations of "chinese_remainder_theorem_2"
+
+    Given arrays
+    - n = [n1, n2, ... nj], where all ni (i=1...j) are pairwise coprime
+    - r = [r1, r2, ... rj]
+
+    we want to solve the system of equations
+    x = r (mod n)
+
+    x = r1 (mod n1)
+    x = r2 (mod n2)
+    ....
+    x = rj (mod nj)
+
+    Solution:
+    Apply chinese remainder theorem for 2 equations iteratively
+    '''
+
+    equation1 = (n[0], r[0])
+    idx = 0
+    while idx < len(n) - 1:
+        equation2 = (n[idx+1], r[idx+1])
+        equation1 = chinese_remainder_theorem_2(equation1[0], equation1[1], equation2[0], equation2[1])
+        idx += 1
+    return equation1
 
 
 def modular_exponentiation(b, e, m):
@@ -159,7 +198,7 @@ def modular_exponentiation(b, e, m):
     Returns b^e (mod m)
     The process takes e steps
     """
-    b = b%m
+    b = b % m
     result = 1
     for _ in range(e):
         result = (result * b) % m
@@ -194,7 +233,7 @@ def fast_modular_exponentiation_by_squaring_gen(b, e, m):
     """
     binary_e = binary_expansion(e)
 
-    factor = b%m
+    factor = b % m
     result = factor if binary_e[0] else 1
     for digit in binary_e[1:]:
         factor = factor * factor % m
