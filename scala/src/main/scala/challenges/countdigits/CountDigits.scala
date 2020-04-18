@@ -3,10 +3,11 @@ package challenges.countdigits
 import challenges._
 
 import scala.annotation.tailrec
+import scala.math.{ceil, log10}
 
 object CountDigits {
 
-  def countDigits(n: Int): Int = n.toString.length
+  def countDigitsString(n: Int): Int = n.toString.length
 
   def countDigitsRecursive(n: Int): Int = {
     val x = n/10
@@ -24,6 +25,8 @@ object CountDigits {
     acc(n,0)
   }
 
+  def countDigitsLog(n: Int): Int = ceil(log10(n.toDouble)).toInt
+
 }
 
 object CountDigitsBenchmark extends App {
@@ -31,17 +34,31 @@ object CountDigitsBenchmark extends App {
   import CountDigits._
 
   val amount = 1234567890
+  val n = 10000000
 
-  println(s"countDigits time: ${executionTime(countDigits, amount)}")
-  println(s"countDigitsRecursive time: ${executionTime(countDigitsRecursive, amount)}")
-  println(s"countDigitsTailRecursive time: ${executionTime(countDigitsTailRecursive, amount)}")
+  def runner(n: Int, countDigits: Int => Int, digit: Int): Unit = {
+    for(_ <- 1 to n)
+      countDigits(digit)
+  }
 
-  println(s"countDigits memory: ${memoryFootprint(countDigits, amount)}")
-  println(s"countDigitsRecursive memory: ${memoryFootprint(countDigitsRecursive, amount)}")
-  println(s"countDigitsTailRecursive memory: ${memoryFootprint(countDigitsTailRecursive, amount)}")
+  val r1 = runner(n, countDigitsString, _)
+  val r2 = runner(n, countDigitsRecursive, _)
+  val r3 = runner(n, countDigitsTailRecursive, _)
+  val r4 = runner(n, countDigitsLog, _)
 
-  println(s"countDigits gc cycles: ${gcCycles(countDigits, amount)}")
-  println(s"countDigitsRecursive gc cycles: ${gcCycles(countDigitsRecursive, amount)}")
-  println(s"countDigitsTailRecursive gc cycles: ${gcCycles(countDigitsTailRecursive, amount)}")
+  println(s"countDigitsString time: ${executionTime(r1, amount)}")
+  println(s"countDigitsRecursive time: ${executionTime(r2, amount)}")
+  println(s"countDigitsTailRecursive time: ${executionTime(r3, amount)}")
+  println(s"countDigitsLog time: ${executionTime(r4, amount)}")
+  println()
+  println(s"countDigitsString memory: ${memoryFootprint(r1, amount)}")
+  println(s"countDigitsRecursive memory: ${memoryFootprint(r2, amount)}")
+  println(s"countDigitsTailRecursive memory: ${memoryFootprint(r3, amount)}")
+  println(s"countDigitsLog memory: ${memoryFootprint(r4, amount)}")
+  println()
+  println(s"countDigitsString gc cycles: ${gcCycles(r1, amount)}")
+  println(s"countDigitsRecursive gc cycles: ${gcCycles(r2, amount)}")
+  println(s"countDigitsTailRecursive gc cycles: ${gcCycles(r3, amount)}")
+  println(s"countDigitsLog gc cycles: ${gcCycles(r4, amount)}")
 
 }
