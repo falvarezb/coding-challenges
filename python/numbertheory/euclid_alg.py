@@ -27,9 +27,7 @@ def euclid_lcm(a, b):
 
     lcm(a,b) * gcd(a,b) = a*b
     """
-    assert a > 0 and b > 0
-    a, b = max(a, b), min(a, b)
-
+    assert a > 0 or b > 0  
     return a*b//euclid_gcd(a, b)
 
 

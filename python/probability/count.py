@@ -2,7 +2,7 @@
                                     Without repetition                                    With Repetition
     Ordered (Permutations)          n * (n - 1) * ... * (n - r + 1) = n! / (n - r)!       n^r
 
-    Non-ordered (Combinations)      n! / (n - r)! / r!  (n k)                             (n + r - 1)! / (n - 1)! / r! (r+n-1 n-1)
+    Non-ordered (Combinations)      n! / (n - r)! / r! ≡ (n k)                            (n + r - 1)! / (n - 1)! / r! (r+n-1 n-1)
 
 """
 

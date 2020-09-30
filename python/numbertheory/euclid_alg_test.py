@@ -22,6 +22,9 @@ def test_euclid_gcd_order_does_not_matter():
     assert euclid_gcd(15, 20) == euclid_gcd(20, 15)
 
 
+def test_euclid_lcm_0():
+    assert euclid_lcm(0, 10) == 0
+
 def test_euclid_lcm():
     assert euclid_lcm(20, 15) == 60
 
