@@ -9,13 +9,15 @@ from stairs_solution import *
 
 
 def test_enumerate_conditional_permutations():
-    assert list1_equals_list2_except_order(enumerate_conditional_permutations(1, [1, 2, 3], lambda l: sum(l) == 1), [[1]])
+    assert enumerate_conditional_permutations(1, [1, 2, 3], lambda l: sum(l) == 1) == [[1]]
     assert list1_equals_list2_except_order(enumerate_conditional_permutations(2, [1, 2, 3], lambda l: sum(l) == 2), [[1, 1], [2]])
     assert list1_equals_list2_except_order(enumerate_conditional_permutations(3, [1, 2, 3], lambda l: sum(l) == 3), [[1, 1, 1], [2, 1], [1, 2], [3]])
     assert list1_equals_list2_except_order(enumerate_conditional_permutations(4, [1, 2, 3], lambda l: sum(l) == 4), [[1, 1, 1, 1], [2, 1, 1], [
         1, 2, 1], [3, 1], [1, 1, 2], [2, 2], [1, 3]])
-    assert list1_equals_list2_except_order(enumerate_conditional_permutations(5, [2, 4], lambda l: sum(l) == 5), [])
-    assert list1_equals_list2_except_order(enumerate_conditional_permutations(1, [2, 4], lambda l: sum(l) == 1), [])
+    assert enumerate_conditional_permutations(5, [2, 4], lambda l: sum(l) == 5) == []
+    assert enumerate_conditional_permutations(1, [2, 4], lambda l: sum(l) == 1) == []
+    assert enumerate_conditional_permutations(1, [1, 2, 3], lambda l: sum(l) == 0) == []
+
 
 
 def test_count_solutions_recursive():
@@ -26,22 +28,29 @@ def test_count_solutions_recursive():
     assert count_solutions_recursive(8, tuple([1, 2, 3])) == 81
     assert count_solutions_recursive(5, tuple([2, 4])) == 0
     assert count_solutions_recursive(1, tuple([2, 4])) == 0
+    assert count_solutions_dp_bottom_up(0, [1, 2, 3]) == 1
 
 
 def test_count_solutions_dp_bottom_up():
-    assert count_solutions_dp_bottom_up(1) == 1
-    assert count_solutions_dp_bottom_up(2) == 2
-    assert count_solutions_dp_bottom_up(3) == 4
-    assert count_solutions_dp_bottom_up(4) == 7
-    assert count_solutions_dp_bottom_up(8) == 81
+    assert count_solutions_dp_bottom_up(1, [1, 2, 3]) == 1
+    assert count_solutions_dp_bottom_up(2, [1, 2, 3]) == 2
+    assert count_solutions_dp_bottom_up(3, [1, 2, 3]) == 4
+    assert count_solutions_dp_bottom_up(4, [1, 2, 3]) == 7
+    assert count_solutions_dp_bottom_up(8, [1, 2, 3]) == 81
+    assert count_solutions_dp_bottom_up(5, [2, 4]) == 0
+    assert count_solutions_dp_bottom_up(1, [2, 4]) == 0
+    assert count_solutions_dp_bottom_up(0, [1, 2, 3]) == 1
 
 
 def test_count_solutions_dp_top_down():
-    assert count_solutions_dp_top_down(1) == 1
-    assert count_solutions_dp_top_down(2) == 2
-    assert count_solutions_dp_top_down(3) == 4
-    assert count_solutions_dp_top_down(4) == 7
-    assert count_solutions_dp_top_down(8) == 81
+    assert count_solutions_dp_top_down(1, [1, 2, 3]) == 1
+    assert count_solutions_dp_top_down(2, [1, 2, 3]) == 2
+    assert count_solutions_dp_top_down(3, [1, 2, 3]) == 4
+    assert count_solutions_dp_top_down(4, [1, 2, 3]) == 7
+    assert count_solutions_dp_top_down(8, [1, 2, 3]) == 81
+    assert count_solutions_dp_top_down(5, [2, 4]) == 0
+    assert count_solutions_dp_top_down(1, [2, 4]) == 0
+    assert count_solutions_dp_top_down(0, [1, 2, 3]) == 1
 
 
 def test_enumerate_solutions_recursive():
@@ -52,6 +61,7 @@ def test_enumerate_solutions_recursive():
         1, 2, 1], [3, 1], [1, 1, 2], [2, 2], [1, 3]]
     assert enumerate_solutions_recursive(5, [2, 4]) == []
     assert enumerate_solutions_recursive(1, [2, 4]) == []
+    assert enumerate_solutions_recursive(0, [1, 2, 3]) == [[]]
 
 
 def test_enumerate_solutions():
@@ -62,14 +72,15 @@ def test_enumerate_solutions():
         1, 2, 1], [3, 1], [1, 1, 2], [2, 2], [1, 3]]
     assert enumerate_solutions(5, [2, 4]) == []
     assert enumerate_solutions(1, [2, 4]) == []
+    assert enumerate_solutions(0, [1, 2, 3]) == [[]]
 
 
 def test_stairs_8():
     stairs = 8
     steps = tuple([1, 2, 3])
     assert count_solutions_recursive(stairs, steps) == 81
-    assert count_solutions_dp_bottom_up(stairs) == 81
-    assert count_solutions_dp_top_down(stairs) == 81
+    assert count_solutions_dp_bottom_up(stairs, steps) == 81
+    assert count_solutions_dp_top_down(stairs, steps) == 81
     assert enumerate_optimal_solutions(stairs, steps) == [[3, 3, 2], [3, 2, 3], [2, 3, 3]]
     assert enumerate_unique_optimal_solutions(stairs, steps) == [[2, 3, 3]]
 
@@ -88,6 +99,7 @@ def test_enumerate_optimal_solutions():
     assert enumerate_optimal_solutions(7, [2, 4]) == []
     assert enumerate_optimal_solutions(3, [2, 5]) == []
     assert enumerate_optimal_solutions(4, [2]) == [[2, 2]]
+    assert enumerate_solutions_recursive(0, [1, 2, 3]) == [[]]
 
 
 # ==== PROPERTY-BASED TESTING ======

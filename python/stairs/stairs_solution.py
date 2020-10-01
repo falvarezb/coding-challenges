@@ -155,39 +155,31 @@ def count_solutions_recursive(n, values):
     return sum([count_solutions_recursive(n - i, values) for i in allowed_values])
 
 
-def count_solutions_dp_bottom_up(n):
+def count_solutions_dp_bottom_up(n, elems):
     """
     dynamic programming solution with bottom-up memoisation
     """
-    results = [0] * n
+    results = [0] * (n + 1)
     results[0] = 1
-    if n >= 2:
-        results[1] = 2
-    if n >= 3:
-        results[2] = 4
-
-    for i in range(3, n):
-        results[i] = results[i-1] + results[i-2] + results[i-3]
-    return results[n-1]
+    
+    for j in range(1, n + 1):
+        allowed_elems = [i for i in elems if i <= j]
+        results[j] = sum([results[j-elem] for elem in allowed_elems])
+    return results[n]
 
 
-def count_solutions_dp_top_down(n):
+def count_solutions_dp_top_down(n, elems):
     """
     dynamic programming solution with top-down memoisation
     """
-    results = [0] * n
+    results = [0] * (n + 1)
+    results[0] = 1
 
-    def aux(i):
-        if results[i - 1] == 0:
-            if i == 1:
-                results[i - 1] = 1
-            elif i == 2:
-                results[i - 1] = 2
-            elif i == 3:
-                results[i - 1] = 4
-            else:
-                results[i - 1] = aux(i - 1) + aux(i - 2) + aux(i - 3)
-        return results[i - 1]
+    def aux(j):
+        if results[j] == 0:
+            allowed_elems = [i for i in elems if i <= j]
+            results[j] = sum([aux(j-elem) for elem in allowed_elems])
+        return results[j]
     return aux(n)
 
 
@@ -214,9 +206,9 @@ if __name__ == '__main__':
         n = 30
         values = tuple([1, 2, 3])
 
-        print(timeit.repeat(lambda: count_combinations_recursive(n, values), repeat=3, number=1))
-        print(timeit.repeat(lambda: count_combinations_dp_bottom_up(n), repeat=3, number=1))
-        print(timeit.repeat(lambda: count_combinations_dp_top_down(n), repeat=3, number=1))
+        print(timeit.repeat(lambda: count_solutions_recursive(n, values), repeat=3, number=1))
+        print(timeit.repeat(lambda: count_solutions_dp_bottom_up(n, values), repeat=3, number=1))
+        print(timeit.repeat(lambda: count_solutions_dp_top_down(n, values), repeat=3, number=1))
 
         """
         Without lru_cache:
