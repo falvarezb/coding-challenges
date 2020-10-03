@@ -3,9 +3,10 @@
 from random import choice, sample
 
 import hypothesis.strategies as st
-from hypothesis import given
+from hypothesis import given, example, note
 
 from stairs_solution import *
+from util import list1_equals_list2_except_order, list1_is_subset_of_list2
 
 
 def test_enumerate_conditional_permutations():
@@ -17,7 +18,6 @@ def test_enumerate_conditional_permutations():
     assert enumerate_conditional_permutations(5, [2, 4], lambda l: sum(l) == 5) == []
     assert enumerate_conditional_permutations(1, [2, 4], lambda l: sum(l) == 1) == []
     assert enumerate_conditional_permutations(1, [1, 2, 3], lambda l: sum(l) == 0) == []
-
 
 
 def test_count_solutions_recursive():
@@ -102,11 +102,15 @@ def test_enumerate_optimal_solutions():
     assert enumerate_solutions_recursive(0, [1, 2, 3]) == [[]]
 
 
+def test_list_subset():
+    assert list1_is_subset_of_list2([[1, 1, 1, 4]], [[1, 1, 1, 4], [2, 1, 4]])
+
 # ==== PROPERTY-BASED TESTING ======
+
 
 def stairs_strategy(max_stairs):
     """
-     Generator of tuples of number of stairs 'n' and list of steps 'values':
+     Generator of tuples of number of stairs 'n' and list of steps 'steps':
         - 'n' is a value such that 0 < n <= max_stairs
         - steps[i] is value such that 0 < steps[i] <= n for all 0 < i <= n
     """
@@ -116,31 +120,23 @@ def stairs_strategy(max_stairs):
     return n, tuple(sample(range(1, n + 1), i))
 
 
-def list1_is_subset_of_list2(list1: 'list of lists', list2: 'list of lists'):
-    """
-    Checks if list1 is a subset of list2, in other words, if all elements of list1 are in list2
-    """
-
-    return all(l in list2 for l in list1)
-
-
-def list1_equals_list2_except_order(list1: 'list of lists', list2: 'list of lists'):
-    """
-    Checks if two lists are equal (without considering the order of the elements)
-
-    So basically it is a set comparison (we cannot use set though because the elements of the lists are also lists, and lists are not hashable)
-    """
-
-    return list1_is_subset_of_list2(list1, list2) and list1_is_subset_of_list2(list2, list1)
+@given(st.builds(stairs_strategy, st.integers(5, 25)))
+def test_solution_comparison(t):
+    n = t[0]
+    elems = t[1]
+    assert count_solutions_recursive(n, elems) == len(enumerate_solutions_recursive(n, elems))
+    assert enumerate_solutions(n, elems) == enumerate_solutions_recursive(n, elems)
+    assert list1_is_subset_of_list2(enumerate_optimal_solutions(n, elems), enumerate_solutions(n, elems))
+    assert list1_is_subset_of_list2(enumerate_unique_optimal_solutions(n, elems), enumerate_optimal_solutions(n, elems))
+    assert count_solutions_recursive(n, elems) == count_solutions_dp_bottom_up(n, elems)
+    assert count_solutions_recursive(n, elems) == count_solutions_dp_top_down(n, elems)
 
 
-def test_list_subset():
-    assert list1_is_subset_of_list2([[1, 1, 1, 4]], [[1, 1, 1, 4], [2, 1, 4]])
-
-
-@ given(st.builds(stairs_strategy, st.integers(10, 25)))
-def test_hypothesis(t):
-    assert count_solutions_recursive(t[0], t[1]) == len(enumerate_solutions_recursive(t[0], t[1]))
-    assert enumerate_solutions(t[0], t[1]) == enumerate_solutions_recursive(t[0], t[1])
-    assert list1_is_subset_of_list2(enumerate_optimal_solutions(t[0], t[1]), enumerate_solutions(t[0], t[1]))
-    assert list1_is_subset_of_list2(enumerate_unique_optimal_solutions(t[0], t[1]), enumerate_optimal_solutions(t[0], t[1]))
+@given(st.builds(stairs_strategy, st.integers(4, 7)))
+def test_enumerate_conditional_permutations_vs_enumerate_solutions(t):
+    n = t[0]
+    elems = t[1]
+    list1 = enumerate_solutions(n, elems)
+    list2 = enumerate_conditional_permutations(n, elems, lambda l: sum(l) == n)
+    note(f"result:{list1_equals_list2_except_order(list1, list2)}")
+    assert list1_equals_list2_except_order(list1, list2)

@@ -1,26 +1,30 @@
 # -*- coding: utf-8 -*-
 
 import functools
-import time
+from util import remove_permutations
 
 """
 Number of ways to climb n > 0 stairs when it is possible to take 1,2 or 3 steps at a time
 
 This problem can be formulated in a more generic way as:
-
 enumerate all permutations with repetition of [1,2,3] such that the sum of its elements equals n
 """
 
 
-def enumerate_conditional_permutations(n: int, elems: list, f: 'list of lists') -> 'list of lists':
+def enumerate_conditional_permutations(n: int, elems: list, f: 'list -> boolean') -> 'list of lists':
     """
     Enumerate all permutations with repetition of up to 'n' elements that satisfy the
-    condition expressed by the function 'f'
+    condition expressed by the function 'f'.
+
+    Given that we cannot make any assumption about 'f', the only way to solve this problem is by using
+    brute force: enumerate all possible permutations and apply f to each of them.
+
+    We'll use this method as "test oracle" when doing property-based testing
 
     Example:
     - n = 3
     - elems = [1,2]
-    - f = lambda x: sum(x) == 3 (the sum of the elements of the permutation equals 4)
+    - f = lambda x: sum(x) == 3 (the sum of the elements of the permutation equals 3)
 
     The algorithm in action:
 
@@ -71,7 +75,7 @@ def enumerate_solutions(n, elems):
 
     and the solution is the last element of the final list: [[1,1,1],[2,1],[1,2]]
 
-    Obviously, the solution is the same as the generic formulation but the number of intermediate
+    The solution is the same as the generic formulation but the number of intermediate
     permutations that needs to be calculated is far less
 
     """
@@ -97,11 +101,7 @@ def enumerate_solutions_recursive(n, elems):
         return [[]]
 
     allowed_elems = [i for i in elems if i <= n]
-    permutations = []
-    for j in allowed_elems:
-        permutations += ([i+[j]
-                          for i in enumerate_solutions_recursive(n-j, elems)])
-    return permutations
+    return [solution+[elem] for elem in allowed_elems for solution in enumerate_solutions_recursive(n-elem, elems)]
 
 
 def enumerate_optimal_solutions(n, elems):
@@ -117,7 +117,7 @@ def enumerate_optimal_solutions(n, elems):
             optimal_permutations.append([[j]])
         else:
             new_permutations = []
-            allowed_elems = [elem for elem in elems if elem < j]
+            allowed_elems = [i for i in elems if i < j]
             for elem in allowed_elems:
                 for permutation in optimal_permutations[j - elem - 1]:
                     new_permutations.append(permutation+[elem])
@@ -141,11 +141,10 @@ def enumerate_unique_optimal_solutions(n, elems):
     return remove_permutations(solutions)
 
 
-
 @functools.lru_cache()
 def count_solutions_recursive(n, values):
     """
-    recursive solution accepting any random steps
+    recursive solution
     """
 
     if n == 0:
@@ -161,7 +160,7 @@ def count_solutions_dp_bottom_up(n, elems):
     """
     results = [0] * (n + 1)
     results[0] = 1
-    
+
     for j in range(1, n + 1):
         allowed_elems = [i for i in elems if i <= j]
         results[j] = sum([results[j-elem] for elem in allowed_elems])
@@ -183,26 +182,10 @@ def count_solutions_dp_top_down(n, elems):
     return aux(n)
 
 
-def remove_permutations(ls: 'list of lists') -> 'list of lists':
-    """
-    given a list of lists, this function returns a new list without permutations
-
-    Example:
-
-    [[2,1,3], [3,1,2], [1,1]] -> [[1,2,3], [1,1]]
-    """
-    new_list = []
-    for l in ls:
-        l = sorted(l)
-        if l not in new_list:
-            new_list.append(l)
-    return new_list
-
-
 if __name__ == '__main__':
 
     def main():
-        import timeit        
+        import timeit
         n = 30
         values = tuple([1, 2, 3])
 
