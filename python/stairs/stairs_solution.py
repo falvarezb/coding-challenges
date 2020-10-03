@@ -110,6 +110,9 @@ def enumerate_optimal_solutions(n, elems):
     Optimal solutions are those permutations with the minimum number of elements
     """
 
+    if n == 0:
+        return [[]]
+        
     optimal_permutations = []
 
     for j in range(1, n + 1):

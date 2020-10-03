@@ -28,7 +28,7 @@ def test_count_solutions_recursive():
     assert count_solutions_recursive(8, tuple([1, 2, 3])) == 81
     assert count_solutions_recursive(5, tuple([2, 4])) == 0
     assert count_solutions_recursive(1, tuple([2, 4])) == 0
-    assert count_solutions_dp_bottom_up(0, [1, 2, 3]) == 1
+    assert count_solutions_recursive(0, tuple([1, 2, 3])) == 1
 
 
 def test_count_solutions_dp_bottom_up():
@@ -83,6 +83,7 @@ def test_stairs_8():
     assert count_solutions_dp_top_down(stairs, steps) == 81
     assert enumerate_optimal_solutions(stairs, steps) == [[3, 3, 2], [3, 2, 3], [2, 3, 3]]
     assert enumerate_unique_optimal_solutions(stairs, steps) == [[2, 3, 3]]
+    assert len(enumerate_conditional_permutations(stairs, steps, lambda l: sum(l) == stairs)) == 81
 
 
 def test_enumerate_optimal_solutions():
@@ -92,14 +93,27 @@ def test_enumerate_optimal_solutions():
     assert enumerate_optimal_solutions(4, [1, 3]) == [[3, 1], [1, 3]]
     assert enumerate_optimal_solutions(8, [1, 4, 5]) == [[4, 4]]
     assert enumerate_optimal_solutions(8, [1, 2, 3]) == [[3, 3, 2], [3, 2, 3], [2, 3, 3]]
-    assert enumerate_unique_optimal_solutions(
-        12, [1, 3, 5]) == [[1, 1, 5, 5], [1, 3, 3, 5], [3, 3, 3, 3]]
     assert enumerate_optimal_solutions(1, [2, 4]) == []
     assert enumerate_optimal_solutions(3, [2, 4]) == []
     assert enumerate_optimal_solutions(7, [2, 4]) == []
     assert enumerate_optimal_solutions(3, [2, 5]) == []
     assert enumerate_optimal_solutions(4, [2]) == [[2, 2]]
-    assert enumerate_solutions_recursive(0, [1, 2, 3]) == [[]]
+    assert enumerate_optimal_solutions(0, [1, 2, 3]) == [[]]
+
+def test_enumerate_unique_optimal_solutions():
+    assert enumerate_unique_optimal_solutions(1, [1, 3]) == [[1]]
+    assert enumerate_unique_optimal_solutions(2, [1, 3]) == [[1, 1]]
+    assert enumerate_unique_optimal_solutions(3, [1, 3]) == [[3]]
+    assert enumerate_unique_optimal_solutions(4, [1, 3]) == [[1, 3]]
+    assert enumerate_unique_optimal_solutions(8, [1, 4, 5]) == [[4, 4]]
+    assert enumerate_unique_optimal_solutions(8, [1, 2, 3]) == [[2, 3, 3]]
+    assert enumerate_unique_optimal_solutions(12, [1, 3, 5]) == [[1, 1, 5, 5], [1, 3, 3, 5], [3, 3, 3, 3]]
+    assert enumerate_unique_optimal_solutions(1, [2, 4]) == []
+    assert enumerate_unique_optimal_solutions(3, [2, 4]) == []
+    assert enumerate_unique_optimal_solutions(7, [2, 4]) == []
+    assert enumerate_unique_optimal_solutions(3, [2, 5]) == []
+    assert enumerate_unique_optimal_solutions(4, [2]) == [[2, 2]]
+    assert enumerate_unique_optimal_solutions(0, [1, 2, 3]) == [[]]
 
 
 def test_list_subset():
