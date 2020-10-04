@@ -83,6 +83,7 @@ def test_stairs_8():
     assert count_solutions_dp_top_down(stairs, steps) == 81
     assert enumerate_optimal_solutions(stairs, steps) == [[3, 3, 2], [3, 2, 3], [2, 3, 3]]
     assert enumerate_unique_optimal_solutions(stairs, steps) == [[2, 3, 3]]
+    assert find_any_optimal_solution(stairs, steps) == [3, 3, 2]
     assert len(enumerate_conditional_permutations(stairs, steps, lambda l: sum(l) == stairs)) == 81
 
 
@@ -99,6 +100,20 @@ def test_enumerate_optimal_solutions():
     assert enumerate_optimal_solutions(3, [2, 5]) == []
     assert enumerate_optimal_solutions(4, [2]) == [[2, 2]]
     assert enumerate_optimal_solutions(0, [1, 2, 3]) == [[]]
+
+def test_find_any_optimal_solution():
+    assert find_any_optimal_solution(1, [1, 3]) == [1]
+    assert find_any_optimal_solution(2, [1, 3]) == [1, 1]
+    assert find_any_optimal_solution(3, [1, 3]) == [3]
+    assert find_any_optimal_solution(4, [1, 3]) == [3, 1]
+    assert find_any_optimal_solution(8, [1, 4, 5]) == [4, 4]
+    assert find_any_optimal_solution(8, [1, 2, 3]) == [3, 3, 2]
+    assert find_any_optimal_solution(1, [2, 4]) == []
+    assert find_any_optimal_solution(3, [2, 4]) == []
+    assert find_any_optimal_solution(7, [2, 4]) == []
+    assert find_any_optimal_solution(3, [2, 5]) == []
+    assert find_any_optimal_solution(4, [2]) == [2, 2]
+    assert find_any_optimal_solution(0, [1, 2, 3]) == []
 
 def test_enumerate_unique_optimal_solutions():
     assert enumerate_unique_optimal_solutions(1, [1, 3]) == [[1]]
@@ -144,6 +159,7 @@ def test_solution_comparison(t):
     assert list1_is_subset_of_list2(enumerate_unique_optimal_solutions(n, elems), enumerate_optimal_solutions(n, elems))
     assert count_solutions_recursive(n, elems) == count_solutions_dp_bottom_up(n, elems)
     assert count_solutions_recursive(n, elems) == count_solutions_dp_top_down(n, elems)
+    assert find_any_optimal_solution(n, elems) in enumerate_solutions_recursive(n, elems)
 
 
 @given(st.builds(stairs_strategy, st.integers(4, 7)))

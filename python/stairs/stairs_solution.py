@@ -104,6 +104,18 @@ def enumerate_solutions_recursive(n, elems):
     return [solution+[elem] for elem in allowed_elems for solution in enumerate_solutions_recursive(n-elem, elems)]
 
 
+def find_any_optimal_solution(n, elems):
+    """
+    Version of 'enumerate_solutions_recursive' restricted to finding 1 optimal solution
+    """
+
+    if n == 0:
+        return []
+
+    allowed_elems = [i for i in elems if i <= n]
+    return min([solution+[elem] for elem in allowed_elems for solution in enumerate_solutions_recursive(n-elem, elems)], key=len, default=[])
+
+
 def enumerate_optimal_solutions(n, elems):
     """
     Version of 'enumerate_solutions' to retrieve only the optimal solutions.
@@ -112,7 +124,7 @@ def enumerate_optimal_solutions(n, elems):
 
     if n == 0:
         return [[]]
-        
+
     optimal_permutations = []
 
     for j in range(1, n + 1):
@@ -126,11 +138,7 @@ def enumerate_optimal_solutions(n, elems):
                     new_permutations.append(permutation+[elem])
             if new_permutations:
                 min_length = min([len(x) for x in new_permutations])
-                optimal_new_permutation = []
-                for new_permutation in new_permutations:
-                    if len(new_permutation) == min_length:
-                        optimal_new_permutation.append(new_permutation)
-                optimal_permutations.append(optimal_new_permutation)
+                optimal_permutations.append([j for j in new_permutations if len(j) == min_length])
             else:
                 optimal_permutations.append([])
     return optimal_permutations[n-1]
