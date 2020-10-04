@@ -14,19 +14,20 @@ def remove_permutations(ls: 'list of lists') -> 'list of lists':
     return new_list
 
 
-def list1_is_subset_of_list2(list1: 'list of lists', list2: 'list of lists'):
+def list1_is_subset_of_list2(list1, list2):
     """
-    Checks if list1 is a subset of list2, in other words, if all elements of list1 are in list2
+    Checks if list1 is a subset of list2
     """
 
     return all(l in list2 for l in list1)
 
 
-def list1_equals_list2_except_order(list1: 'list of lists', list2: 'list of lists'):
+def list1_equals_list2_except_order(list1, list2):
     """
     Checks if two lists are equal (without considering the order of the elements)
 
-    So basically it is a set comparison (we cannot use set though because the elements of the lists are also lists, and lists are not hashable)
+    So basically it is a 'set' comparison. 
+    We cannot use 'set' though because the elements of the lists may also be lists, and lists are not hashable)
     """
 
     return list1_is_subset_of_list2(list1, list2) and list1_is_subset_of_list2(list2, list1)
