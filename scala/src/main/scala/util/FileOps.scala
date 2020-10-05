@@ -1,8 +1,12 @@
 package util
 
 import java.io.File
-import java.nio.file.{Files, StandardCopyOption}
+import java.nio.charset.StandardCharsets
+import java.nio.file.StandardOpenOption.{APPEND, CREATE, TRUNCATE_EXISTING, WRITE}
+import java.nio.file.{Files, Paths, StandardCopyOption}
+
 import scala.annotation.tailrec
+import scala.util.Try
 
 object FileOps {
 
@@ -42,6 +46,33 @@ object FileOps {
 
     nextStep(List(new File(originPath)))
       .filter(file => fileNameRegex.r.findFirstIn(file.toString).isDefined)
+  }
+
+  def writeToFile(fileName: String, content: String, overwrite: Boolean = false): Unit = {
+    Try{
+      Files.write(Paths.get(fileName), content.getBytes(StandardCharsets.UTF_8), CREATE, if(overwrite) TRUNCATE_EXISTING else APPEND, WRITE)
+    }.recover{
+      case t => t.printStackTrace()
+    }
+    ()
+  }
+
+  /**
+   * [(1,"a",3), (2,"b",4)] =>
+   * """
+   * 1,a,3
+   * 2,b,4
+   *
+   * """
+   */
+  def toCsv[T,U,V](x: List[(T, U, V)]): String = {
+    x.map{ s =>
+      val str = s.toString
+      str.slice(1, str.length-1)
+    } match {
+      case Nil => ""
+      case xs => xs.mkString("\n") + "\n"
+    }
   }
 
   def main(args: Array[String]): Unit = {
