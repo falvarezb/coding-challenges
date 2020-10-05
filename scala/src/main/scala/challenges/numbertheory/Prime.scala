@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.math.BigInt
 import scala.math.{sqrt, ceil}
-import Math.floorMod
+import Math.{floorMod, pow}
 
 object Primes {
 
@@ -313,12 +313,12 @@ object Primes {
       else if(e == 1)
         b%m
       else
-        Math.pow(aux(e/2),2).toInt %m
+        pow(aux(e/2),2).toInt %m
     }
 
     val binaryE = binaryRepresentation(e)
     binaryE.zipWithIndex.map {
-      case (digit, position) => aux(digit * Math.pow(2, position).toInt)
+      case (digit, position) => aux(digit * pow(2, position).toInt)
     }.reduceLeft((acc, x) => acc * x % m)
   }
 
@@ -339,6 +339,13 @@ object Primes {
 
   def primesSet(n: Int): Set[BigInt] = primeNumbersGenerator take(n) toSet
   def primesList(n: Int): List[BigInt] = primeNumbersGenerator take(n) toList
+
+  def main(args: Array[String]): Unit = {
+    val t = System.currentTimeMillis()
+    for(_ <- 1 to 1000)
+      fastModularExponentiation2(2, pow(2, 100).toInt, 5)
+    println(-t + System.currentTimeMillis())
+  }
 
 }
 
