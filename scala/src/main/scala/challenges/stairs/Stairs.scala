@@ -67,7 +67,7 @@ object Stairs extends App {
   /**
     * n=5
     * values=[2,3]
-    * canonical combination: [2,3] and [3,2]
+    * canonical combination: [2,3]
     *
     * If no combination exists, returns an empty list
     */
