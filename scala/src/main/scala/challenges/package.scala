@@ -9,10 +9,6 @@ import scala.io.Source
 
 package object challenges {
 
-  def resourcesPath(name: String): String = s"src/main/resources/$name"
-  def writeToFile(filePath: String, content: String, overwrite: Boolean = false): Path = Files.write(Paths.get(filePath), content.toString.getBytes(StandardCharsets.UTF_8), CREATE, if(overwrite) TRUNCATE_EXISTING else APPEND, WRITE)
-  def readFromFile(filePath: String): immutable.Seq[String] = Source.fromFile(new File(filePath)).getLines().toList
-
   val standardConfig = config(
     Key.exec.minWarmupRuns -> 10,
     Key.exec.maxWarmupRuns -> 20,

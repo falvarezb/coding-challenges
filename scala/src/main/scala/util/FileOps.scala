@@ -3,9 +3,11 @@ package util
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.StandardOpenOption.{APPEND, CREATE, TRUNCATE_EXISTING, WRITE}
-import java.nio.file.{Files, Paths, StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import scala.annotation.tailrec
+import scala.collection.immutable
+import scala.io.Source
 import scala.util.Try
 
 object FileOps {
@@ -88,5 +90,6 @@ object FileOps {
 
   }
 
+  def readFromFile(filePath: String): immutable.Seq[String] = Source.fromFile(new File(filePath)).getLines().toList
 }
 
