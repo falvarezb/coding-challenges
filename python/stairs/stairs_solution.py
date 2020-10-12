@@ -8,6 +8,17 @@ Number of ways to climb n > 0 stairs when it is possible to take 1,2 or 3 steps 
 
 This problem can be formulated in a more generic way as:
 enumerate all permutations with repetition of [1,2,3] such that the sum of its elements equals n
+
+This problem is an example of combinatorial searching. From the book The Art of Programming:
+
+there are five basic types of questions in combinatorial problems:
+1. existence: are there any arrangements of a set of elements that conform to a given pattern?
+2. construction: if so, can such arrangement be found quickly?
+3. enumeration: how many different arrangements exist?
+4. generation: can all arrangements be visited systematically?
+5. optimisation: what arrangements maximise/minimise a given function (known as objective function)?
+
+In the following functions, we use "count" instead of "enumeration", and "enumeration" instead of "generation"
 """
 
 
