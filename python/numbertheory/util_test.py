@@ -1,5 +1,5 @@
 import pytest
-from util import even_as_power_of_2, binary_expansion, num_digits, num_digits_exp, num_digits_of_n_bit_long_integer, random_n_bit_long_odd_integer, convert_to_int, convert_to_str
+from util import *
 
 
 def test_convert_to_int_h():
@@ -24,7 +24,7 @@ def test_even_as_power_of_2_13():
 
 
 def test_binary_expansion():
-    assert binary_expansion(10) == [0, 1, 0, 1]
+    assert binary_expansion(10) == [1, 0, 1, 0]
 
 
 def test_num_digits_132():
@@ -44,3 +44,10 @@ def test_random_n_bit_long_odd_integer():
     num = random_n_bit_long_odd_integer(n)
     assert num % 2 == 1
     assert len(binary_expansion(num)) == n
+
+def test_two_complement():
+    assert two_complement(5,4) == 11
+    assert two_complement(two_complement(5,4), 4) == 5
+    assert two_complement(0b0101, 4) == 0b1011
+    assert two_complement(0b101, 6) == 0b111011
+    assert two_complement(0b0101) == 0b11

@@ -50,13 +50,25 @@ def convert_to_str(n):
 def binary_expansion(n):
     """
     Returns binary representation of n
-    MSB (most significant bit) is in the rightmost position
+    MSB (most significant bit) is in the leftmost position
     """
     result = []
     while n > 0:
         result.append(n % 2)
         n = n//2
-    return result
+    return result[::-1]
+
+
+def two_complement(n, length = None):
+    """
+    Returns two's complement of n with regards to 2^(length)
+    If length is not specified, by default is the number of bits of n
+    """
+    if not length:
+        length = len(bin(n)[2:])
+    mask = 2**length - 1 # = 111..(num_bits)..111
+    return (~n & mask) + 1 # (~n & mask) = ones' complement
+
 
 
 def num_digits(n):
