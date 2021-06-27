@@ -47,7 +47,13 @@ def test_random_n_bit_long_odd_integer():
 
 def test_two_complement():
     assert two_complement(5,4) == 11
+    assert two_complement(5) == 3
     assert two_complement(two_complement(5,4), 4) == 5
     assert two_complement(0b0101, 4) == 0b1011
     assert two_complement(0b101, 6) == 0b111011
-    assert two_complement(0b0101) == 0b11
+
+def test_radix_complement():
+    assert radix_complement(5, 2) == 3
+    assert radix_complement(5, 3) == 4
+    assert radix_complement(5, 4) == 11
+    assert radix_complement(5, 10) == 5

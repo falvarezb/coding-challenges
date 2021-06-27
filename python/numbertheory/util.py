@@ -1,4 +1,4 @@
-from math import log10, ceil
+from math import log10, ceil, log
 from random import getrandbits
 
 
@@ -59,23 +59,39 @@ def binary_expansion(n):
     return result[::-1]
 
 
-def two_complement(n, length = None):
+def two_complement(n, length=None):
     """
-    Returns two's complement of n with regards to 2^(length)
+    Returns two's complement of n with regards to 2^(length): 2^(length) - n
     If length is not specified, by default is the number of bits of n
     """
     if not length:
         length = len(bin(n)[2:])
-    mask = 2**length - 1 # = 111..(num_bits)..111
-    return (~n & mask) + 1 # (~n & mask) = ones' complement
+    mask = 2**length - 1  # = 111..(num_bits)..111
+    return (~n & mask) + 1  # (~n & mask) = ones' complement
 
 
+def radix_complement(x: int, b: int) -> int:
+    """
+    Returns radix complement of integer x in base b: b^n - x
+    (where n is the number of digits of x in base b)
+    """
 
-def num_digits(n):
+    n = num_digits(x, b)
+    return b**n - x
+
+
+def num_digits(n: int, b: int = 10) -> int:
     '''
-    Returns number of digits of integer n
+    Returns number of digits of integer n in base b
     '''
-    return ceil(log10(n))
+
+    return ceil(log(n, b))
+
+    # q = n // b
+    # if q > 0:
+    #     return 1 + num_digits(q, b)
+
+    # return 1
 
 
 def num_digits_exp(n, e):
