@@ -35,12 +35,20 @@ object MissingNumberOnArray {
     util.Arrays.parallelSort(arr) //Using Java alternative as Scala's ParArray does not have sorting methods
     val arrSorted = arr
 
+    def isLastElement(idx: Int) = {
+      arrSorted.length-1 == idx
+    }
+
     @tailrec
     def traverseArray(idx: Int, missingValues: List[Int]): List[Int] = {
-      if(arrSorted.length-1 == idx)
+      if(isLastElement(idx))
         missingValues
-      else
-        traverseArray(idx+1, if(arrSorted(idx)+1 != arrSorted(idx+1))  ((arrSorted(idx + 1) - 1) to(arrSorted(idx) + 1,-1)).toList ::: missingValues else missingValues)
+      else {
+        val thisElement = arrSorted(idx)
+        val nextElement = arrSorted(idx+1)
+        val missingValuesBetweenElements = if(thisElement+1 != nextElement)  ((nextElement - 1) to(thisElement + 1,-1)).toList else Nil
+        traverseArray(idx+1, missingValuesBetweenElements ::: missingValues)
+      }
 
     }
 

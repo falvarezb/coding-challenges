@@ -46,12 +46,12 @@ class MissingNumberOnArrayTest extends FunSpec with PropertyChecks{
   describe("one missing element") {
     describe("given the array of integers [1,3,2,5] with elements between 1 and 5") {
       it("the missing element is 4") {
-        assert(solution1(Array(1l, 3l, 2l, 5l), 5) == 4)
+        assert(solution1(Array(1L, 3L, 2L, 5L), 5) == 4)
       }
     }
   }
 
-  describe("two missing elements") {
+  describe("multiple missing elements") {
     describe("given the array of integers [1,3,2,5,7,8] with elements between 1 and 8") {
 
       val arr = Array(1, 3, 2, 5, 7, 8)
@@ -77,7 +77,7 @@ class MissingNumberOnArrayTest extends FunSpec with PropertyChecks{
       val arr = Array(1,2,3)
       val n = 10
       val expectedSolution = List(4,5,6,7,8,9,10)
-      it("the missing elements are 4,5,6,7,8,9,10)") {
+      it("the missing elements are 4,5,6,7,8,9,10") {
         assert(solutionN(arr, n) == expectedSolution)
         assert(solutionNOptimised(arr, n) == expectedSolution)
       }
