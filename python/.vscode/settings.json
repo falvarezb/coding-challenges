@@ -1,6 +1,6 @@
 {
     "python.testing.pytestArgs": [
-        "stairs"
+        "stairs","numbertheory","missingnumberarray"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
