@@ -24,7 +24,13 @@ def test_even_as_power_of_2_13():
 
 
 def test_binary_expansion():
-    assert binary_expansion(10) == [1, 0, 1, 0]
+    assert binary_expansion(10) == "1010"
+
+def test_negabinary_expansion_of_positive_number():
+    assert negabinary_expansion(10) == "11110"
+
+def test_negabinary_expansion_of_negative_number():
+    assert negabinary_expansion(-5) == "1111"
 
 
 def test_num_digits_132():

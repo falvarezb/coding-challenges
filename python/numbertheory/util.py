@@ -52,11 +52,27 @@ def binary_expansion(n):
     Returns binary representation of n
     MSB (most significant bit) is in the leftmost position
     """
-    result = []
+    b = 2
+    digits = []
     while n > 0:
-        result.append(n % 2)
-        n = n//2
-    return result[::-1]
+        n, r = divmod(n, b)
+        digits.append(str(r))
+    return "".join(digits[::-1])
+
+def negabinary_expansion(n):
+    """
+    Returns negabinary (base -2) representation of n
+    MSB (most significant bit) is in the leftmost position
+    """
+    b = -2
+    digits = []
+    while n != 0:
+        n, r = divmod(n, b)
+        if r < 0:
+            r -= b
+            n += 1
+        digits.append(str(r))
+    return "".join(digits[::-1])
 
 
 def two_complement(n, length=None):
