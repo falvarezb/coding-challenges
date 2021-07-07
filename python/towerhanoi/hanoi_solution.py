@@ -5,40 +5,44 @@ class Stack:
     The end of the list is the top of the stack
     The elements of the stack must be comparable as the implementation does not allow to push an element on top of a smaller one
     """
-    def __init__(self):
-        self.arr = []
+
+    empty_stack = None
+
+    def __init__(self, arr: list):
+        self._arr = arr
 
     def push(self, x):
-        if len(self.arr) > 0 and self.arr[-1] <= x:
+        if len(self._arr) > 0 and self._arr[-1] <= x:
             raise ValueError("too large a disk!")
-        self.arr.append(x)
+        self._arr.append(x)
 
     def pop(self):
-        return self.arr.pop()
+        return self._arr.pop()
 
     def __len__(self):
-        return len(self.arr)
+        return len(self._arr)
+
+    def __getitem__(self, position):
+        return self._arr[position]
+
+    def __eq__(self, value):
+        return self._arr.__eq__(value._arr)
 
     @staticmethod
     def factory_n(n: int):
-        stack = Stack()
-        for i in range(n,0,-1):
-            stack.push(i)
+        stack = Stack(list(range(n, 0, -1)))
         return stack
 
     @staticmethod
-    def factory_arr(arr: list):
-        stack = Stack()
-        for i in arr:
-            stack.push(i)
-        return stack
+    def empty():
+        return Stack([])
 
 
 def move_disks(tower1: Stack, tower2: Stack, tower3: Stack):
     """
     Solves the problem of the towers of Hanoi: to move disks from tower1 to tower3 using "buffer" tower2 to make
     sure that, during the process, smaller disks are always on top of larger ones.
-    
+
     Disks are represented as integers representing the relative size of each element, so that disk 'm' is larger than disk 'n'
     iff m > n
     """
@@ -48,12 +52,10 @@ def move_disks(tower1: Stack, tower2: Stack, tower3: Stack):
         tower3.push(tower1.pop())
         return
 
-    # Split tower1 to solve the smaller problem with n-1 disks    
-    smaller_case = Stack.factory_arr((tower1.arr[1:len(tower1.arr)]))
+    # recursive calls
     for _ in range(len(tower1)-1):
         tower1.pop()
 
-    # recursive calls
-    move_disks(smaller_case, tower3, tower2)
+    move_disks(tower1[1:len(tower1)], tower3, tower2)
     tower3.push(tower1.pop())
     move_disks(tower2, tower1, tower3)
