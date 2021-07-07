@@ -5,8 +5,8 @@ class Stack:
     The end of the list is the top of the stack
     The elements of the stack must be comparable as the implementation does not allow to push an element on top of a smaller one
     """
-    def __init__(self, arr: list):
-        self.arr = arr
+    def __init__(self):
+        self.arr = []
 
     def push(self, x):
         if len(self.arr) > 0 and self.arr[-1] <= x:
@@ -18,6 +18,20 @@ class Stack:
 
     def __len__(self):
         return len(self.arr)
+
+    @staticmethod
+    def factory_n(n: int):
+        stack = Stack()
+        for i in range(n,0,-1):
+            stack.push(i)
+        return stack
+
+    @staticmethod
+    def factory_arr(arr: list):
+        stack = Stack()
+        for i in arr:
+            stack.push(i)
+        return stack
 
 
 def solve(tower1: Stack, tower2: Stack, tower3: Stack):
@@ -36,10 +50,12 @@ def solve(tower1: Stack, tower2: Stack, tower3: Stack):
         tower3.push(tower2.pop())
         return
 
-    # Split tower1 to solve the smaller problem with n-1 disks
-    smaller_case = Stack(tower1.arr[1:len(tower1.arr)])
+    # Split tower1 to solve the smaller problem with n-1 disks    
+    smaller_case = Stack.factory_arr((tower1.arr[1:len(tower1.arr)]))
     for _ in range(len(tower1)-1):
         tower1.pop()
+
+    # recursive calls
     solve(smaller_case, tower3, tower2)
     tower3.push(tower1.pop())
     solve(tower2, tower1, tower3)
