@@ -34,7 +34,7 @@ class Stack:
         return stack
 
 
-def solve(tower1: Stack, tower2: Stack, tower3: Stack):
+def move_disks(tower1: Stack, tower2: Stack, tower3: Stack):
     """
     Solves the problem of the towers of Hanoi: to move disks from tower1 to tower3 using "buffer" tower2 to make
     sure that, during the process, smaller disks are always on top of larger ones.
@@ -44,10 +44,8 @@ def solve(tower1: Stack, tower2: Stack, tower3: Stack):
     """
     # Recursive algorithm
     # base case
-    if len(tower1) == 2:
-        tower2.push(tower1.pop())
+    if len(tower1) == 1:
         tower3.push(tower1.pop())
-        tower3.push(tower2.pop())
         return
 
     # Split tower1 to solve the smaller problem with n-1 disks    
@@ -56,6 +54,6 @@ def solve(tower1: Stack, tower2: Stack, tower3: Stack):
         tower1.pop()
 
     # recursive calls
-    solve(smaller_case, tower3, tower2)
+    move_disks(smaller_case, tower3, tower2)
     tower3.push(tower1.pop())
-    solve(tower2, tower1, tower3)
+    move_disks(tower2, tower1, tower3)
