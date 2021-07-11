@@ -1,6 +1,6 @@
 {
     "python.testing.pytestArgs": [
-        "stairs","numbertheory","missingnumberarray","grid","magicindex","towerhanoi"
+        "stairs","numbertheory","missingnumberarray","grid","magicindex","towerhanoi","powerset","merge_sorted_lists"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
