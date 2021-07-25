@@ -32,13 +32,11 @@ public class ChiefHopperJava {
 
         if(min == max) return min;
 
-        while(min < max) {
-            int mid = (min + max) / 2;
-            if (finalEnergy(BigInteger.valueOf(mid), arr).compareTo(BigInteger.ZERO) > 0)
-                max = mid;
-            else
-                min = mid + 1;
+        BigInteger energy = finalEnergy(BigInteger.valueOf(max), arr);
+        while(energy.compareTo(BigInteger.ZERO) > 0) {
+            max --;
+            energy = energy.subtract(BigInteger.valueOf(2).pow(size));
         }
-        return min;
+        return max+1;
     }
 }
