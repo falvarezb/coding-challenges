@@ -30,11 +30,8 @@ public class ChiefHopperJava {
     }
 
     public static int chiefHopper(List<Integer> list) {
-        int size = list.size();
         int max = list.stream().max(Integer::compareTo).get();
-
         BigInteger energy = finalEnergy(BigInteger.valueOf(max), list);
-        BigInteger times = energy.divide(BigInteger.valueOf(2).pow(size));
-        return max-times.intValue();
+        return max-energy.divide(BigInteger.valueOf(2).pow(list.size())).intValue();
     }
 }
