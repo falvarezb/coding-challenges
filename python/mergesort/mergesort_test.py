@@ -1,4 +1,4 @@
-from merge_sorted_lists.merge_sorted_list import *
+from mergesort_solution import *
 
 def test_l1endsfirst():
     assert merge_list([1,3,6,7], [2,4,5,9]) == [1,2,3,4,5,6,7,9]
