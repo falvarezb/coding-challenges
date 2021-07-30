@@ -1,4 +1,7 @@
 from closest_points.closest_points_solution import *
+import hypothesis.strategies as st
+from hypothesis import given, example, note
+from random import sample
 
 
 def test_quadratic_solution():
@@ -33,3 +36,8 @@ def test_right_half_even():
     newPx, newPy = right_half_points(Px, Py)
     assert newPx == [p3,p4]
     assert newPy == [PEntry(p3, 0), PEntry(p4, 1)]
+
+
+@given(st.lists(st.tuples(st.integers(0,100), st.integers(0,10)), min_size=2, max_size=50))
+def test_solution_comparison(points):
+    assert distance(*quadratic_solution(points)) == distance(*nlogn_solution(points))
