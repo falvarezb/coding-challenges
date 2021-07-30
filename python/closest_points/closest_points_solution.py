@@ -21,7 +21,8 @@ def quadratic_solution(points):
             d = distance(points[i], points[j])
             if d < min_distance:
                 min_distance = d
-    return min_distance
+                min_pair = (points[i], points[j])
+    return min_pair
 
 
 class PEntry:
@@ -31,24 +32,21 @@ class PEntry:
     y_position: position of (x,y) in the list of points sorted by coordinate y
     """
 
-    def __init__(self, point, x_position, y_position):
+    def __init__(self, point, x_position):
         self.point = point
-        self.x_position = x_position
-        self.y_position = y_position
+        self.x_position = x_position        
 
     def __repr__(self) -> str:
-        return f"[{self.point}, {self.x_position}, {self.y_position}]"
+        return f"[{self.point}, {self.x_position}]"
 
     def __eq__(self, o: object) -> bool:
-        return self.point == o.point and self.x_position == o.x_position and self.y_position == o.y_position
+        return self.point == o.point and self.x_position == o.x_position
 
 
 def sort_points(points):
     Px = sorted(points, key=lambda p: p[0])
-    Px = [PEntry(p, i, -1) for i, p in enumerate(Px)]
-    Py = sorted(Px, key=lambda pentry: pentry.point[1])
-    for i, p in enumerate(Py):
-        p.y_position = i
+    Px_aux = [PEntry(p, i) for i, p in enumerate(Px)]
+    Py = sorted(Px_aux, key=lambda pentry: pentry.point[1])
     return Px, Py
 
 
@@ -56,13 +54,10 @@ def left_half_points(Px, Py):
     n = len(Px)
     left_half_upper_bound = math.ceil(n/2)
 
-    Qx, Qy = Px[:left_half_upper_bound], []
-    idx = 0
+    Qx, Qy = Px[:left_half_upper_bound], []    
     for pentry in Py:
-        if pentry.x_position < left_half_upper_bound:
-            pentry.y_position = idx
-            Qy.append(pentry)
-            idx += 1
+        if pentry.x_position < left_half_upper_bound:                        
+            Qy.append(pentry)            
     return Qx, Qy
 
 
@@ -70,15 +65,10 @@ def right_half_points(Px, Py):
     n = len(Px)
     right_half_lower_bound = math.floor(n/2)
 
-    Rx, Ry = Px[right_half_lower_bound:], []
-    idx = 0
+    Rx, Ry = Px[right_half_lower_bound:], []    
     for pentry in Py:
-        if pentry.x_position >= right_half_lower_bound:
-            pentry.y_position = idx
-            Ry.append(pentry)
-            idx += 1
-    for pentry in Rx:
-        pentry.x_position -= right_half_lower_bound
+        if pentry.x_position >= right_half_lower_bound:            
+            Ry.append(PEntry(pentry.point, pentry.x_position-right_half_lower_bound))            
     return Rx, Ry
 
 
@@ -93,7 +83,7 @@ def nlogn_solution(points):
         Py: list of points sorted by coordinate y
         """
         if len(Px) == 2:
-            return Px[0].point, Px[1].point
+            return Px[0], Px[1]
 
         Qx, Qy = left_half_points(Px, Py)
         Rx, Ry = right_half_points(Px, Py)
@@ -105,17 +95,23 @@ def nlogn_solution(points):
         rightmost_Qx = Qx[-1]
         s = []
         for p in Py:
-            if distance(p.point,rightmost_Qx.point) < delta:
+            if distance(p.point,rightmost_Qx) < delta:
                 s.append(p)
         
-        min_distance = delta
+        min_distance = delta        
         for i in range(len(Py)-1):
             for j in range(i+1, min(len(Py),i+16)):
                 d = distance(Py[i].point, Py[j].point)
                 if d < min_distance:
                     min_distance = d
-        
-        return min_distance
+                    min_pair = (Py[i].point, Py[j].point)
+
+        if min_distance < delta:
+            return min_pair
+        elif distance(q1,q2) < distance(r1,r2):
+            return (q1,q2)
+        else:
+            return (r1,r2)                
 
 
     return closest_points(*sort_points(points))
