@@ -32,9 +32,17 @@ def quadratic_solution(points):
 
 class PyElement:
     """
-    Object representing elemlents of Py (list of points sorted by coordinate y):
+    Given a list of points P:
+    - Px is the list of points sorted by coordinate x
+    - Py is the list of points sorted by coordinate y
+
+    This class represents elemenets of Py:
     - point: point (x,y) in the plane
-    - x_position: position of (x,y) in the list of points Px sorted by coordinate x    
+    - x_position: position of (x,y) in Px
+
+    We use 
+    - Px to split in two halves the set of elements in each recursion
+    - Py to find the solution when merging the results of the two halves in each recursion
     """
 
     def __init__(self, point, x_position):
@@ -48,17 +56,12 @@ class PyElement:
         return self.point == o.point and self.x_position == o.x_position
 
 
-def sort_points(points):
+def sort_points(P):
     """
-    points: list of tuples, each tuple representing a point (x,y) in the plane
-
-    returns the tuple (Px, Py) where:
-    Px = list of points ordered by coordinate x
-    Py = list of points ordered by coordinate y
+    P -> Px, Py
     """
-    Px = sorted(points, key=lambda p: p[0])
-    Px_aux = [PyElement(p, i) for i, p in enumerate(Px)]
-    Py = sorted(Px_aux, key=lambda pentry: pentry.point[1])
+    Px = sorted(P, key=lambda p: p[0])
+    Py = sorted([PyElement(p, i) for i, p in enumerate(Px)], key=lambda py: py.point[1])
     return Px, Py
 
 
@@ -90,10 +93,13 @@ def right_half_points(Px, Py):
     return newPx, newPy
 
 
-def get_candidates(left_half, Py, min_left_distance, min_right_distance):
+def get_candidates_from_different_halves(left_half, Py, min_left_distance, min_right_distance):
     """
-    candidates to be the closest points lie within 'min_distance_upper_bound' of
-    the middle point separating the left and right halves  
+    Once the closest points in each half have been determined, we need to consider if the closest
+    points overall belong to different halves.
+
+    The potential candidates must lie within 'min_distance_upper_bound' of
+    the middle point separating the left and right halves
     """
 
     rightmost_left_point = left_half[-1]
@@ -103,6 +109,22 @@ def get_candidates(left_half, Py, min_left_distance, min_right_distance):
         if abs(p.point[0]-rightmost_left_point[0]) < min_distance_upper_bound:
             candidates.append(p)
     return min_distance_upper_bound, candidates
+
+
+def closest_points_from_different_halves(candidates):
+    """
+    Obtain the closest points among the candidates belonging to different halves
+    """
+    min_distance = math.inf
+    closest_candidates = None
+    for i in range(len(candidates)-1):
+        for j in range(i+1, min(len(candidates), i+16)):
+            d = distance(candidates[i].point, candidates[j].point)
+            if d < min_distance:
+                min_distance = d
+                closest_candidates = (candidates[i].point, candidates[j].point)
+    return min_distance, closest_candidates
+
 
 def nlogn_solution(points):
     """
@@ -125,40 +147,25 @@ def nlogn_solution(points):
         Rx, Ry = right_half_points(Px, Py)
 
         # closest points in the left half
-        l1, l2 = closest_points(Lx, Ly)
-        min_left_distance = distance(l1, l2)
+        left_closest_points = closest_points(Lx, Ly)
+        min_left_distance = distance(*left_closest_points)
         # closest points in the right half
-        r1, r2 = closest_points(Rx, Ry)
-        min_right_distance = distance(r1, r2)
+        right_closest_points = closest_points(Rx, Ry)
+        min_right_distance = distance(*right_closest_points)
 
-        # min_distance = min(min_left_distance, min_right_distance)
-        # rightmost_left_point = Lx[-1]
-        # candidates = []
-        # for p in Py:
-        #     if abs(p.point[0]-rightmost_left_point[0]) < min_distance:
-        #         candidates.append(p)
-        min_distance_upper_bound, candidates = get_candidates(Lx, Py, min_left_distance, min_right_distance)
-        min_distance = min_distance_upper_bound
-
-        for i in range(len(candidates)-1):
-            for j in range(i+1, min(len(candidates), i+16)):
-                d = distance(candidates[i].point, candidates[j].point)
-                if d < min_distance:
-                    min_distance = d
-                    min_pair = (candidates[i].point, candidates[j].point)
+        min_distance_upper_bound, candidates = get_candidates_from_different_halves(Lx, Py, min_left_distance, min_right_distance)
+        min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
-            return min_pair
+            return closest_candidates
         elif min_left_distance < min_right_distance:
-            return (l1, l2)
+            return left_closest_points
         else:
-            return (r1, r2)
+            return right_closest_points
 
     return closest_points(*sort_points(points))
 
 
 if __name__ == "__main__":
-    points = [(0, 0), (3, 4), (2, 5), (1, 4)]
-    Px, Py = sort_points(points)
-    print(Px)
-    print(Py)
+    P = [(0, 0), (3, 4), (2, 5), (1, 4)]
+    print(nlogn_solution(P))
