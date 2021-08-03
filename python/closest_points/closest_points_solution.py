@@ -14,19 +14,19 @@ def distance(p1: tuple, p2: tuple) -> float:
     return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
 
-def quadratic_solution(points):
+def quadratic_solution(P):
     """
     brute force algorithm, O(n^2)
 
     points: list of tuples, each tuple representing a point (x,y) in the plane
     """
     min_distance = math.inf
-    for i in range(len(points)-1):
-        for j in range(i+1, len(points)):
-            d = distance(points[i], points[j])
+    for i in range(len(P)-1):
+        for j in range(i+1, len(P)):
+            d = distance(P[i], P[j])
             if d < min_distance:
                 min_distance = d
-                min_pair = (points[i], points[j])
+                min_pair = (P[i], P[j])
     return min_pair
 
 
@@ -167,5 +167,17 @@ def nlogn_solution(points):
 
 
 if __name__ == "__main__":
-    P = [(0, 0), (3, 4), (2, 5), (1, 4)]
-    print(nlogn_solution(P))
+
+    from random import sample
+    import timeit
+
+    def main():
+        x = sample(range(100), 100)
+        y = sample(range(100), 100)
+        P = list(zip(x,y))
+        print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
+        # print(timeit.repeat(lambda: quadratic_solution(P), repeat=1, number=1))               
+        # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
+        # print(nlogn_solution(P))
+
+    main()
