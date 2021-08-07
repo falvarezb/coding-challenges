@@ -5,6 +5,11 @@ Given n points in the plane, find the pair that is closest together.
 """
 
 import math
+from multiprocessing import Process, Value
+
+sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
 
 
 def distance(p1: tuple, p2: tuple) -> float:
@@ -126,6 +131,37 @@ def closest_points_from_different_halves(candidates):
     return min_distance, closest_candidates
 
 
+def closest_points(Px, Py):
+    """
+    Px: list of points sorted by coordinate x
+    Py: list of points sorted by coordinate y
+
+    Recursive function, each iteration halves the input, O(log n)
+    """
+    if len(Px) == 2:
+        return Px[0], Px[1]
+
+    Lx, Ly = left_half_points(Px, Py)
+    Rx, Ry = right_half_points(Px, Py)
+
+    # closest points in the left half
+    left_closest_points = closest_points(Lx, Ly)
+    min_left_distance = distance(*left_closest_points)
+    # closest points in the right half
+    right_closest_points = closest_points(Rx, Ry)
+    min_right_distance = distance(*right_closest_points)
+
+    min_distance_upper_bound, candidates = get_candidates_from_different_halves(Lx, Py, min_left_distance, min_right_distance)
+    min_distance, closest_candidates = closest_points_from_different_halves(candidates)
+
+    if min_distance < min_distance_upper_bound:
+        return closest_candidates
+    elif min_left_distance < min_right_distance:
+        return left_closest_points
+    else:
+        return right_closest_points
+
+
 def nlogn_solution(points):
     """
     divide and conquer algorithm, O(n log n)
@@ -133,19 +169,57 @@ def nlogn_solution(points):
     points: list of tuples, each tuple representing a point (x,y) in the plane
     """
 
-    def closest_points(Px, Py):
-        """
-        Px: list of points sorted by coordinate x
-        Py: list of points sorted by coordinate y
+    return closest_points(*sort_points(points))
 
-        Recursive function, each iteration halves the input, O(log n)
-        """
-        if len(Px) == 2:
-            return Px[0], Px[1]
 
-        Lx, Ly = left_half_points(Px, Py)
-        Rx, Ry = right_half_points(Px, Py)
+def closest_points_par(Px, Py, s1_x, s1_y, s2_x, s2_y):
+    """
+    Px: list of points sorted by coordinate x
+    Py: list of points sorted by coordinate y
 
+    Recursive function, each iteration halves the input, O(log n)
+    """
+    if len(Px) == 2:
+        s1_x.value = Px[0][0]
+        s1_y.value = Px[0][1]
+        s2_x.value = Px[1][0]
+        s2_y.value = Px[1][1]
+        return
+
+    Lx, Ly = left_half_points(Px, Py)
+    Rx, Ry = right_half_points(Px, Py)
+
+
+    if len(Px) > 100000:        
+        # closest points in each half
+        pleft = Process(target=closest_points_par, args=(Lx, Ly, lsol1_x, lsol1_y, lsol2_x, lsol2_y))
+        pright = Process(target=closest_points_par, args=(Rx, Ry, rsol1_x, rsol1_y, rsol2_x, rsol2_y))
+        pleft.start()
+        pright.start()
+        pleft.join()
+        pright.join()
+        min_left_distance = distance((lsol1_x.value, lsol1_y.value), (lsol2_x.value, lsol2_y.value))
+        min_right_distance = distance((rsol1_x.value, rsol1_y.value), (rsol2_x.value, rsol2_y.value))
+
+        min_distance_upper_bound, candidates = get_candidates_from_different_halves(Lx, Py, min_left_distance, min_right_distance)
+        min_distance, closest_candidates = closest_points_from_different_halves(candidates)
+
+        if min_distance < min_distance_upper_bound:
+            s1_x.value = closest_candidates[0][0]
+            s1_y.value = closest_candidates[0][1]
+            s2_x.value = closest_candidates[1][0]
+            s2_y.value = closest_candidates[1][1]
+        elif min_left_distance < min_right_distance:
+            s1_x.value = lsol1_x.value
+            s1_y.value = lsol1_y.value
+            s2_x.value = lsol2_x.value
+            s2_y.value = lsol2_y.value
+        else:
+            s1_x.value = rsol1_x.value
+            s1_y.value = rsol1_y.value
+            s2_x.value = rsol2_x.value
+            s2_y.value = rsol2_y.value
+    else:
         # closest points in the left half
         left_closest_points = closest_points(Lx, Ly)
         min_left_distance = distance(*left_closest_points)
@@ -157,13 +231,29 @@ def nlogn_solution(points):
         min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
-            return closest_candidates
+            s1_x.value = closest_candidates[0][0]
+            s1_y.value = closest_candidates[0][1]
+            s2_x.value = closest_candidates[1][0]
+            s2_y.value = closest_candidates[1][1]
         elif min_left_distance < min_right_distance:
-            return left_closest_points
+            s1_x.value = left_closest_points[0][0]
+            s1_y.value = left_closest_points[0][1]
+            s2_x.value = left_closest_points[1][0]
+            s2_y.value = left_closest_points[1][1]
         else:
-            return right_closest_points
+            s1_x.value = right_closest_points[0][0]
+            s1_y.value = right_closest_points[0][1]
+            s2_x.value = right_closest_points[1][0]
+            s2_y.value = right_closest_points[1][1]
 
-    return closest_points(*sort_points(points))
+def nlogn_solution_par(points):
+    """
+    divide and conquer algorithm, O(n log n)
+
+    points: list of tuples, each tuple representing a point (x,y) in the plane
+    """
+
+    return closest_points_par(*sort_points(points), sol1_x, sol1_y, sol2_x, sol2_y)
 
 
 if __name__ == "__main__":
@@ -172,12 +262,17 @@ if __name__ == "__main__":
     import timeit
 
     def main():
-        x = sample(range(100), 100)
-        y = sample(range(100), 100)
-        P = list(zip(x,y))
-        print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
-        # print(timeit.repeat(lambda: quadratic_solution(P), repeat=1, number=1))               
+        x = sample(range(1000000), 1000000)
+        y = sample(range(1000000), 1000000)
+        P = list(zip(x, y))
+        # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
+        print(timeit.repeat(lambda: nlogn_solution_par(P), repeat=1, number=1))
         # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
         # print(nlogn_solution(P))
+        # print(nlogn_solution_par(P))
+        # print(sol1_x.value)
+        # print(sol1_y.value)
+        # print(sol2_x.value)
+        # print(sol2_y.value)
 
     main()
