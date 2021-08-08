@@ -13,6 +13,11 @@ def test_nlogn_solution():
     assert nlogn_solution(P) == ((0,0),(0,1))
 
 
+def test_nlogn_solution_par():
+    P=[(0, 1), (0, 3), (2, 0), (0, 0)]
+    assert nlogn_solution_par(P) == ((0,0),(0,1))
+
+
 def test_sort_points():
     P = [(0, 0), (3, 4), (2, 5), (1, 4)]
     Px, Py = sort_points(P)
@@ -39,5 +44,9 @@ def test_right_half_even():
 
 
 @given(st.lists(st.tuples(st.integers(0,100), st.integers(0,100)), min_size=2, max_size=100, unique=True))
-def test_solution_comparison(P):
+def test_quadratic_vs_nlogn(P):
     assert distance(*quadratic_solution(P)) == distance(*nlogn_solution(P))
+
+@given(st.lists(st.tuples(st.integers(0,1000), st.integers(0,1000)), min_size=1000, max_size=1000, unique=True))
+def test_quadratic_vs_nlogn_par(P):
+    assert distance(*nlogn_solution_par(P)) == distance(*nlogn_solution(P))

@@ -7,7 +7,7 @@ Given n points in the plane, find the pair that is closest together.
 import math
 from multiprocessing import Process, Value
 
-sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+
 lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
 rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
 
@@ -190,7 +190,7 @@ def closest_points_par(Px, Py, s1_x, s1_y, s2_x, s2_y):
     Rx, Ry = right_half_points(Px, Py)
 
 
-    if len(Px) > 100000:        
+    if len(Px) >= 1000:        
         # closest points in each half
         pleft = Process(target=closest_points_par, args=(Lx, Ly, lsol1_x, lsol1_y, lsol2_x, lsol2_y))
         pright = Process(target=closest_points_par, args=(Rx, Ry, rsol1_x, rsol1_y, rsol2_x, rsol2_y))
@@ -252,8 +252,9 @@ def nlogn_solution_par(points):
 
     points: list of tuples, each tuple representing a point (x,y) in the plane
     """
-
-    return closest_points_par(*sort_points(points), sol1_x, sol1_y, sol2_x, sol2_y)
+    sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+    closest_points_par(*sort_points(points), sol1_x, sol1_y, sol2_x, sol2_y)
+    return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))    
 
 
 if __name__ == "__main__":
@@ -262,14 +263,14 @@ if __name__ == "__main__":
     import timeit
 
     def main():
-        x = sample(range(1000000), 1000000)
-        y = sample(range(1000000), 1000000)
+        x = sample(range(1000), 1000)
+        y = sample(range(1000), 1000)
         P = list(zip(x, y))
         # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
-        print(timeit.repeat(lambda: nlogn_solution_par(P), repeat=1, number=1))
+        # print(timeit.repeat(lambda: nlogn_solution_par(P), repeat=1, number=1))
         # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
-        # print(nlogn_solution(P))
-        # print(nlogn_solution_par(P))
+        print(nlogn_solution(P))
+        print(nlogn_solution_par(P))
         # print(sol1_x.value)
         # print(sol1_y.value)
         # print(sol2_x.value)
