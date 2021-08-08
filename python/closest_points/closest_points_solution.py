@@ -132,7 +132,7 @@ def closest_points(Px, Py):
     Px: list of points sorted by coordinate x
     Py: list of points sorted by coordinate y
 
-    Recursive function, each iteration halves the input, O(log n)
+    Recursive function, each iteration halves the input, therefore this recursive function is O(log n)
     """
     if len(Px) == 2:
         return Px[0], Px[1]
@@ -175,12 +175,14 @@ def copy_solution_to_shared_memory(solution, shmem):
     shmem[1][1].value = solution[1][1]
 
 
-def closest_points_par(Px, Py, shmem):
+def closest_points_par(Px, Py, shmem, par_threshold):
     """
-    Px: list of points sorted by coordinate x
-    Py: list of points sorted by coordinate y
+    Parallel version of 'closest_points'
+    
+    If the number of points is greater than a given threshold, the process spawns 2 new processes to run each half of the input
+    Ideally, the threshold should be such that the number of processes is less or equal than the number of processors
 
-    Recursive function, each iteration halves the input, O(log n)
+    Each child proccess calculates the solution corresponding to its input and shares that information with its parent through shared memory
     """
     if len(Px) == 2:
         copy_solution_to_shared_memory(Px, shmem)
@@ -189,13 +191,13 @@ def closest_points_par(Px, Py, shmem):
     Lx, Ly = left_half_points(Px, Py)
     Rx, Ry = right_half_points(Px, Py)
 
-    if len(Px) >= 1000:
+    if len(Px) > par_threshold:
         lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
         rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
 
         # closest points in each half
-        pleft = Process(target=closest_points_par, args=(Lx, Ly, ((lsol1_x, lsol1_y), (lsol2_x, lsol2_y))))
-        pright = Process(target=closest_points_par, args=(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y))))
+        pleft = Process(target=closest_points_par, args=(Lx, Ly, ((lsol1_x, lsol1_y), (lsol2_x, lsol2_y)), par_threshold))
+        pright = Process(target=closest_points_par, args=(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y)), par_threshold))
         pleft.start()
         pright.start()
         pleft.join()
@@ -219,6 +221,7 @@ def closest_points_par(Px, Py, shmem):
             shmem[1][0].value = rsol2_x.value
             shmem[1][1].value = rsol2_y.value
     else:
+        # DEFAULTING TO SERIAL ALGORITHM
         # closest points in the left half
         left_closest_points = closest_points(Lx, Ly)
         min_left_distance = distance(*left_closest_points)
@@ -239,12 +242,12 @@ def closest_points_par(Px, Py, shmem):
 
 def nlogn_solution_par(points):
     """
-    divide and conquer algorithm, O(n log n)
-
-    points: list of tuples, each tuple representing a point (x,y) in the plane
+    Parallel version of 'nlogn_solution'
     """
     sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-    closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)))
+    num_processes = 8 #power of 2
+    par_threshold = len(points)//num_processes
+    closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)), par_threshold)
     return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))
 
 
@@ -254,17 +257,13 @@ if __name__ == "__main__":
     import timeit
 
     def main():
-        x = sample(range(1000), 1000)
-        y = sample(range(1000), 1000)
+        x = sample(range(1000000), 1000000)
+        y = sample(range(1000000), 1000000)
         P = list(zip(x, y))
         # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
-        # print(timeit.repeat(lambda: nlogn_solution_par(P), repeat=1, number=1))
+        print(timeit.repeat(lambda: nlogn_solution_par(P), repeat=1, number=1))
         # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
-        print(nlogn_solution(P))
-        print(nlogn_solution_par(P))
-        # print(sol1_x.value)
-        # print(sol1_y.value)
-        # print(sol2_x.value)
-        # print(sol2_y.value)
+        # print(nlogn_solution(P))
+        # print(nlogn_solution_par(P))
 
     main()
