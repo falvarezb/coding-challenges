@@ -168,14 +168,14 @@ def nlogn_solution(points):
     return closest_points(*sort_points(points))
 
 
-def copy_values(origin, s1, s2):
-    s1[0].value = origin[0][0]
-    s1[1].value = origin[0][1]
-    s2[0].value = origin[1][0]
-    s2[1].value = origin[1][1]
+def copy_solution_to_shared_memory(solution, shmem):
+    shmem[0][0].value = solution[0][0]
+    shmem[0][1].value = solution[0][1]
+    shmem[1][0].value = solution[1][0]
+    shmem[1][1].value = solution[1][1]
 
 
-def closest_points_par(Px, Py, s1, s2):
+def closest_points_par(Px, Py, shmem):
     """
     Px: list of points sorted by coordinate x
     Py: list of points sorted by coordinate y
@@ -183,19 +183,19 @@ def closest_points_par(Px, Py, s1, s2):
     Recursive function, each iteration halves the input, O(log n)
     """
     if len(Px) == 2:
-        copy_values(Px, s1, s2)
+        copy_solution_to_shared_memory(Px, shmem)
         return
 
     Lx, Ly = left_half_points(Px, Py)
     Rx, Ry = right_half_points(Px, Py)
 
-    if len(Px) >= 250:
+    if len(Px) >= 1000:
         lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
         rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
 
         # closest points in each half
-        pleft = Process(target=closest_points_par, args=(Lx, Ly, (lsol1_x, lsol1_y), (lsol2_x, lsol2_y)))
-        pright = Process(target=closest_points_par, args=(Rx, Ry, (rsol1_x, rsol1_y), (rsol2_x, rsol2_y)))
+        pleft = Process(target=closest_points_par, args=(Lx, Ly, ((lsol1_x, lsol1_y), (lsol2_x, lsol2_y))))
+        pright = Process(target=closest_points_par, args=(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y))))
         pleft.start()
         pright.start()
         pleft.join()
@@ -207,17 +207,17 @@ def closest_points_par(Px, Py, s1, s2):
         min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
-            copy_values(closest_candidates, s1, s2)
+            copy_solution_to_shared_memory(closest_candidates, shmem)
         elif min_left_distance < min_right_distance:
-            s1[0].value = lsol1_x.value
-            s1[1].value = lsol1_y.value
-            s2[0].value = lsol2_x.value
-            s2[1].value = lsol2_y.value
+            shmem[0][0].value = lsol1_x.value
+            shmem[0][1].value = lsol1_y.value
+            shmem[1][0].value = lsol2_x.value
+            shmem[1][1].value = lsol2_y.value
         else:
-            s1[0].value = rsol1_x.value
-            s1[1].value = rsol1_y.value
-            s2[0].value = rsol2_x.value
-            s2[1].value = rsol2_y.value
+            shmem[0][0].value = rsol1_x.value
+            shmem[0][1].value = rsol1_y.value
+            shmem[1][0].value = rsol2_x.value
+            shmem[1][1].value = rsol2_y.value
     else:
         # closest points in the left half
         left_closest_points = closest_points(Lx, Ly)
@@ -230,11 +230,11 @@ def closest_points_par(Px, Py, s1, s2):
         min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
-            copy_values(closest_candidates, s1, s2)
+            copy_solution_to_shared_memory(closest_candidates, shmem)
         elif min_left_distance < min_right_distance:
-            copy_values(left_closest_points, s1, s2)
+            copy_solution_to_shared_memory(left_closest_points, shmem)
         else:
-            copy_values(right_closest_points, s1, s2)
+            copy_solution_to_shared_memory(right_closest_points, shmem)
 
 
 def nlogn_solution_par(points):
@@ -244,7 +244,7 @@ def nlogn_solution_par(points):
     points: list of tuples, each tuple representing a point (x,y) in the plane
     """
     sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-    closest_points_par(*sort_points(points), (sol1_x, sol1_y), (sol2_x, sol2_y))
+    closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)))
     return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))
 
 
