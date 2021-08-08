@@ -8,10 +8,6 @@ import math
 from multiprocessing import Process, Value
 
 
-lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-
-
 def distance(p1: tuple, p2: tuple) -> float:
     """
     each tuple represents a point (x,y) in the plane
@@ -172,7 +168,14 @@ def nlogn_solution(points):
     return closest_points(*sort_points(points))
 
 
-def closest_points_par(Px, Py, s1_x, s1_y, s2_x, s2_y):
+def copy_values(origin, s1, s2):
+    s1[0].value = origin[0][0]
+    s1[1].value = origin[0][1]
+    s2[0].value = origin[1][0]
+    s2[1].value = origin[1][1]
+
+
+def closest_points_par(Px, Py, s1, s2):
     """
     Px: list of points sorted by coordinate x
     Py: list of points sorted by coordinate y
@@ -180,20 +183,19 @@ def closest_points_par(Px, Py, s1_x, s1_y, s2_x, s2_y):
     Recursive function, each iteration halves the input, O(log n)
     """
     if len(Px) == 2:
-        s1_x.value = Px[0][0]
-        s1_y.value = Px[0][1]
-        s2_x.value = Px[1][0]
-        s2_y.value = Px[1][1]
+        copy_values(Px, s1, s2)
         return
 
     Lx, Ly = left_half_points(Px, Py)
     Rx, Ry = right_half_points(Px, Py)
 
+    if len(Px) >= 250:
+        lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+        rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
 
-    if len(Px) >= 1000:        
         # closest points in each half
-        pleft = Process(target=closest_points_par, args=(Lx, Ly, lsol1_x, lsol1_y, lsol2_x, lsol2_y))
-        pright = Process(target=closest_points_par, args=(Rx, Ry, rsol1_x, rsol1_y, rsol2_x, rsol2_y))
+        pleft = Process(target=closest_points_par, args=(Lx, Ly, (lsol1_x, lsol1_y), (lsol2_x, lsol2_y)))
+        pright = Process(target=closest_points_par, args=(Rx, Ry, (rsol1_x, rsol1_y), (rsol2_x, rsol2_y)))
         pleft.start()
         pright.start()
         pleft.join()
@@ -205,20 +207,17 @@ def closest_points_par(Px, Py, s1_x, s1_y, s2_x, s2_y):
         min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
-            s1_x.value = closest_candidates[0][0]
-            s1_y.value = closest_candidates[0][1]
-            s2_x.value = closest_candidates[1][0]
-            s2_y.value = closest_candidates[1][1]
+            copy_values(closest_candidates, s1, s2)
         elif min_left_distance < min_right_distance:
-            s1_x.value = lsol1_x.value
-            s1_y.value = lsol1_y.value
-            s2_x.value = lsol2_x.value
-            s2_y.value = lsol2_y.value
+            s1[0].value = lsol1_x.value
+            s1[1].value = lsol1_y.value
+            s2[0].value = lsol2_x.value
+            s2[1].value = lsol2_y.value
         else:
-            s1_x.value = rsol1_x.value
-            s1_y.value = rsol1_y.value
-            s2_x.value = rsol2_x.value
-            s2_y.value = rsol2_y.value
+            s1[0].value = rsol1_x.value
+            s1[1].value = rsol1_y.value
+            s2[0].value = rsol2_x.value
+            s2[1].value = rsol2_y.value
     else:
         # closest points in the left half
         left_closest_points = closest_points(Lx, Ly)
@@ -231,20 +230,12 @@ def closest_points_par(Px, Py, s1_x, s1_y, s2_x, s2_y):
         min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
-            s1_x.value = closest_candidates[0][0]
-            s1_y.value = closest_candidates[0][1]
-            s2_x.value = closest_candidates[1][0]
-            s2_y.value = closest_candidates[1][1]
+            copy_values(closest_candidates, s1, s2)
         elif min_left_distance < min_right_distance:
-            s1_x.value = left_closest_points[0][0]
-            s1_y.value = left_closest_points[0][1]
-            s2_x.value = left_closest_points[1][0]
-            s2_y.value = left_closest_points[1][1]
+            copy_values(left_closest_points, s1, s2)
         else:
-            s1_x.value = right_closest_points[0][0]
-            s1_y.value = right_closest_points[0][1]
-            s2_x.value = right_closest_points[1][0]
-            s2_y.value = right_closest_points[1][1]
+            copy_values(right_closest_points, s1, s2)
+
 
 def nlogn_solution_par(points):
     """
@@ -253,8 +244,8 @@ def nlogn_solution_par(points):
     points: list of tuples, each tuple representing a point (x,y) in the plane
     """
     sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-    closest_points_par(*sort_points(points), sol1_x, sol1_y, sol2_x, sol2_y)
-    return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))    
+    closest_points_par(*sort_points(points), (sol1_x, sol1_y), (sol2_x, sol2_y))
+    return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))
 
 
 if __name__ == "__main__":
