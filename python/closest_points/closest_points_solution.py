@@ -94,7 +94,7 @@ def right_half_points(Px, Py):
     return newPx, newPy
 
 
-def get_candidates_from_different_halves(left_half, Py, min_left_distance, min_right_distance):
+def get_candidates_from_different_halves(left_half, Py, min_distance_upper_bound):
     """
     Once the closest points in each half have been determined, we need to consider if the closest
     points overall belong to different halves.
@@ -103,18 +103,18 @@ def get_candidates_from_different_halves(left_half, Py, min_left_distance, min_r
     the middle point separating the left and right halves
     """
 
-    rightmost_left_point = left_half[-1]
-    min_distance_upper_bound = min(min_left_distance, min_right_distance)
+    rightmost_left_point = left_half[-1]    
     candidates = []
     for p in Py:
         if abs(p.point[0]-rightmost_left_point[0]) < min_distance_upper_bound:
             candidates.append(p)
-    return min_distance_upper_bound, candidates
+    return candidates
 
 
 def closest_points_from_different_halves(candidates):
     """
-    Obtain the closest points among the candidates belonging to different halves
+    Obtain the closest points among the previously selected candidates
+    Returns the closest points and their distance to each other
     """
     min_distance = math.inf
     closest_candidates = None
@@ -147,7 +147,8 @@ def closest_points(Px, Py):
     right_closest_points = closest_points(Rx, Ry)
     min_right_distance = distance(*right_closest_points)
 
-    min_distance_upper_bound, candidates = get_candidates_from_different_halves(Lx, Py, min_left_distance, min_right_distance)
+    min_distance_upper_bound = min(min_left_distance, min_right_distance)
+    candidates = get_candidates_from_different_halves(Lx, Py, min_distance_upper_bound)
     min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
     if min_distance < min_distance_upper_bound:
@@ -205,7 +206,8 @@ def closest_points_par(Px, Py, shmem, par_threshold):
         min_left_distance = distance((lsol1_x.value, lsol1_y.value), (lsol2_x.value, lsol2_y.value))
         min_right_distance = distance((rsol1_x.value, rsol1_y.value), (rsol2_x.value, rsol2_y.value))
 
-        min_distance_upper_bound, candidates = get_candidates_from_different_halves(Lx, Py, min_left_distance, min_right_distance)
+        min_distance_upper_bound = min(min_left_distance, min_right_distance)
+        candidates = get_candidates_from_different_halves(Lx, Py, min_distance_upper_bound)
         min_distance, closest_candidates = closest_points_from_different_halves(candidates)
 
         if min_distance < min_distance_upper_bound:
@@ -226,13 +228,14 @@ def closest_points_par(Px, Py, shmem, par_threshold):
         copy_solution_to_shared_memory(closest_points(Px, Py), shmem)
 
 
-def nlogn_solution_par(points):
+def nlogn_solution_par(points, num_processes):
     """
-    Parallel version of 'nlogn_solution'
+    Parallel version of 'nlogn_solution' where num_processes is the number of processes to spawn
+    
+    num_processes MUST be a power of 2
     """
     # shared memory values: not really needed as no new process is spawned here. However, needed to respect the signature of 'closest_points_par'
     sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-    num_processes = 4  # power of 2
     par_threshold = len(points)//num_processes
     closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)), par_threshold)
     return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))
@@ -248,9 +251,9 @@ if __name__ == "__main__":
         y = sample(range(1000), 1000)
         P = list(zip(x, y))
         # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
-        # print(timeit.repeat(lambda: nlogn_solution_par(P), repeat=1, number=1))
+        # print(timeit.repeat(lambda: nlogn_solution_par(P,4), repeat=1, number=1))
         # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
         print(nlogn_solution(P))
-        print(nlogn_solution_par(P))
+        print(nlogn_solution_par(P, 1))
 
     main()
