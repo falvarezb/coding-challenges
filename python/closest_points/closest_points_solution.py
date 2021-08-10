@@ -252,8 +252,8 @@ if __name__ == "__main__":
         P = list(zip(x, y))
         # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
         # print(timeit.repeat(lambda: nlogn_solution_par(P,4), repeat=1, number=1))
-        # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
+        P = [(0, 0), (3, 4), (2, 5), (1, 4)]
         print(nlogn_solution(P))
-        print(nlogn_solution_par(P, 1))
+        # print(nlogn_solution_par(P, 1))
 
     main()
