@@ -78,14 +78,14 @@ void *mymergesort(void *base, size_t num, size_t size, int (*compar)(const void 
 {
     if (num == 1)
     {
-        char *result = (char *)malloc(size);
+        char *result = (char *) malloc(size);
         for (size_t m = 0; m < size; m++)
-            *(result++) = *((char *)(base)++);
-        return (void *)result;
+            *(result+m) = *((char *)base+m);
+        return result;
     }
 
     void *left = mymergesort(base, num / 2, size, compar);
-    void *right = mymergesort(base + num / 2, num - num / 2, size, compar);
+    void *right = mymergesort((char*)base + (num / 2)*size, num - num / 2, size, compar);
     void *result = merge_lists(left, num / 2, right, num - num / 2, size, compar);
     free(left);
     free(right);
@@ -108,6 +108,13 @@ int main(int argc, char const *argv[])
     int *result = merge_lists(arr1, num1, arr2, num2, sizeof(int), compar);
     for (size_t i = 0; i < num1 + num2; i++)
         printf("result[%zu]=%d\n", i, *(result + i));
+
+    int base[] = {2,1,5,3,8,4,3};
+    size_t num = 7;
+    size_t size = sizeof(int);
+    int* mergesort_result = mymergesort(base, num, size, compar);
+    for (size_t i = 0; i < num; i++)
+        printf("mergesort_result[%zu]=%d\n", i, *(mergesort_result + i));
 
     return 0;
 }
