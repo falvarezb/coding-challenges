@@ -1,27 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <time.h>
+#include "closest_point.h"
 
 #define MIN(x, y) ((x < y) ? x : y)
-
-typedef struct
-{
-    int x;
-    int y;
-} point;
-
-typedef struct
-{
-    point p;
-    int xposition;
-} PyElement;
-
-typedef struct
-{
-    point p1;
-    point p2;
-    float distance;
-} points_distance;
 
 float distance(point p1, point p2)
 {
@@ -71,7 +55,7 @@ points_distance quadratic_solution(point P[], size_t length)
             {
                 min_distance = d;
                 closest_points.p1 = P[i];
-                closest_points.p2  = P[j];
+                closest_points.p2 = P[j];
                 closest_points.distance = d;
             }
         }
@@ -79,27 +63,35 @@ points_distance quadratic_solution(point P[], size_t length)
     return closest_points;
 }
 
-PyElement *get_candidates_from_different_halves(point reference, PyElement Py[], size_t length, size_t *new_length, float min_distance_upper_bound)
+PyElement *get_candidates_from_different_halves(point reference, PyElement Py[], size_t length, size_t *candidates_length, float min_distance_upper_bound)
 {
     PyElement *candidates = (PyElement *)malloc(length * sizeof(PyElement));
     if (candidates == NULL)
         return NULL;
 
-    size_t i;
-    for (i = 0; i < length; i++)
+    size_t j = 0;
+    for (size_t i = 0; i < length; i++)
         if (abs((Py + i)->p.x - reference.x) < min_distance_upper_bound)
-            *(candidates + i) = *(Py + i);
+            *(candidates + j++) = *(Py + i);
 
-    *new_length = i;
+    *candidates_length = j;
     return candidates;
 }
 
 points_distance closest_points_from_different_halves(PyElement P[], size_t length)
 {
-    float min_distance = INFINITY;
-    float d;
     points_distance closest_points;
 
+    if (length == 0)
+    {
+        closest_points.distance = INFINITY;
+        return closest_points;
+    }
+    
+
+    float min_distance = INFINITY;
+    float d;
+    
     for (size_t i = 0; i < length - 1; i++)
     {
         for (size_t j = i + 1; j < MIN(length, i + 16); j++)
@@ -136,15 +128,17 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
     PyElement *Ly = (PyElement *)malloc(left_size * sizeof(PyElement));
     PyElement *Ry = (PyElement *)malloc(right_size * sizeof(PyElement));
 
+    size_t j = 0;
     for (size_t i = 0; i < length; i++)
         if ((Py + i)->xposition < left_half_upper_bound)
-            *(Ly + i) = *(Py + i);
+            *(Ly + j++) = *(Py + i);
 
+    j = 0;
     for (size_t i = 0; i < length; i++)
         if ((Py + i)->xposition >= right_half_lower_bound)
         {
             PyElement py = {(Py + i)->p, (Py + i)->xposition - right_half_lower_bound};
-            *(Ly + i) = py;
+            *(Ry + j++) = py;
         }
 
     points_distance left_closest_points = closest_points(Px, Ly, left_size);
@@ -152,12 +146,12 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
     points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
     float min_right_distance = distance(right_closest_points.p1, right_closest_points.p2);
 
-    int min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
-    size_t *new_length = (size_t*) malloc(sizeof(size_t));
-    PyElement *candidates = get_candidates_from_different_halves(*(Px + left_size - 1), Py, length, new_length, min_distance_upper_bound);
-    points_distance closest_candidates = closest_points_from_different_halves(candidates, *new_length);
+    float min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
+    size_t *candidates_length = (size_t *)malloc(sizeof(size_t));
+    PyElement *candidates = get_candidates_from_different_halves(*(Px + left_size - 1), Py, length, candidates_length, min_distance_upper_bound);
+    points_distance closest_candidates = closest_points_from_different_halves(candidates, *candidates_length);
 
-    free(new_length);
+    free(candidates_length);
     free(Ly);
     free(Ry);
     free(candidates);
@@ -177,56 +171,80 @@ points_distance nlogn_solution(point P[], size_t length)
     return closest_points(P, Py, length);
 }
 
-int main(int argc, char const *argv[])
-{
-    {
-        //test data
-        size_t length = 4;
-        point P[] = {
-            0, 0,
-            3, 4,
-            2, 5,
-            1, 4};
+// int main(int argc, char const *argv[])
+// {
+    // {
+    //     size_t length = 6;
+    //     point P[] = {
+    //         0, 0,
+    //         3, 4,
+    //         2, 5,
+    //         1, 4,
+    //         2, 2,
+    //         3, 3};
 
-        //quadratic_solution test
-        points_distance closest_points = quadratic_solution(P, length);
-        printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
-    }
+    //     //quadratic_solution test
+    //     points_distance closest_points = quadratic_solution(P, length);
+    //     printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
+    // }
 
-    {
-        //sort_points test
-        size_t length = 4;
-        point P[] = {
-            0, 0,
-            3, 4,
-            2, 5,
-            1, 4};
-        PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
-        sort_points(P, length, Py);
-        for (size_t i = 0; i < length; i++)
-        {
-            point p = *(P + i);
-            printf("Px[%zu]=(%d,%d)\n", i, p.x, p.y);
-        }
+    // {
+    //     //sort_points test
+    //     size_t length = 4;
+    //     point P[] = {
+    //         0, 0,
+    //         3, 4,
+    //         2, 5,
+    //         1, 4};
+    //     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
+    //     sort_points(P, length, Py);
+    //     for (size_t i = 0; i < length; i++)
+    //     {
+    //         point p = *(P + i);
+    //         printf("Px[%zu]=(%d,%d)\n", i, p.x, p.y);
+    //     }
 
-        for (size_t i = 0; i < length; i++)
-        {
-            PyElement p = *(Py + i);
-            printf("Py[%zu]=(%d,%d)\n", i, p.p.x, p.p.y);
-        }
-    }
+    //     for (size_t i = 0; i < length; i++)
+    //     {
+    //         PyElement p = *(Py + i);
+    //         printf("Py[%zu]=(%d,%d)\n", i, p.p.x, p.p.y);
+    //     }
+    // }
 
-    {
-        //nlogn_solution test
-        size_t length = 3;
-        point P[] = {
-            0, 0,
-            3, 4,
-            2, 5,
-            1, 4};
+    // {
+    //     //nlogn_solution test
+    //     size_t length = 5;
+    //     point P[] = {
+    //         1, 2,
+    //         10, 4,
+    //         6, 3,
+    //         1, 8,
+    //         6,3};
 
-        //quadratic_solution test
-        points_distance closest_points = nlogn_solution(P, length);
-        printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
-    }
-}
+    //     points_distance closest_points = nlogn_solution(P, length);
+    //     printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
+    // }
+
+    // {
+    //     //nlogn_solution vs quadratic_solution
+    //     srand (time(NULL));
+    //     size_t length = 5;
+    //     point P1[length];
+    //     point P2[length];
+    //     for (size_t i = 0; i < length; i++)
+    //     {
+    //         int x = rand() % 10+1;
+    //         int y = rand() % 10+1;
+    //         point p = {x,y};
+    //         P1[i] = p;
+    //         P2[i] = p;
+    //         printf("(%d,%d)", p.x,p.y);
+    //     }
+
+    //     points_distance closest_points1 = nlogn_solution(P1, length);
+    //     points_distance closest_points2 = quadratic_solution(P2, length);
+    //     printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
+    //     printf("\n(%d,%d),(%d,%d)\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
+    //     assert(closest_points1.distance == closest_points2.distance);
+    // }
+//}
