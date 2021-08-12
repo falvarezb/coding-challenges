@@ -23,9 +23,9 @@ typedef struct
     float distance;
 } points_distance;
 
-float distance(point *p1, point *p2)
+float distance(point p1, point p2)
 {
-    return sqrt(pow(p1->x - p2->x, 2) + pow(p1->y - p2->y, 2));
+    return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
 int compar_point(const void *p1, const void *p2)
@@ -68,7 +68,7 @@ point *quadratic_solution(point P[], size_t length)
     {
         for (size_t j = i + 1; j < length; j++)
         {
-            d = distance(&P[i], &P[j]);
+            d = distance(P[i], P[j]);
             if (d < min_distance)
             {
                 min_distance = d;
@@ -95,25 +95,23 @@ PyElement *get_candidates_from_different_halves(point reference, PyElement Py[],
     return candidates;
 }
 
-points_distance *closest_points_from_different_halves(PyElement P[], size_t length)
+points_distance closest_points_from_different_halves(PyElement P[], size_t length)
 {
     float min_distance = INFINITY;
     float d;
-    points_distance *closest_points = (points_distance *)malloc(sizeof(points_distance));
-    if (closest_points == NULL)
-        return NULL;
+    points_distance closest_points;
 
     for (size_t i = 0; i < length - 1; i++)
     {
         for (size_t j = i + 1; j < MIN(length, i + 16); j++)
         {
-            d = distance(&(P[i].p), &(P[j].p));
+            d = distance(P[i].p, P[j].p);
             if (d < min_distance)
             {
                 min_distance = d;
-                closest_points->p1 = P[i].p;
-                closest_points->p2 = P[j].p;
-                closest_points->distance = d;
+                closest_points.p1 = P[i].p;
+                closest_points.p2 = P[j].p;
+                closest_points.distance = d;
             }
         }
     }
@@ -121,16 +119,14 @@ points_distance *closest_points_from_different_halves(PyElement P[], size_t leng
     return closest_points;
 }
 
-point *closest_points(point Px[], PyElement Py[], size_t length)
+points_distance closest_points(point Px[], PyElement Py[], size_t length)
 {
-    point *result = (point *)malloc(sizeof(point) * length);
-    if (result == NULL)
-        return NULL;
-
     if (length == 2)
     {
-        result[0] = Px[0];
-        result[1] = Px[1];
+        points_distance result;
+        result.p1 = Px[0];
+        result.p2 = Px[1];
+        result.distance = distance(result.p1, result.p2);
         return result;
     }
 
@@ -152,33 +148,26 @@ point *closest_points(point Px[], PyElement Py[], size_t length)
             *(Ly + i) = py;
         }
 
-    point *left_closest_points = closest_points(Px, Ly, left_size);
-    float min_left_distance = distance(left_closest_points, left_closest_points + 1);
-    point *right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
-    float min_right_distance = distance(right_closest_points, right_closest_points + 1);
+    points_distance left_closest_points = closest_points(Px, Ly, left_size);
+    float min_left_distance = distance(left_closest_points.p1, left_closest_points.p2);
+    points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
+    float min_right_distance = distance(right_closest_points.p1, right_closest_points.p2);
 
     int min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
     size_t *new_length;
     PyElement *candidates = get_candidates_from_different_halves(*(Px + left_size - 1), Py, length, new_length, min_distance_upper_bound);
-    points_distance *closest_candidates = closest_points_from_different_halves(candidates, *new_length);
+    points_distance closest_candidates = closest_points_from_different_halves(candidates, *new_length);
 
     free(Ly);
     free(Ry);
     free(candidates);
     
-    if (closest_candidates->distance < min_distance_upper_bound)
-    {
-        result[0] = closest_candidates->p1;
-        result[1] = closest_candidates->p2;
-        return result;
-    }
-    else if (min_left_distance < min_right_distance)
-    {
-        return left_closest_points;
-    }
-    else{
-        return right_closest_points;
-    }
+    if (closest_candidates.distance < min_distance_upper_bound)    
+        return closest_candidates;    
+    else if (min_left_distance < min_right_distance)    
+        return left_closest_points;    
+    else
+        return right_closest_points;    
 }
 
 
