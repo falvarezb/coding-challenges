@@ -56,13 +56,11 @@ void sort_points(point P[], size_t length, PyElement Py[])
     mergesort(Py, length, sizeof(PyElement), compar_PyElem);
 }
 
-point *quadratic_solution(point P[], size_t length)
+points_distance quadratic_solution(point P[], size_t length)
 {
     float min_distance = INFINITY;
     float d;
-    point *closest_points = (point *)malloc(sizeof(point) * 2);
-    if (closest_points == NULL)
-        return NULL;
+    points_distance closest_points;
 
     for (size_t i = 0; i < length - 1; i++)
     {
@@ -72,8 +70,9 @@ point *quadratic_solution(point P[], size_t length)
             if (d < min_distance)
             {
                 min_distance = d;
-                closest_points[0] = P[i];
-                closest_points[1] = P[j];
+                closest_points.p1 = P[i];
+                closest_points.p2  = P[j];
+                closest_points.distance = d;
             }
         }
     }
@@ -190,8 +189,8 @@ int main(int argc, char const *argv[])
             1, 4};
 
         //quadratic_solution test
-        point *closest_points = quadratic_solution(P, length);
-        printf("(%d,%d),(%d,%d)\n", closest_points[0].x, closest_points[0].y, closest_points[1].x, closest_points[1].y);
+        points_distance closest_points = quadratic_solution(P, length);
+        printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
     }
 
     {
