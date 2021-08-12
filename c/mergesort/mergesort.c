@@ -74,6 +74,11 @@ void *merge_lists(void *arr1, size_t num1,
     return result;
 }
 
+/**
+ * 'mymergesort' to avoid conflict with MacOSX's 'mergesort' in stdlib.h
+ * 
+ *  The sorted result is allocated in a new array that is returned by the function
+ */
 void *mymergesort(void *base, size_t num, size_t size, int (*compar)(const void *, const void *))
 {
     if (num == 1)
