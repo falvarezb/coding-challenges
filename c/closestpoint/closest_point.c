@@ -82,7 +82,7 @@ points_distance closest_points_from_different_halves(PyElement P[], size_t lengt
 {
     points_distance closest_points;
 
-    if (length == 0)
+    if (length < 2)
     {
         closest_points.distance = INFINITY;
         return closest_points;

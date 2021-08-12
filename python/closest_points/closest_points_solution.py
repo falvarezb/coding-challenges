@@ -247,13 +247,16 @@ if __name__ == "__main__":
     import timeit
 
     def main():
-        x = sample(range(1000), 1000)
-        y = sample(range(1000), 1000)
+        x = sample(range(10), 5)
+        y = sample(range(10), 5)
         P = list(zip(x, y))
+        print(P)
         # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
         # print(timeit.repeat(lambda: nlogn_solution_par(P,4), repeat=1, number=1))
-        P = [(0, 0), (3, 4), (2, 5), (1, 4)]
-        print(nlogn_solution(P))
+        # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
+        result = nlogn_solution(P)
+        print(result)
+        print(distance(*result))
         # print(nlogn_solution_par(P, 1))
 
     main()
