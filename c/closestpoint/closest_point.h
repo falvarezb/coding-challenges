@@ -25,5 +25,6 @@ typedef struct
 PyElement *get_candidates_from_different_halves(point reference, PyElement Py[], size_t length, size_t *candidates_length, float min_distance_upper_bound);
 points_distance nlogn_solution(point P[], size_t length);
 points_distance quadratic_solution(point P[], size_t length);
+void sort_points(point P[], size_t length, PyElement Py[]);
 
 #endif

@@ -29,6 +29,9 @@ int compar_PyElem(const void *p1, const void *p2)
     return (point1->p.y > point2->p.y) - (point1->p.y < point2->p.y);
 }
 
+/**
+ * P -> Px, Py
+ */
 void sort_points(point P[], size_t length, PyElement Py[])
 {
     //P is sorted in place and becomes Px
@@ -168,7 +171,7 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
     //closest points in the left half
     points_distance left_closest_points = closest_points(Px, Ly, left_size);
     float min_left_distance = distance(left_closest_points.p1, left_closest_points.p2);
-    
+
     //closest points in the right half
     points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
     float min_right_distance = distance(right_closest_points.p1, right_closest_points.p2);
@@ -200,79 +203,5 @@ points_distance nlogn_solution(point P[], size_t length)
 }
 
 // int main(int argc, char const *argv[])
-// {
-// {
-//     size_t length = 6;
-//     point P[] = {
-//         0, 0,
-//         3, 4,
-//         2, 5,
-//         1, 4,
-//         2, 2,
-//         3, 3};
-
-//     //quadratic_solution test
-//     points_distance closest_points = quadratic_solution(P, length);
-//     printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
-// }
-
-// {
-//     //sort_points test
-//     size_t length = 4;
-//     point P[] = {
-//         0, 0,
-//         3, 4,
-//         2, 5,
-//         1, 4};
-//     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
-//     sort_points(P, length, Py);
-//     for (size_t i = 0; i < length; i++)
-//     {
-//         point p = *(P + i);
-//         printf("Px[%zu]=(%d,%d)\n", i, p.x, p.y);
-//     }
-
-//     for (size_t i = 0; i < length; i++)
-//     {
-//         PyElement p = *(Py + i);
-//         printf("Py[%zu]=(%d,%d)\n", i, p.p.x, p.p.y);
-//     }
-// }
-
-// {
-//     //nlogn_solution test
-//     size_t length = 5;
-//     point P[] = {
-//         1, 2,
-//         10, 4,
-//         6, 3,
-//         1, 8,
-//         6,3};
-
-//     points_distance closest_points = nlogn_solution(P, length);
-//     printf("(%d,%d),(%d,%d)\n", closest_points.p1.x, closest_points.p1.y, closest_points.p2.x, closest_points.p2.y);
-// }
-
-// {
-//     //nlogn_solution vs quadratic_solution
-//     srand (time(NULL));
-//     size_t length = 5;
-//     point P1[length];
-//     point P2[length];
-//     for (size_t i = 0; i < length; i++)
-//     {
-//         int x = rand() % 10+1;
-//         int y = rand() % 10+1;
-//         point p = {x,y};
-//         P1[i] = p;
-//         P2[i] = p;
-//         printf("(%d,%d)", p.x,p.y);
-//     }
-
-//     points_distance closest_points1 = nlogn_solution(P1, length);
-//     points_distance closest_points2 = quadratic_solution(P2, length);
-//     printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
-//     printf("\n(%d,%d),(%d,%d)\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
-//     assert(closest_points1.distance == closest_points2.distance);
-// }
+//{
 //}

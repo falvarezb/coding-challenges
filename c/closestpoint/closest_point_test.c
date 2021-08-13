@@ -20,6 +20,12 @@ void assert_points_distance_equal(points_distance p1, points_distance p2)
     assert_float_equal(p1.distance, p2.distance, 0.01);
 }
 
+void assert_point_equal(point p1, point p2)
+{
+    assert_int_equal(p1.x, p2.x);
+    assert_int_equal(p1.y, p2.y);
+}
+
 void test_get_candidates_from_different_halves(void **state)
 {
     (void)state; /* unused */
@@ -60,6 +66,35 @@ void test_get_candidates_from_different_halves_empty(void **state)
     assert_non_null(result);
     assert_int_equal(*candidates_length, 1);
     assert_pyelem_equal(*result, p4);
+}
+
+void test_sort_points(void **state)
+{
+    (void)state; /* unused */
+
+    size_t length = 4;
+    point p1 = {0, 0};
+    point p2 = {3, 4};
+    point p3 = {2, 5};
+    point p4 = {1, 4};
+    point P[] = {p1, p2, p3, p4};
+    PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
+    
+    sort_points(P, length, Py);
+
+    assert_point_equal(*P, p1);
+    assert_point_equal(*(P+1), p4);
+    assert_point_equal(*(P+2), p3);
+    assert_point_equal(*(P+3), p2);
+
+    assert_point_equal(Py->p, p1);
+    assert_int_equal(Py->xposition, 0);
+    assert_point_equal((Py+1)->p, p4);
+    assert_int_equal((Py+1)->xposition, 1);
+    assert_point_equal((Py+2)->p, p2);
+    assert_int_equal((Py+2)->xposition, 3);
+    assert_point_equal((Py+3)->p, p3);
+    assert_int_equal((Py+3)->xposition, 2);
 }
 
 void test_nlogn(void **state)
@@ -108,6 +143,7 @@ int main(int argc, char const *argv[])
 {
 
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_sort_points),
         cmocka_unit_test(test_nlogn_vs_quadratic),
         cmocka_unit_test(test_get_candidates_from_different_halves),
         cmocka_unit_test(test_get_candidates_from_different_halves_empty),
