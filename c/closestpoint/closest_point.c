@@ -7,6 +7,9 @@
 
 #define MIN(x, y) ((x < y) ? x : y)
 
+/**
+ * Euclidean distance
+ */
 float distance(point p1, point p2)
 {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
@@ -42,6 +45,7 @@ void sort_points(point P[], size_t length, PyElement Py[])
 
 points_distance quadratic_solution(point P[], size_t length)
 {
+    assert(length >= 2);
     float min_distance = INFINITY;
     float d;
     points_distance closest_points;
@@ -63,6 +67,12 @@ points_distance quadratic_solution(point P[], size_t length)
     return closest_points;
 }
 
+/**
+ * Special cases:
+ * -> returns 0 elements when there are repeat points
+ * -> returns 1 element when the only candidate is the point used as reference
+ * 
+ */ 
 PyElement *get_candidates_from_different_halves(point reference, PyElement Py[], size_t length, size_t *candidates_length, float min_distance_upper_bound)
 {
     PyElement *candidates = (PyElement *)malloc(length * sizeof(PyElement));
@@ -115,6 +125,25 @@ points_distance closest_points_from_different_halves(PyElement P[], size_t lengt
     return closest_points;
 }
 
+void populateLy(PyElement* Py, size_t Pylength, PyElement* Ly, size_t left_half_upper_bound)
+{    
+    size_t j = 0;
+    for (size_t i = 0; i < Pylength; i++)
+        if ((Py + i)->xposition < left_half_upper_bound)
+            *(Ly + j++) = *(Py + i);
+}
+
+void populateRy(PyElement* Py, size_t Pylength, PyElement* Ry, size_t right_half_lower_bound)
+{
+    size_t j = 0;
+    for (size_t i = 0; i < Pylength; i++)
+        if ((Py + i)->xposition >= right_half_lower_bound)
+        {
+            PyElement py = {(Py + i)->p, (Py + i)->xposition - right_half_lower_bound};
+            *(Ry + j++) = py;
+        }
+}
+
 points_distance closest_points(point Px[], PyElement Py[], size_t length)
 {
     if (length == 2)
@@ -133,21 +162,14 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
     PyElement *Ly = (PyElement *)malloc(left_size * sizeof(PyElement));
     PyElement *Ry = (PyElement *)malloc(right_size * sizeof(PyElement));
 
-    size_t j = 0;
-    for (size_t i = 0; i < length; i++)
-        if ((Py + i)->xposition < left_half_upper_bound)
-            *(Ly + j++) = *(Py + i);
+    populateLy(Py, length, Ly, left_half_upper_bound);
+    populateRy(Py, length, Ry, right_half_lower_bound);
 
-    j = 0;
-    for (size_t i = 0; i < length; i++)
-        if ((Py + i)->xposition >= right_half_lower_bound)
-        {
-            PyElement py = {(Py + i)->p, (Py + i)->xposition - right_half_lower_bound};
-            *(Ry + j++) = py;
-        }
-
+    //closest points in the left half
     points_distance left_closest_points = closest_points(Px, Ly, left_size);
     float min_left_distance = distance(left_closest_points.p1, left_closest_points.p2);
+    
+    //closest points in the right half
     points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
     float min_right_distance = distance(right_closest_points.p1, right_closest_points.p2);
 
