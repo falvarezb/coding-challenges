@@ -80,9 +80,9 @@ void test_nlogn(void **state)
 void test_nlogn_vs_quadratic(void **state)
 {
     srand(time(NULL));
-    for (size_t i = 0; i < 100; i++)
+    for (size_t i = 2; i < 100; i++)
     {        
-        size_t length = 5;
+        size_t length = i;
         point P1[length];
         point P2[length];
         for (size_t i = 0; i < length; i++)
