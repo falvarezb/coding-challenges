@@ -15,15 +15,17 @@ void assert_pyelem_equal(PyElement p1, PyElement p2)
     assert_int_equal(p1.xposition, p2.xposition);
 }
 
-void assert_points_distance_equal(points_distance p1, points_distance p2)
-{
-    assert_float_equal(p1.distance, p2.distance, 0.01);
-}
-
 void assert_point_equal(point p1, point p2)
 {
     assert_int_equal(p1.x, p2.x);
     assert_int_equal(p1.y, p2.y);
+}
+
+void assert_points_distance_equal(points_distance p1, points_distance p2)
+{
+    assert_point_equal(p1.p1, p2.p1);
+    assert_point_equal(p1.p2, p2.p2);
+    assert_float_equal(p1.distance, p2.distance, 0.01);
 }
 
 void test_get_candidates_from_different_halves(void **state)
@@ -139,10 +141,39 @@ void test_nlogn_vs_quadratic(void **state)
     }
 }
 
+void test_nlogn_par_base_case(void **state)
+{
+    size_t length = 2;
+    point p1 = {1,0};
+    point p2 = {1,1};
+    point P[] = {p1,p2};
+
+    points_distance closest_points = nlogn_solution_par(P, length);
+    points_distance expected = {p1,p2, 1.0};
+    assert_points_distance_equal(closest_points, expected);
+}
+
+void test_nlogn_par(void **state)
+{
+    size_t length = 5;
+    point P[] = {
+        3, 9,
+        1, 5,
+        0, 1,
+        5, 3,
+        8, 6};
+
+    points_distance closest_points = nlogn_solution_par(P, length);
+    points_distance expected = {{0, 1}, {1, 5}, 4.12};
+    assert_points_distance_equal(closest_points, expected);
+}
+
 int main(int argc, char const *argv[])
 {
 
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_nlogn_par),
+        cmocka_unit_test(test_nlogn_par_base_case),
         cmocka_unit_test(test_sort_points),
         cmocka_unit_test(test_nlogn_vs_quadratic),
         cmocka_unit_test(test_get_candidates_from_different_halves),

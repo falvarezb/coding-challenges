@@ -26,5 +26,6 @@ PyElement *get_candidates_from_different_halves(point reference, PyElement Py[],
 points_distance nlogn_solution(point P[], size_t length);
 points_distance quadratic_solution(point P[], size_t length);
 void sort_points(point P[], size_t length, PyElement Py[]);
+points_distance nlogn_solution_par(point P[], size_t length);
 
 #endif
