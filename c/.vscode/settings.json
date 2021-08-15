@@ -2,6 +2,7 @@
     "files.associations": {
         "stdio.h": "c",
         "stdlib.h": "c",
-        "cmocka.h": "c"
+        "cmocka.h": "c",
+        "wait.h": "c"
     }
 }

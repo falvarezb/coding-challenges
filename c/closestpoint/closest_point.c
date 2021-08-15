@@ -5,6 +5,12 @@
 #include <time.h>
 #include "closest_point.h"
 
+//par-version headers
+#include <sys/wait.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #define MIN(x, y) ((x < y) ? x : y)
 
 /**
@@ -75,7 +81,7 @@ points_distance quadratic_solution(point P[], size_t length)
  * -> returns 0 elements when there are repeat points
  * -> returns 1 element when the only candidate is the point used as reference
  * 
- */ 
+ */
 PyElement *get_candidates_from_different_halves(point reference, PyElement Py[], size_t length, size_t *candidates_length, float min_distance_upper_bound)
 {
     PyElement *candidates = (PyElement *)malloc(length * sizeof(PyElement));
@@ -104,8 +110,7 @@ points_distance closest_points_from_different_halves(PyElement P[], size_t lengt
         closest_points.distance = INFINITY;
         return closest_points;
     }
-    
-    
+
     float min_distance = INFINITY;
     float d;
 
@@ -128,15 +133,15 @@ points_distance closest_points_from_different_halves(PyElement P[], size_t lengt
     return closest_points;
 }
 
-void populateLy(PyElement* Py, size_t Pylength, PyElement* Ly, size_t left_half_upper_bound)
-{    
+void populateLy(PyElement *Py, size_t Pylength, PyElement *Ly, size_t left_half_upper_bound)
+{
     size_t j = 0;
     for (size_t i = 0; i < Pylength; i++)
         if ((Py + i)->xposition < left_half_upper_bound)
             *(Ly + j++) = *(Py + i);
 }
 
-void populateRy(PyElement* Py, size_t Pylength, PyElement* Ry, size_t right_half_lower_bound)
+void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half_lower_bound)
 {
     size_t j = 0;
     for (size_t i = 0; i < Pylength; i++)
@@ -170,11 +175,11 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
 
     //closest points in the left half
     points_distance left_closest_points = closest_points(Px, Ly, left_size);
-    float min_left_distance = distance(left_closest_points.p1, left_closest_points.p2);
+    float min_left_distance = left_closest_points.distance;
 
     //closest points in the right half
     points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
-    float min_right_distance = distance(right_closest_points.p1, right_closest_points.p2);
+    float min_right_distance = right_closest_points.distance;
 
     float min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
     size_t *candidates_length = (size_t *)malloc(sizeof(size_t));
@@ -201,6 +206,57 @@ points_distance nlogn_solution(point P[], size_t length)
     sort_points(P, length, Py);
     return closest_points(P, Py, length);
 }
+
+// points_distance closest_points_par(point Px[], PyElement Py[], size_t length)
+// {
+//     points_distance *result = (points_distance *) mmap(NULL, sizeof(points_distance), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+//     if (result == MAP_FAILED)
+//         exit(EXIT_FAILURE);
+
+//     if (length == 2)
+//     {
+//         points_distance result;
+//         result.p1 = Px[0];
+//         result.p2 = Px[1];
+//         result.distance = distance(result.p1, result.p2);
+//         return result;
+//     }
+
+//     size_t left_half_upper_bound = ceil(length / 2.);
+//     size_t right_half_lower_bound = floor(length / 2.);
+//     size_t left_size = left_half_upper_bound;
+//     size_t right_size = length - right_half_lower_bound;
+//     PyElement *Ly = (PyElement *)malloc(left_size * sizeof(PyElement));
+//     PyElement *Ry = (PyElement *)malloc(right_size * sizeof(PyElement));
+
+//     populateLy(Py, length, Ly, left_half_upper_bound);
+//     populateRy(Py, length, Ry, right_half_lower_bound);
+
+//     switch (fork())
+//     {
+//         case -1: //error
+//             exit(EXIT_FAILURE);
+//         case 0:
+//             switch (fork())
+//             {
+//                 case -1: //error
+//                     exit(EXIT_FAILURE);
+//                 case 0: //child
+//                     //closest points in the left half
+//                     points_distance left_closest_points = closest_points(Px, Ly, left_size);
+//                     float min_left_distance = distance(left_closest_points.p1, left_closest_points.p2);
+
+//                 default: //parent
+//                     break;
+//             }
+//         default: //grandparent
+//             break;
+//     }
+// }
+
+// points_distance nlogn_solution_par(point P[], size_t length)
+// {
+// }
 
 // int main(int argc, char const *argv[])
 //{
