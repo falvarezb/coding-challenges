@@ -6,6 +6,7 @@
             "command": "/usr/bin/gcc",
             "args": [
                 "-g",
+                "-DFAB_MAIN",
                 "${file}",                
                 "-o",
                 "${fileDirname}/out/${fileBasenameNoExtension}"
@@ -27,7 +28,7 @@
             "label": "C/C++: build test",
             "command": "/usr/bin/gcc",
             "args": [
-                "-g",
+                "-g",                
                 "${file}",
                 "${fileDirname}/${fileBasenameNoExtension}_test.c",
                 "-lcmocka",

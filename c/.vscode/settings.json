@@ -6,6 +6,7 @@
         "wait.h": "c",
         "__mutex_base": "c",
         "atomic": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "closest_point.h": "c"
     }
 }
