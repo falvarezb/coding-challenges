@@ -10,8 +10,44 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #define MIN(x, y) ((x < y) ? x : y)
+
+void                    /* Examine a wait() status using the W* macros */
+printWaitStatus(const char *msg, int status)
+{
+    if (msg != NULL)
+        printf("%s", msg);
+
+    if (WIFEXITED(status)) {
+        printf("child exited, status=%d\n", WEXITSTATUS(status));
+
+    } else if (WIFSIGNALED(status)) {
+        printf("child killed by signal %d (%s)",
+                WTERMSIG(status), strsignal(WTERMSIG(status)));
+#ifdef WCOREDUMP        /* Not in SUSv3, may be absent on some systems */
+        if (WCOREDUMP(status))
+            printf(" (core dumped)");
+#endif
+        printf("\n");
+
+    } else if (WIFSTOPPED(status)) {
+        printf("child stopped by signal %d (%s)\n",
+                WSTOPSIG(status), strsignal(WSTOPSIG(status)));
+
+#ifdef WIFCONTINUED     /* SUSv3 has this, but older Linux versions and
+                           some other UNIX implementations don't */
+    } else if (WIFCONTINUED(status)) {
+        printf("child continued\n");
+#endif
+
+    } else {            /* Should never happen */
+        printf("what happened to this child? (status=%x)\n",
+                (unsigned int) status);
+    }
+}
 
 /**
  * Euclidean distance
@@ -210,10 +246,11 @@ points_distance nlogn_solution(point P[], size_t length)
 void closest_points_par(point Px[], PyElement Py[], size_t length, points_distance *result, int par_threshold)
 {
     if (length == 2)
-    {
+    {        
         result->p1 = Px[0];
         result->p2 = Px[1];
         result->distance = distance(result->p1, result->p2);
+        //printf("pid=%d, ppid=%d, result (%d,%d),(%d,%d),%f\n", getpid(), getppid(), result->p1.x, result->p1.y,result->p2.x, result->p2.y, result->distance);
         return;
     }
     else if (length > par_threshold)
@@ -230,22 +267,44 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
 
         points_distance *left_result = mmap(NULL, sizeof(points_distance), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
         if (left_result == MAP_FAILED)
-            exit(EXIT_FAILURE);
+            exit(10);
         points_distance *right_result = (points_distance *)malloc(sizeof(points_distance));
 
         switch (fork())
         {
         case -1: //error
-            exit(EXIT_FAILURE);
+            exit(2);
         case 0: //child
             //closest points in the left half
+            printf("pid=%d, ppid=%d, child\n", getpid(), getppid());
+            //sleep(10);
             closest_points_par(Px, Ly, left_size, left_result, par_threshold);
             break;
         default: //parent
             //closest points in the right half
             closest_points_par(Px + right_half_lower_bound, Ry, right_size, right_result, par_threshold);
-            if (wait(NULL) == -1)
-                exit(EXIT_FAILURE);
+            printf("pid=%d, ppid=%d, waiting\n", getpid(), getppid());
+            // wait(NULL);
+            int status;
+            pid_t child_pid;
+            // if (wait(status) == -1){
+            //     perror("error while waiting:");
+            //     //printWaitStatus(NULL, *status);
+            // }
+                //exit(EXIT_FAILURE);
+            //sleep(10);
+            do
+            {
+                child_pid = wait(&status);
+            }
+            while (child_pid == -1 && errno == EINTR);
+            if (child_pid == -1)
+            {
+                perror("error while waiting:");
+                exit(3);
+            }
+            printWaitStatus(NULL, status);
+            printf("pid=%d, ppid=%d, continuing\n", getpid(), getppid());
 
             float min_left_distance = left_result->distance;
             float min_right_distance = right_result->distance;
@@ -280,7 +339,7 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
             }
             free(right_result);
             if (munmap(left_result, sizeof(points_distance)) == -1)
-                exit(EXIT_FAILURE);
+                exit(4);
         }
     }
     else 
@@ -289,19 +348,35 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
         result->p1 = intermediate_result.p1;
         result->p2 = intermediate_result.p2;
         result->distance = intermediate_result.distance;
+        printf("pid=%d, ppid=%d, result (%d,%d),(%d,%d),%f\n", getpid(), getppid(), result->p1.x, result->p1.y,result->p2.x, result->p2.y, result->distance);
     }
 }
 
 points_distance nlogn_solution_par(point P[], size_t length)
 {
+    printf("pid=%d, ppid=%d, main\n", getpid(), getppid());
     assert(length >= 2);
     points_distance *result = (points_distance *)malloc(sizeof(points_distance));
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
     sort_points(P, length, Py);
-    closest_points_par(P, Py, length, result, 100);
+    closest_points_par(P, Py, length, result, 4);
     return *result;
 }
 
 // int main(int argc, char const *argv[])
-//{
-//}
+// {
+//     size_t length = 9;
+//     point P[] = {
+//         3, 9,
+//         1, 5,
+//         0, 1,
+//         5, 3,
+//         8, 6,
+//         20,20,
+//         40,40,
+//         40,141,
+//         100,100};
+
+//     points_distance result = nlogn_solution_par(P, length);
+//     printf("pid=%d, ppid=%d, result (%d,%d),(%d,%d),%f\n", getpid(), getppid(), result.p1.x, result.p1.y,result.p2.x, result.p2.y, result.distance);
+// }

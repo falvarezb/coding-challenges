@@ -155,13 +155,15 @@ void test_nlogn_par_base_case(void **state)
 
 void test_nlogn_par(void **state)
 {
-    size_t length = 5;
+    size_t length = 7;
     point P[] = {
         3, 9,
         1, 5,
         0, 1,
         5, 3,
-        8, 6};
+        8, 6,
+        20,20,
+        40,40};
 
     points_distance closest_points = nlogn_solution_par(P, length);
     points_distance expected = {{0, 1}, {1, 5}, 4.12};
@@ -178,6 +180,7 @@ int main(int argc, char const *argv[])
         cmocka_unit_test(test_nlogn_vs_quadratic),
         cmocka_unit_test(test_get_candidates_from_different_halves),
         cmocka_unit_test(test_get_candidates_from_different_halves_empty),
-        cmocka_unit_test(test_nlogn)};
+        cmocka_unit_test(test_nlogn)
+        };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

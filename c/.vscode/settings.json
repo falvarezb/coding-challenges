@@ -3,6 +3,9 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "cmocka.h": "c",
-        "wait.h": "c"
+        "wait.h": "c",
+        "__mutex_base": "c",
+        "atomic": "c",
+        "time.h": "c"
     }
 }
