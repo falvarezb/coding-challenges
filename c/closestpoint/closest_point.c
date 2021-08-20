@@ -255,7 +255,7 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
     {
         result->p1 = Px[0];
         result->p2 = Px[1];
-        result->distance = distance(result->p1, result->p2);        
+        result->distance = distance(result->p1, result->p2);
         return;
     }
     else if (length > par_threshold)
@@ -281,12 +281,12 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
             exit(2);
         case 0: //child
             //closest points in the left half
-            //printf("pid=%d, ppid=%d, child\n", getpid(), getppid());            
+            //printf("pid=%d, ppid=%d, child\n", getpid(), getppid());
             closest_points_par(Px, Ly, left_size, left_result, par_threshold);
             _exit(10);
         default: //parent
             //closest points in the right half
-            closest_points_par(Px + right_half_lower_bound, Ry, right_size, right_result, par_threshold);                      
+            closest_points_par(Px + right_half_lower_bound, Ry, right_size, right_result, par_threshold);
             int status;
             pid_t child_pid;
             do
@@ -298,7 +298,7 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
                 perror("error while waiting:");
                 exit(3);
             }
-            //printWaitStatus(NULL, status);            
+            //printWaitStatus(NULL, status);
 
             float min_left_distance = left_result->distance;
             float min_right_distance = right_result->distance;
@@ -341,7 +341,7 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
         points_distance intermediate_result = closest_points(Px, Py, length);
         result->p1 = intermediate_result.p1;
         result->p2 = intermediate_result.p2;
-        result->distance = intermediate_result.distance;        
+        result->distance = intermediate_result.distance;
     }
 }
 
@@ -349,7 +349,7 @@ points_distance nlogn_solution_par(point P[], size_t length, int num_processes)
 {
     //printf("pid=%d, ppid=%d, main\n", getpid(), getppid());
     assert(length >= 2);
-    int par_threshold = ceil((float)length/num_processes);
+    int par_threshold = ceil((float)length / num_processes);
     points_distance *result = (points_distance *)malloc(sizeof(points_distance));
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
     sort_points(P, length, Py);
@@ -357,49 +357,37 @@ points_distance nlogn_solution_par(point P[], size_t length, int num_processes)
     return *result;
 }
 
-void mytest()
+void perf_test()
 {
-    printf("main pid=%d\n", getpid());
     srand(time(NULL));
-    for (size_t i = 100; i < 101; i++)
-    {        
-        size_t length = i;
-        point P1[length];
-        point P2[length];
-        for (size_t i = 0; i < length; i++)
-        {
-            int x = rand() % 100 + 1;
-            int y = rand() % 100 + 1;
-            point p = {x, y};
-            P1[i] = p;
-            P2[i] = p;
-            //printf("(%d,%d)\n", p.x,p.y);
-        }
-        //printf("\n");
+    size_t length = 1000000;
+    point *P = malloc(sizeof(point) * length);
+    for (size_t i = 0; i < length; i++)
+    {
+        int x = rand() % (length * 10) + 1;
+        int y = rand() % (length * 10) + 1;
+        point p = {x, y};
+        P[i] = p;
+    }
+    int num_processes = 16;
+    {
+        struct timespec start, finish;
+        double elapsed;
 
-        points_distance closest_points1 = nlogn_solution(P1, length);
-        printf("length:%zu\n", length);
-        printf("pid:%d sol1: (%d,%d),(%d,%d)\n", getpid(), closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        points_distance closest_points = nlogn_solution_par(P, length, num_processes);
 
-        points_distance closest_points2 = nlogn_solution_par(P2, length, 4);
-        printf("pid:%d sol2: (%d,%d),(%d,%d)\n", getpid(), closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
+        clock_gettime(CLOCK_MONOTONIC, &finish);
+
+        elapsed = (finish.tv_sec - start.tv_sec);
+        elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+        printf("time=%.4f seconds\n", elapsed);
     }
 }
 
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
-{
-    // size_t length = 4;
-    // point P[] = {
-    //     69,36,
-    //     37,74,
-    //     96,98,
-    //     39,47};
-
-    // points_distance result1 = nlogn_solution(P, length);
-    // printf("pid=%d, ppid=%d, result1 (%d,%d),(%d,%d),%f\n", getpid(), getppid(), result1.p1.x, result1.p1.y, result1.p2.x, result1.p2.y, result1.distance);
-    // points_distance result2 = nlogn_solution_par(P, length, 4);
-    // printf("pid=%d, ppid=%d, result (%d,%d),(%d,%d),%f\n", getpid(), getppid(), result2.p1.x, result2.p1.y, result2.p2.x, result2.p2.y, result2.distance);
-    mytest();
+{    
+    perf_test();
 }
 #endif
