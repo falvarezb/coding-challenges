@@ -227,10 +227,38 @@ void test_nlogn_multithread(void **state)
     assert_points_distance_equal(closest_points, expected);
 }
 
+void test_multiproc_vs_multithread(void **state)
+{
+    srand(time(NULL));
+    for (size_t i = 2; i < 100; i++)
+    {        
+        size_t length = i;
+        point P1[length];
+        point P2[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            int x = rand() % 100 + 1;
+            int y = rand() % 100 + 1;
+            point p = {x, y};
+            P1[i] = p;
+            P2[i] = p;
+            //printf("(%d,%d)", p.x,p.y);
+        }
+        //printf("\n");
+
+        points_distance closest_points1 = nlogn_solution_multithread(P1, length, 4);
+        points_distance closest_points2 = nlogn_solution_multiproc(P2, length, 4);
+        //printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
+        //printf("\n(%d,%d),(%d,%d)\n\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
+        assert_points_distance_equal(closest_points1, closest_points2);        
+    }
+}
+
 int main(int argc, char const *argv[])
 {
 
-    const struct CMUnitTest tests[] = {
+    const struct CMUnitTest tests[] = {        
+        cmocka_unit_test(test_multiproc_vs_multithread),
         cmocka_unit_test(test_nlogn_multithread),
         cmocka_unit_test(test_nlogn_multithread_base_case),
         cmocka_unit_test(test_nlogn_vs_multiproc),
