@@ -249,7 +249,7 @@ points_distance nlogn_solution(point P[], size_t length)
     return closest_points(P, Py, length);
 }
 
-void closest_points_par(point Px[], PyElement Py[], size_t length, points_distance *result, int par_threshold)
+void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_distance *result, int par_threshold)
 {
     if (length == 2)
     {
@@ -282,11 +282,11 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
         case 0: //child
             //closest points in the left half
             //printf("pid=%d, ppid=%d, child\n", getpid(), getppid());
-            closest_points_par(Px, Ly, left_size, left_result, par_threshold);
+            closest_points_multiproc(Px, Ly, left_size, left_result, par_threshold);
             _exit(10);
         default: //parent
             //closest points in the right half
-            closest_points_par(Px + right_half_lower_bound, Ry, right_size, right_result, par_threshold);
+            closest_points_multiproc(Px + right_half_lower_bound, Ry, right_size, right_result, par_threshold);
             int status;
             pid_t child_pid;
             do
@@ -345,7 +345,7 @@ void closest_points_par(point Px[], PyElement Py[], size_t length, points_distan
     }
 }
 
-points_distance nlogn_solution_par(point P[], size_t length, int num_processes)
+points_distance nlogn_solution_multiproc(point P[], size_t length, int num_processes)
 {
     //printf("pid=%d, ppid=%d, main\n", getpid(), getppid());
     assert(length >= 2);
@@ -353,7 +353,7 @@ points_distance nlogn_solution_par(point P[], size_t length, int num_processes)
     points_distance *result = (points_distance *)malloc(sizeof(points_distance));
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
     sort_points(P, length, Py);
-    closest_points_par(P, Py, length, result, par_threshold);
+    closest_points_multiproc(P, Py, length, result, par_threshold);
     return *result;
 }
 
@@ -375,7 +375,7 @@ void perf_test()
         double elapsed;
 
         clock_gettime(CLOCK_MONOTONIC, &start);
-        points_distance closest_points = nlogn_solution_par(P, length, num_processes);
+        points_distance closest_points = nlogn_solution_multiproc(P, length, num_processes);
 
         clock_gettime(CLOCK_MONOTONIC, &finish);
 

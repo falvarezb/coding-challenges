@@ -142,7 +142,7 @@ void test_nlogn_vs_quadratic(void **state)
     }
 }
 
-void test_nlogn_vs_par(void **state)
+void test_nlogn_vs_multiproc(void **state)
 {
     srand(time(NULL));
     for (size_t i = 2; i < 100; i++)
@@ -162,26 +162,26 @@ void test_nlogn_vs_par(void **state)
         //printf("\n");
 
         points_distance closest_points1 = nlogn_solution(P1, length);
-        points_distance closest_points2 = nlogn_solution_par(P2, length, 4);
+        points_distance closest_points2 = nlogn_solution_multiproc(P2, length, 4);
         //printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
         //printf("\n(%d,%d),(%d,%d)\n\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
         assert_points_distance_equal(closest_points1, closest_points2);        
     }
 }
 
-void test_nlogn_par_base_case(void **state)
+void test_nlogn_multiproc_base_case(void **state)
 {
     size_t length = 2;
     point p1 = {1,0};
     point p2 = {1,1};
     point P[] = {p1,p2};
 
-    points_distance closest_points = nlogn_solution_par(P, length, 4);
+    points_distance closest_points = nlogn_solution_multiproc(P, length, 4);
     points_distance expected = {p1,p2, 1.0};
     assert_points_distance_equal(closest_points, expected);
 }
 
-void test_nlogn_par(void **state)
+void test_nlogn_multiproc(void **state)
 {
     size_t length = 7;
     point P[] = {
@@ -193,7 +193,7 @@ void test_nlogn_par(void **state)
         20,20,
         40,40};
 
-    points_distance closest_points = nlogn_solution_par(P, length, 4);
+    points_distance closest_points = nlogn_solution_multiproc(P, length, 4);
     points_distance expected = {{0, 1}, {1, 5}, 4.12};
     assert_points_distance_equal(closest_points, expected);
 }
@@ -202,9 +202,9 @@ int main(int argc, char const *argv[])
 {
 
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_nlogn_vs_par),
-        cmocka_unit_test(test_nlogn_par),
-        cmocka_unit_test(test_nlogn_par_base_case),
+        cmocka_unit_test(test_nlogn_vs_multiproc),
+        cmocka_unit_test(test_nlogn_multiproc),
+        cmocka_unit_test(test_nlogn_multiproc_base_case),
         cmocka_unit_test(test_sort_points),
         cmocka_unit_test(test_nlogn_vs_quadratic),
         cmocka_unit_test(test_get_candidates_from_different_halves),
