@@ -7,6 +7,10 @@
         "__mutex_base": "c",
         "atomic": "c",
         "time.h": "c",
-        "closest_point.h": "c"
+        "closest_point.h": "c",
+        "__locale": "c",
+        "__string": "c",
+        "string": "c",
+        "string_view": "c"
     }
 }

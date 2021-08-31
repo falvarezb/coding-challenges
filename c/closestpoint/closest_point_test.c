@@ -198,10 +198,41 @@ void test_nlogn_multiproc(void **state)
     assert_points_distance_equal(closest_points, expected);
 }
 
+void test_nlogn_multithread_base_case(void **state)
+{
+    size_t length = 2;
+    point p1 = {1,0};
+    point p2 = {1,1};
+    point P[] = {p1,p2};
+
+    points_distance closest_points = nlogn_solution_multithread(P, length, 4);
+    points_distance expected = {p1,p2, 1.0};
+    assert_points_distance_equal(closest_points, expected);
+}
+
+void test_nlogn_multithread(void **state)
+{
+    size_t length = 7;
+    point P[] = {
+        3, 9,
+        1, 5,
+        0, 1,
+        5, 3,
+        8, 6,
+        20,20,
+        40,40};
+
+    points_distance closest_points = nlogn_solution_multiproc(P, length, 4);
+    points_distance expected = {{0, 1}, {1, 5}, 4.12};
+    assert_points_distance_equal(closest_points, expected);
+}
+
 int main(int argc, char const *argv[])
 {
 
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_nlogn_multithread),
+        cmocka_unit_test(test_nlogn_multithread_base_case),
         cmocka_unit_test(test_nlogn_vs_multiproc),
         cmocka_unit_test(test_nlogn_multiproc),
         cmocka_unit_test(test_nlogn_multiproc_base_case),
