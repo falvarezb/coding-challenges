@@ -294,11 +294,8 @@ void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_
             {
                 child_pid = wait(&status);
             } while (child_pid == -1 && errno == EINTR);
-            if (child_pid == -1 && errno != ECHILD)
-            {
-                perror("error while waiting:");
-                exit(3);
-            }
+            if (child_pid == -1 && errno != ECHILD)            
+                errExit("error while waiting");                    
             //printWaitStatus(NULL, status);
 
             float min_left_distance = left_result->distance;
@@ -392,11 +389,8 @@ void* closest_points_multithread(void* targs)
         left_args->result = left_result;
         left_args->par_threshold = args->par_threshold;
         int s = pthread_create(&thread, NULL, closest_points_multithread, left_args);            
-        if (s != 0)
-        {
-            perror("pthread_create");
-            exit(EXIT_FAILURE);
-        }
+        if (s != 0)        
+            errExit("pthread_create");        
         
 
         //current thread
@@ -409,11 +403,8 @@ void* closest_points_multithread(void* targs)
         right_args->par_threshold = args->par_threshold;
         closest_points_multithread(right_args);
         s = pthread_join(thread, NULL);
-        if (s != 0)
-        {
-            perror("pthread_join");
-            exit(EXIT_FAILURE);
-        }
+        if (s != 0)        
+            errExit("pthread_join");        
 
         float min_left_distance = left_result->distance;
         float min_right_distance = right_result->distance;
@@ -477,7 +468,7 @@ points_distance nlogn_solution_multithread(point P[], size_t length, int num_pro
 
 
 
-void perf_test()
+void perf_test(points_distance (*func) (point P[], size_t length, int num_processes))
 {
     srand(time(NULL));
     size_t length = 1000000;
@@ -495,7 +486,7 @@ void perf_test()
         double elapsed;
 
         clock_gettime(CLOCK_MONOTONIC, &start);
-        points_distance closest_points = nlogn_solution_multiproc(P, length, num_processes);
+        points_distance closest_points = func(P, length, num_processes);
 
         clock_gettime(CLOCK_MONOTONIC, &finish);
 
@@ -508,6 +499,7 @@ void perf_test()
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
 {    
-    perf_test();
+    perf_test(nlogn_solution_multiproc);
+    perf_test(nlogn_solution_multithread);
 }
 #endif
