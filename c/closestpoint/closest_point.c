@@ -95,7 +95,7 @@ void sort_points(point P[], size_t length, PyElement Py[])
     mergesort(Py, length, sizeof(PyElement), compar_PyElem);
 }
 
-points_distance quadratic_solution(point P[], size_t length)
+points_distance quadratic_solution(point P[], size_t length, int num_processes)
 {
     assert(length >= 2);
     float min_distance = INFINITY;
@@ -242,7 +242,7 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
         return right_closest_points;
 }
 
-points_distance nlogn_solution(point P[], size_t length)
+points_distance nlogn_solution(point P[], size_t length, int num_processes)
 {
     assert(length >= 2);
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));

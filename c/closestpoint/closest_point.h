@@ -23,9 +23,14 @@ typedef struct
 } points_distance;
 
 PyElement *get_candidates_from_different_halves(point reference, PyElement Py[], size_t length, size_t *candidates_length, float min_distance_upper_bound);
-points_distance nlogn_solution(point P[], size_t length);
-points_distance quadratic_solution(point P[], size_t length);
 void sort_points(point P[], size_t length, PyElement Py[]);
+
+//num_processes added to unify interface and simplify signature of testing methods
+points_distance nlogn_solution(point P[], size_t length, int num_processes);
+
+//num_processes added to unify interface and simplify signature of testing methods
+points_distance quadratic_solution(point P[], size_t length, int num_processes);
+
 points_distance nlogn_solution_multiproc(point P[], size_t length, int num_processes);
 points_distance nlogn_solution_multithread(point P[], size_t length, int num_processes);
 

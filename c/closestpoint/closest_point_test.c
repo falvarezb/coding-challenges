@@ -6,7 +6,40 @@
 #include <assert.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdbool.h>
 #include "closest_point.h"
+
+struct testcase {
+    size_t length;
+    point* P;
+    points_distance expected;
+    int num_processes;
+};
+
+struct testcase tc1()
+{   
+    int num_points = 2; 
+    point p1 = {1,0};
+    point p2 = {1,1};    
+    point* P = malloc(sizeof(point)*num_points);
+    P[0] = p1;
+    P[1] = p2;      
+    return (struct testcase) {num_points, P, {p1,p2, 1.0}, 4};
+}
+
+struct testcase tc2()
+{
+    int num_points = 7; 
+    point* P = malloc(sizeof(point)*num_points);
+    P[0] = (point){3,9};
+    P[1] = (point){1, 5};
+    P[2] = (point){0, 1};
+    P[3] = (point){5, 3};
+    P[4] = (point){8, 6};
+    P[5] = (point){20,20};
+    P[6] = (point){40,40};
+    return (struct testcase) {num_points, P, {{0, 1}, {1, 5}, 4.12}, 4};
+}
 
 void assert_pyelem_equal(PyElement p1, PyElement p2)
 {
@@ -21,11 +54,37 @@ void assert_point_equal(point p1, point p2)
     assert_int_equal(p1.y, p2.y);
 }
 
-void assert_points_distance_equal(points_distance p1, points_distance p2)
+void assert_points_distance_equal(points_distance p1, points_distance p2, bool only_distance)
 {
-    assert_point_equal(p1.p1, p2.p1);
-    assert_point_equal(p1.p2, p2.p2);
+    if (!only_distance)
+    {            
+        assert_point_equal(p1.p1, p2.p1);
+        assert_point_equal(p1.p2, p2.p2);
+    }
     assert_float_equal(p1.distance, p2.distance, 0.01);
+}
+
+void compare_solutions(points_distance (*func1) (point P[], size_t length, int num_processes), points_distance (*func2) (point P[], size_t length, int num_processes), bool only_distance)
+{
+    const int max_num_points = 100;
+    srand(time(NULL));
+    for (size_t i = 2; i < max_num_points; i++)
+    {        
+        size_t length = i;
+        point P1[length];
+        point P2[length];
+        for (size_t i = 0; i < length; i++)
+        {
+            int x = rand() % max_num_points + 1;
+            int y = rand() % max_num_points + 1;
+            point p = {x, y};
+            P1[i] = p;
+            P2[i] = p;         
+        }        
+        points_distance closest_points1 = func1(P1, length, 4);
+        points_distance closest_points2 = func2(P2, length, 4);        
+        assert_points_distance_equal(closest_points1, closest_points2, only_distance);        
+    }
 }
 
 void test_get_candidates_from_different_halves(void **state)
@@ -101,157 +160,52 @@ void test_sort_points(void **state)
 
 void test_nlogn(void **state)
 {
-    size_t length = 5;
-    point P[] = {
-        3, 9,
-        1, 5,
-        0, 1,
-        5, 3,
-        8, 6};
-
-    points_distance closest_points = nlogn_solution(P, length);
-    points_distance expected = {{0, 1}, {1, 5}, 4.12};
-    assert_points_distance_equal(closest_points, expected);
-}
-
-void test_nlogn_vs_quadratic(void **state)
-{
-    srand(time(NULL));
-    for (size_t i = 2; i < 100; i++)
-    {        
-        size_t length = i;
-        point P1[length];
-        point P2[length];
-        for (size_t i = 0; i < length; i++)
-        {
-            int x = rand() % 100 + 1;
-            int y = rand() % 100 + 1;
-            point p = {x, y};
-            P1[i] = p;
-            P2[i] = p;
-            //printf("(%d,%d)", p.x,p.y);
-        }
-        //printf("\n");
-
-        points_distance closest_points1 = nlogn_solution(P1, length);
-        points_distance closest_points2 = quadratic_solution(P2, length);
-        //printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
-        //printf("\n(%d,%d),(%d,%d)\n\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
-        assert_float_equal(closest_points1.distance, closest_points2.distance, 0.01);
-        
-    }
-}
-
-void test_nlogn_vs_multiproc(void **state)
-{
-    srand(time(NULL));
-    for (size_t i = 2; i < 100; i++)
-    {        
-        size_t length = i;
-        point P1[length];
-        point P2[length];
-        for (size_t i = 0; i < length; i++)
-        {
-            int x = rand() % 100 + 1;
-            int y = rand() % 100 + 1;
-            point p = {x, y};
-            P1[i] = p;
-            P2[i] = p;
-            //printf("(%d,%d)", p.x,p.y);
-        }
-        //printf("\n");
-
-        points_distance closest_points1 = nlogn_solution(P1, length);
-        points_distance closest_points2 = nlogn_solution_multiproc(P2, length, 4);
-        //printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
-        //printf("\n(%d,%d),(%d,%d)\n\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
-        assert_points_distance_equal(closest_points1, closest_points2);        
-    }
+    struct testcase tc = tc2();
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
 }
 
 void test_nlogn_multiproc_base_case(void **state)
 {
-    size_t length = 2;
-    point p1 = {1,0};
-    point p2 = {1,1};
-    point P[] = {p1,p2};
-
-    points_distance closest_points = nlogn_solution_multiproc(P, length, 4);
-    points_distance expected = {p1,p2, 1.0};
-    assert_points_distance_equal(closest_points, expected);
+    struct testcase tc = tc1();
+    points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
 }
 
 void test_nlogn_multiproc(void **state)
 {
-    size_t length = 7;
-    point P[] = {
-        3, 9,
-        1, 5,
-        0, 1,
-        5, 3,
-        8, 6,
-        20,20,
-        40,40};
-
-    points_distance closest_points = nlogn_solution_multiproc(P, length, 4);
-    points_distance expected = {{0, 1}, {1, 5}, 4.12};
-    assert_points_distance_equal(closest_points, expected);
+    struct testcase tc = tc2();
+    points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
 }
 
 void test_nlogn_multithread_base_case(void **state)
-{
-    size_t length = 2;
-    point p1 = {1,0};
-    point p2 = {1,1};
-    point P[] = {p1,p2};
-
-    points_distance closest_points = nlogn_solution_multithread(P, length, 4);
-    points_distance expected = {p1,p2, 1.0};
-    assert_points_distance_equal(closest_points, expected);
+{    
+    struct testcase tc = tc1();
+    points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
 }
 
 void test_nlogn_multithread(void **state)
 {
-    size_t length = 7;
-    point P[] = {
-        3, 9,
-        1, 5,
-        0, 1,
-        5, 3,
-        8, 6,
-        20,20,
-        40,40};
+    struct testcase tc = tc2();
+    points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
+}
 
-    points_distance closest_points = nlogn_solution_multiproc(P, length, 4);
-    points_distance expected = {{0, 1}, {1, 5}, 4.12};
-    assert_points_distance_equal(closest_points, expected);
+void test_nlogn_vs_quadratic(void **state)
+{
+    compare_solutions(nlogn_solution, quadratic_solution, true);
+}
+
+void test_nlogn_vs_multiproc(void **state)
+{
+    compare_solutions(nlogn_solution, nlogn_solution_multiproc, false);
 }
 
 void test_multiproc_vs_multithread(void **state)
 {
-    srand(time(NULL));
-    for (size_t i = 2; i < 100; i++)
-    {        
-        size_t length = i;
-        point P1[length];
-        point P2[length];
-        for (size_t i = 0; i < length; i++)
-        {
-            int x = rand() % 100 + 1;
-            int y = rand() % 100 + 1;
-            point p = {x, y};
-            P1[i] = p;
-            P2[i] = p;
-            //printf("(%d,%d)", p.x,p.y);
-        }
-        //printf("\n");
-
-        points_distance closest_points1 = nlogn_solution_multithread(P1, length, 4);
-        points_distance closest_points2 = nlogn_solution_multiproc(P2, length, 4);
-        //printf("\n(%d,%d),(%d,%d)\n", closest_points1.p1.x, closest_points1.p1.y, closest_points1.p2.x, closest_points1.p2.y);
-        //printf("\n(%d,%d),(%d,%d)\n\n", closest_points2.p1.x, closest_points2.p1.y, closest_points2.p2.x, closest_points2.p2.y);
-        assert_points_distance_equal(closest_points1, closest_points2);        
-    }
+    compare_solutions(nlogn_solution_multithread, nlogn_solution_multiproc, false);
 }
 
 int main(int argc, char const *argv[])
