@@ -26,16 +26,16 @@
         },
         {
             "type": "cppbuild",
-            "label": "C/C++: build test",
+            "label": "C/C++: closest point build test",
             "command": "/usr/bin/gcc",
             "args": [
-                "-g",                
-                "${file}",
-                "${fileDirname}/util.c",  
-                "${fileDirname}/${fileBasenameNoExtension}_test.c",
+                "-g",                                
+                "${workspaceFolder}/closestpoint/closest_point_test.c",  
+                "${workspaceFolder}/closestpoint/util.c",  
+                "${workspaceFolder}/closestpoint/*_sol.c",
                 "-lcmocka",
                 "-o",
-                "${fileDirname}/out/test.out"
+                "${workspaceFolder}/closestpoint/out/test.out"
             ],
             "options": {
                 "cwd": "${fileDirname}"

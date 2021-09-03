@@ -155,3 +155,79 @@ void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half
         }
 }
 
+points_distance closest_points(point Px[], PyElement Py[], size_t length)
+{
+    if (length == 2)
+    {
+        points_distance result;
+        result.p1 = Px[0];
+        result.p2 = Px[1];
+        result.distance = distance(result.p1, result.p2);
+        return result;
+    }
+
+    size_t left_half_upper_bound = ceil(length / 2.);
+    size_t right_half_lower_bound = floor(length / 2.);
+    size_t left_size = left_half_upper_bound;
+    size_t right_size = length - right_half_lower_bound;
+    PyElement *Ly = (PyElement *)malloc(left_size * sizeof(PyElement));
+    PyElement *Ry = (PyElement *)malloc(right_size * sizeof(PyElement));
+
+    populateLy(Py, length, Ly, left_half_upper_bound);
+    populateRy(Py, length, Ry, right_half_lower_bound);
+
+    //closest points in the left half
+    points_distance left_closest_points = closest_points(Px, Ly, left_size);
+    float min_left_distance = left_closest_points.distance;
+
+    //closest points in the right half
+    points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
+    float min_right_distance = right_closest_points.distance;
+
+    float min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
+    size_t *candidates_length = (size_t *)malloc(sizeof(size_t));
+    PyElement *candidates = get_candidates_from_different_halves(*(Px + left_size - 1), Py, length, candidates_length, min_distance_upper_bound);
+    points_distance closest_candidates = closest_points_from_different_halves(candidates, *candidates_length);
+
+    free(candidates_length);
+    free(Ly);
+    free(Ry);
+    free(candidates);
+
+    if (closest_candidates.distance < min_distance_upper_bound)
+        return closest_candidates;
+    else if (min_left_distance < min_right_distance)
+        return left_closest_points;
+    else
+        return right_closest_points;
+}
+
+
+void perf_test(points_distance (*func) (point P[], size_t length, int num_processes))
+{
+    srand(time(NULL));
+    size_t length = 1000000;
+    point *P = malloc(sizeof(point) * length);
+    for (size_t i = 0; i < length; i++)
+    {
+        int x = rand() % (length * 10) + 1;
+        int y = rand() % (length * 10) + 1;
+        point p = {x, y};
+        P[i] = p;
+    }
+    int num_processes = 16;
+    {
+        struct timespec start, finish;
+        double elapsed;
+
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        points_distance closest_points = func(P, length, num_processes);
+
+        clock_gettime(CLOCK_MONOTONIC, &finish);
+
+        elapsed = (finish.tv_sec - start.tv_sec);
+        elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+        printf("time=%.4f seconds\n", elapsed);
+    }
+}
+

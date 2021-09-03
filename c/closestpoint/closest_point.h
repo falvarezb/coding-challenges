@@ -57,6 +57,8 @@ void sort_points(point P[], size_t length, PyElement Py[]);
 points_distance closest_points_from_different_halves(PyElement P[], size_t length);
 void populateLy(PyElement *Py, size_t Pylength, PyElement *Ly, size_t left_half_upper_bound);
 void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half_lower_bound);
+points_distance closest_points(point Px[], PyElement Py[], size_t length);
+void perf_test(points_distance (*func) (point P[], size_t length, int num_processes));
 
 
 // =====  SOLUTIONS ====

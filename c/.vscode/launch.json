@@ -18,17 +18,17 @@
             "preLaunchTask": "C/C++: gcc build active file"
         },
         {
-            "name": "gcc - run test",
+            "name": "gcc - closest point test",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/out/test.out",
+            "program": "${workspaceFolder}/closestpoint/out/test.out",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "C/C++: build test"
+            "preLaunchTask": "C/C++: closest point build test"
         }
     ]
 }
