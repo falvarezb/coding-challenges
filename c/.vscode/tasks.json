@@ -7,7 +7,8 @@
             "args": [
                 "-g",
                 "-DFAB_MAIN",
-                "${file}",                
+                "${file}",
+                "${fileDirname}/util.c",                
                 "-o",
                 "${fileDirname}/out/${fileBasenameNoExtension}"
             ],
@@ -30,6 +31,7 @@
             "args": [
                 "-g",                
                 "${file}",
+                "${fileDirname}/util.c",  
                 "${fileDirname}/${fileBasenameNoExtension}_test.c",
                 "-lcmocka",
                 "-o",
