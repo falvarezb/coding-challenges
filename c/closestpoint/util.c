@@ -55,7 +55,7 @@ PyElement *get_candidates_from_different_halves(point reference, PyElement Py[],
 {
     PyElement *candidates = (PyElement *)malloc(length * sizeof(PyElement));
     if (candidates == NULL)
-        return NULL;
+        errExit("malloc candidates");
 
     size_t j = 0;
     for (size_t i = 0; i < length; i++)
@@ -149,7 +149,11 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
     size_t left_size = left_half_upper_bound;
     size_t right_size = length - right_half_lower_bound;
     PyElement *Ly = (PyElement *)malloc(left_size * sizeof(PyElement));
+    if (Ly == NULL)
+        errExit("malloc Ly");
     PyElement *Ry = (PyElement *)malloc(right_size * sizeof(PyElement));
+    if (Ry == NULL)
+        errExit("malloc Ry");
 
     populateLy(Py, length, Ly, left_half_upper_bound);
     populateRy(Py, length, Ry, right_half_lower_bound);
@@ -164,6 +168,9 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
 
     float min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
     size_t *candidates_length = (size_t *)malloc(sizeof(size_t));
+    if (candidates_length == NULL)
+        errExit("malloc candidates_length");
+
     PyElement *candidates = get_candidates_from_different_halves(*(Px + left_size - 1), Py, length, candidates_length, min_distance_upper_bound);
     points_distance closest_candidates = closest_points_from_different_halves(candidates, *candidates_length);
 
@@ -185,7 +192,7 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
  * It prints out the time taken to run the function "func"
  * The arguments of "func" are hardcoded inside this function
  */
-void perf_test(points_distance (*func) (point P[], size_t length, int num_processes))
+void perf_test(points_distance (*func)(point P[], size_t length, int num_processes))
 {
     srand(time(NULL));
     size_t length = 1000000;
@@ -198,7 +205,7 @@ void perf_test(points_distance (*func) (point P[], size_t length, int num_proces
         P[i] = p;
     }
     int num_processes = 16;
-    
+
     struct timespec start, finish;
     double elapsed;
 
@@ -210,6 +217,4 @@ void perf_test(points_distance (*func) (point P[], size_t length, int num_proces
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
     printf("time=%.4f seconds\n", elapsed);
-    
 }
-
