@@ -1,45 +1,5 @@
 #include "closest_point.h"
 
-/* Examine a wait() status using the W* macros */
-void printWaitStatus(const char *msg, int status)
-{
-    if (msg != NULL)
-        printf("%s", msg);
-
-    if (WIFEXITED(status))
-    {
-        printf("child exited, status=%d\n", WEXITSTATUS(status));
-    }
-    else if (WIFSIGNALED(status))
-    {
-        printf("child killed by signal %d (%s)",
-               WTERMSIG(status), strsignal(WTERMSIG(status)));
-#ifdef WCOREDUMP /* Not in SUSv3, may be absent on some systems */
-        if (WCOREDUMP(status))
-            printf(" (core dumped)");
-#endif
-        printf("\n");
-    }
-    else if (WIFSTOPPED(status))
-    {
-        printf("child stopped by signal %d (%s)\n",
-               WSTOPSIG(status), strsignal(WSTOPSIG(status)));
-
-#ifdef WIFCONTINUED /* SUSv3 has this, but older Linux versions and \
-                       some other UNIX implementations don't */
-    }
-    else if (WIFCONTINUED(status))
-    {
-        printf("child continued\n");
-#endif
-    }
-    else
-    { /* Should never happen */
-        printf("what happened to this child? (status=%x)\n",
-               (unsigned int)status);
-    }
-}
-
 /**
  * Euclidean distance
  */
@@ -48,6 +8,9 @@ float distance(point p1, point p2)
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
+/**
+ * Algorithm used by sort function to compare points
+ */
 int compar_point(const void *p1, const void *p2)
 {
     const point *point1 = (const point *)p1;
@@ -55,6 +18,9 @@ int compar_point(const void *p1, const void *p2)
     return (point1->x > point2->x) - (point1->x < point2->x);
 }
 
+/**
+ * Algorithm used by sort function to compare PyElem
+ */
 int compar_PyElem(const void *p1, const void *p2)
 {
     const PyElement *point1 = (const PyElement *)p1;
@@ -63,7 +29,7 @@ int compar_PyElem(const void *p1, const void *p2)
 }
 
 /**
- * P -> Px, Py
+ * given P, returns Px, Py
  */
 void sort_points(point P[], size_t length, PyElement Py[])
 {
@@ -136,6 +102,9 @@ points_distance closest_points_from_different_halves(PyElement P[], size_t lengt
     return closest_points;
 }
 
+/**
+ * Determine the elements of Py that correspond to Ly
+ */
 void populateLy(PyElement *Py, size_t Pylength, PyElement *Ly, size_t left_half_upper_bound)
 {
     size_t j = 0;
@@ -144,6 +113,9 @@ void populateLy(PyElement *Py, size_t Pylength, PyElement *Ly, size_t left_half_
             *(Ly + j++) = *(Py + i);
 }
 
+/**
+ * Determine the elements of Py that correspond to Ry
+ */
 void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half_lower_bound)
 {
     size_t j = 0;
@@ -155,6 +127,12 @@ void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half
         }
 }
 
+/**
+ * Implementation of the algorithm to find the closest points in time nlogn
+ * 
+ * Note: this function is defined here because is also shared by the parallel versions of the
+ * nlogn solution
+ */
 points_distance closest_points(point Px[], PyElement Py[], size_t length)
 {
     if (length == 2)
@@ -202,7 +180,11 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
         return right_closest_points;
 }
 
-
+/**
+ * Function defined to run perf tests
+ * It prints out the time taken to run the function "func"
+ * The arguments of "func" are hardcoded inside this function
+ */
 void perf_test(points_distance (*func) (point P[], size_t length, int num_processes))
 {
     srand(time(NULL));
@@ -216,18 +198,18 @@ void perf_test(points_distance (*func) (point P[], size_t length, int num_proces
         P[i] = p;
     }
     int num_processes = 16;
-    {
-        struct timespec start, finish;
-        double elapsed;
+    
+    struct timespec start, finish;
+    double elapsed;
 
-        clock_gettime(CLOCK_MONOTONIC, &start);
-        points_distance closest_points = func(P, length, num_processes);
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    points_distance closest_points = func(P, length, num_processes);
 
-        clock_gettime(CLOCK_MONOTONIC, &finish);
+    clock_gettime(CLOCK_MONOTONIC, &finish);
 
-        elapsed = (finish.tv_sec - start.tv_sec);
-        elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-        printf("time=%.4f seconds\n", elapsed);
-    }
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    printf("time=%.4f seconds\n", elapsed);
+    
 }
 
