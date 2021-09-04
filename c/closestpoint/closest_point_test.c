@@ -41,6 +41,30 @@ struct testcase tc2()
     return (struct testcase) {num_points, P, {{0, 1}, {1, 5}, 4.12}, 4};
 }
 
+struct testcase tc3()
+{ // repeat points
+    int num_points = 4; 
+    point* P = malloc(sizeof(point)*num_points);
+    P[0] = (point){3,9};
+    P[1] = (point){1, 5};
+    P[2] = (point){10, 5};
+    P[3] = (point){3, 9};
+    return (struct testcase) {num_points, P, {{3, 9}, {3, 9}, 0}, 4};
+}
+
+struct testcase tc4()
+{ //by construction, we know the expected result
+    int num_points = 1000; 
+    point* P = malloc(sizeof(point)*num_points);
+    for (size_t i = 0; i < num_points-1; i++)
+    {
+        P[i] = (point){i*5,i*5};
+    }
+    P[num_points-1] = (point){10, 11};
+    
+    return (struct testcase) {num_points, P, {{10, 10}, {10, 11}, 1}, 4};
+}
+
 void assert_pyelem_equal(PyElement p1, PyElement p2)
 {
     assert_int_equal(p1.p.x, p2.p.x);
@@ -158,9 +182,30 @@ void test_sort_points(void **state)
     assert_int_equal((Py+3)->xposition, 2);
 }
 
+void test_quadratic_repeat(void **state)
+{
+    struct testcase tc = tc3();
+    points_distance closest_points = quadratic_solution(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
+}
+
 void test_nlogn(void **state)
 {
     struct testcase tc = tc2();
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
+}
+
+void test_nlogn_repeat(void **state)
+{
+    struct testcase tc = tc3();
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
+    assert_points_distance_equal(closest_points, tc.expected, false);
+}
+
+void test_nlogn_by_construction(void **state)
+{
+    struct testcase tc = tc4();
     points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
     assert_points_distance_equal(closest_points, tc.expected, false);
 }
@@ -222,7 +267,10 @@ int main(int argc, char const *argv[])
         cmocka_unit_test(test_nlogn_vs_quadratic),
         cmocka_unit_test(test_get_candidates_from_different_halves),
         cmocka_unit_test(test_get_candidates_from_different_halves_empty),
-        cmocka_unit_test(test_nlogn)
+        cmocka_unit_test(test_nlogn),
+        cmocka_unit_test(test_nlogn_repeat),
+        cmocka_unit_test(test_nlogn_by_construction),
+        cmocka_unit_test(test_quadratic_repeat)        
         };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
