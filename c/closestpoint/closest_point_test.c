@@ -2,10 +2,6 @@
 #include <stdarg.h>
 #include <setjmp.h>
 #include <cmocka.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdio.h>
-#include <time.h>
 #include <stdbool.h>
 #include "closest_point.h"
 
@@ -99,8 +95,9 @@ void compare_solutions(points_distance (*func1) (point P[], size_t length, int n
         point P2[length];
         for (size_t i = 0; i < length; i++)
         {
-            int x = rand() % max_num_points + 1;
-            int y = rand() % max_num_points + 1;
+            int scale_factor = 1000;
+            int x = rand() % (max_num_points*scale_factor) + 1;
+            int y = rand() % (max_num_points*scale_factor) + 1;
             point p = {x, y};
             P1[i] = p;
             P2[i] = p;         

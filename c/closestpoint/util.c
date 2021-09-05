@@ -188,6 +188,20 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
 }
 
 /**
+ * Return point with random coordinates whose values vary in the range [min_value, max_value]
+ */
+point* rand_point(int min_value, int max_value)
+{
+    point *p = (point *)malloc(sizeof(point));
+    if (p == NULL)
+        errExit("malloc point");
+
+    p->x = rand() % (max_value - min_value + 1) + min_value;
+    p->y = rand() % (max_value - min_value + 1) + min_value;
+    return p;
+}
+
+/**
  * Function defined to run perf tests
  * It prints out the time taken to run the function "func"
  * The arguments of "func" are hardcoded inside this function
