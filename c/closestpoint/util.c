@@ -201,34 +201,41 @@ point* rand_point(int min_value, int max_value)
     return p;
 }
 
+void print_points_distance(points_distance p)
+{
+    printf("x1=%d, y1=%d\n", p.p1.x, p.p1.y);
+    printf("x2=%d, y2=%d\n", p.p2.x, p.p2.y);
+    printf("d=%.2f\n", p.distance);    
+}
+
 /**
  * Function defined to run perf tests
  * It prints out the time taken to run the function "func"
  * The arguments of "func" are hardcoded inside this function
  */
-void perf_test(points_distance (*func)(point P[], size_t length, int num_processes))
+void perf_test(points_distance (*func)(point P[], size_t length, int num_processes), size_t num_points, int num_processes)
 {
-    srand(time(NULL));
-    size_t length = 1000000;
-    point *P = malloc(sizeof(point) * length);
-    for (size_t i = 0; i < length; i++)
+    srand(time(NULL));    
+    point *P = malloc(sizeof(point) * num_points);
+    for (size_t i = 0; i < num_points; i++)
     {
-        int x = rand() % (length * 10) + 1;
-        int y = rand() % (length * 10) + 1;
-        point p = {x, y};
-        P[i] = p;
-    }
-    int num_processes = 16;
+        // scale factor to expand coordinates space and make point repetition less likely
+        int scale_factor = 100;
+        point* p = rand_point(0, num_points*scale_factor);                        
+        P[i] = *p;        
+        free(p);               
+    }    
 
     struct timespec start, finish;
     double elapsed;
 
     clock_gettime(CLOCK_MONOTONIC, &start);
-    points_distance closest_points = func(P, length, num_processes);
+    points_distance closest_points = func(P, num_points, num_processes);
 
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    printf("time=%.4f seconds\n", elapsed);
+    printf("num_points=%d, num_processes=%d, time=%.4f seconds\n", num_points, num_processes, elapsed); 
+    print_points_distance(closest_points);   
 }

@@ -95,12 +95,12 @@ void compare_solutions(points_distance (*func1) (point P[], size_t length, int n
         point P2[length];
         for (size_t i = 0; i < length; i++)
         {
+            // scale factor to expand coordinates space and make point repetition less likely
             int scale_factor = 1000;
-            int x = rand() % (max_num_points*scale_factor) + 1;
-            int y = rand() % (max_num_points*scale_factor) + 1;
-            point p = {x, y};
-            P1[i] = p;
-            P2[i] = p;         
+            point* p = rand_point(0, max_num_points*scale_factor);                        
+            P1[i] = *p;
+            P2[i] = *p;  
+            free(p);       
         }        
         points_distance closest_points1 = func1(P1, length, 4);
         points_distance closest_points2 = func2(P2, length, 4);        

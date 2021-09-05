@@ -27,6 +27,10 @@ points_distance quadratic_solution(point P[], size_t length, int num_processes)
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
 {    
-    perf_test(quadratic_solution);    
+    perf_test(quadratic_solution, 100000, -1);
 }
 #endif
+
+//num_points=1000, num_processes=-1, time=0.0451 seconds
+//num_points=10000, num_processes=-1, time=3.7744 seconds
+//num_points=100000, num_processes=-1, time=378.8448 seconds

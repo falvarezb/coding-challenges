@@ -128,6 +128,12 @@ points_distance nlogn_solution_multiproc(point P[], size_t length, int num_proce
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
 {    
-    perf_test(nlogn_solution_multiproc);    
+    perf_test(nlogn_solution_multiproc, 10000000, 8);       
 }
 #endif
+
+//num_points=1000, num_processes=8, time=0.0033 seconds
+//num_points=10000, num_processes=8, time=0.0097 seconds
+//num_points=100000, num_processes=8, time=0.0999 seconds
+//num_points=1000000, num_processes=8, time=1.1675 seconds
+//num_points=10000000, num_processes=8, time=15.4827 seconds
