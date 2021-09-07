@@ -34,7 +34,7 @@ int compar_PyElem(const void *p1, const void *p2)
 void sort_points(point P[], size_t length, PyElement Py[])
 {
     //P is sorted in place and becomes Px
-    mergesort(P, length, sizeof(point), compar_point);
+    qsort(P, length, sizeof(point), compar_point);
 
     //building Py
     for (size_t i = 0; i < length; i++)
@@ -42,7 +42,7 @@ void sort_points(point P[], size_t length, PyElement Py[])
         PyElement py = {*(P + i), i};
         *(Py + i) = py;
     }
-    mergesort(Py, length, sizeof(PyElement), compar_PyElem);
+    qsort(Py, length, sizeof(PyElement), compar_PyElem);
 }
 
 /**

@@ -5,60 +5,61 @@
 #include <stdbool.h>
 #include "closest_point.h"
 
-struct testcase {
+struct testcase
+{
     size_t length;
-    point* P;
+    point *P;
     points_distance expected;
     int num_processes;
 };
 
 struct testcase tc1()
-{   
-    int num_points = 2; 
-    point p1 = {1,0};
-    point p2 = {1,1};    
-    point* P = malloc(sizeof(point)*num_points);
+{
+    int num_points = 2;
+    point p1 = {1, 0};
+    point p2 = {1, 1};
+    point *P = malloc(sizeof(point) * num_points);
     P[0] = p1;
-    P[1] = p2;      
-    return (struct testcase) {num_points, P, {p1,p2, 1.0}, 4};
+    P[1] = p2;
+    return (struct testcase){num_points, P, {p1, p2, 1.0}, 4};
 }
 
 struct testcase tc2()
 {
-    int num_points = 7; 
-    point* P = malloc(sizeof(point)*num_points);
-    P[0] = (point){3,9};
+    int num_points = 7;
+    point *P = malloc(sizeof(point) * num_points);
+    P[0] = (point){3, 9};
     P[1] = (point){1, 5};
     P[2] = (point){0, 1};
     P[3] = (point){5, 3};
     P[4] = (point){8, 6};
-    P[5] = (point){20,20};
-    P[6] = (point){40,40};
-    return (struct testcase) {num_points, P, {{0, 1}, {1, 5}, 4.12}, 4};
+    P[5] = (point){20, 20};
+    P[6] = (point){40, 40};
+    return (struct testcase){num_points, P, {{0, 1}, {1, 5}, 4.12}, 4};
 }
 
 struct testcase tc3()
 { // repeat points
-    int num_points = 4; 
-    point* P = malloc(sizeof(point)*num_points);
-    P[0] = (point){3,9};
+    int num_points = 4;
+    point *P = malloc(sizeof(point) * num_points);
+    P[0] = (point){3, 9};
     P[1] = (point){1, 5};
     P[2] = (point){10, 5};
     P[3] = (point){3, 9};
-    return (struct testcase) {num_points, P, {{3, 9}, {3, 9}, 0}, 4};
+    return (struct testcase){num_points, P, {{3, 9}, {3, 9}, 0}, 4};
 }
 
 struct testcase tc4()
 { //by construction, we know the expected result
-    int num_points = 1000; 
-    point* P = malloc(sizeof(point)*num_points);
-    for (size_t i = 0; i < num_points-1; i++)
+    int num_points = 10;
+    point *P = malloc(sizeof(point) * num_points);
+    for (size_t i = 0; i < num_points - 1; i++)
     {
-        P[i] = (point){i*5,i*5};
+        P[i] = (point){i * 5, i * 5};
     }
-    P[num_points-1] = (point){10, 11};
-    
-    return (struct testcase) {num_points, P, {{10, 10}, {10, 11}, 1}, 4};
+    P[num_points - 1] = (point){10, 11};
+
+    return (struct testcase){num_points, P, {{10, 10}, {10, 11}, 1}, 4};
 }
 
 void assert_pyelem_equal(PyElement p1, PyElement p2)
@@ -74,22 +75,21 @@ void assert_point_equal(point p1, point p2)
     assert_int_equal(p1.y, p2.y);
 }
 
-void assert_points_distance_equal(points_distance p1, points_distance p2, bool only_distance)
+void assert_points_distance_equal(points_distance p1, points_distance p2)
 {
-    if (!only_distance)
-    {            
-        assert_point_equal(p1.p1, p2.p1);
-        assert_point_equal(p1.p2, p2.p2);
-    }
     assert_float_equal(p1.distance, p2.distance, 0.01);
+    // we cannot guarantee that the pair of points inside each 'points_distance' argument come in the same order,
+    // therefore we need to check both possibilities
+    assert_true((p1.p1.x == p2.p1.x && p1.p1.y == p2.p1.y && p1.p2.x == p2.p2.x && p1.p2.y == p2.p2.y) ||
+                (p1.p1.x == p2.p2.x && p1.p1.y == p2.p2.y && p1.p2.x == p2.p1.x && p1.p2.y == p2.p1.y));
 }
 
-void compare_solutions(points_distance (*func1) (point P[], size_t length, int num_processes), points_distance (*func2) (point P[], size_t length, int num_processes), bool only_distance)
+void compare_solutions(points_distance (*func1)(point P[], size_t length, int num_processes), points_distance (*func2)(point P[], size_t length, int num_processes))
 {
     const int max_num_points = 100;
     srand(time(NULL));
     for (size_t i = 2; i < max_num_points; i++)
-    {        
+    {
         size_t length = i;
         point P1[length];
         point P2[length];
@@ -97,14 +97,14 @@ void compare_solutions(points_distance (*func1) (point P[], size_t length, int n
         {
             // scale factor to expand coordinates space and make point repetition less likely
             int scale_factor = 1000;
-            point* p = rand_point(0, max_num_points*scale_factor);                        
+            point *p = rand_point(0, max_num_points * scale_factor);
             P1[i] = *p;
-            P2[i] = *p;  
-            free(p);       
-        }        
+            P2[i] = *p;
+            free(p);
+        }
         points_distance closest_points1 = func1(P1, length, 4);
-        points_distance closest_points2 = func2(P2, length, 4);        
-        assert_points_distance_equal(closest_points1, closest_points2, only_distance);        
+        points_distance closest_points2 = func2(P2, length, 4);
+        assert_points_distance_equal(closest_points1, closest_points2);
     }
 }
 
@@ -161,99 +161,99 @@ void test_sort_points(void **state)
     point p4 = {1, 4};
     point P[] = {p1, p2, p3, p4};
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
-    
+
     sort_points(P, length, Py);
 
     assert_point_equal(*P, p1);
-    assert_point_equal(*(P+1), p4);
-    assert_point_equal(*(P+2), p3);
-    assert_point_equal(*(P+3), p2);
+    assert_point_equal(*(P + 1), p4);
+    assert_point_equal(*(P + 2), p3);
+    assert_point_equal(*(P + 3), p2);
 
     assert_point_equal(Py->p, p1);
     assert_int_equal(Py->xposition, 0);
-    assert_point_equal((Py+1)->p, p4);
-    assert_int_equal((Py+1)->xposition, 1);
-    assert_point_equal((Py+2)->p, p2);
-    assert_int_equal((Py+2)->xposition, 3);
-    assert_point_equal((Py+3)->p, p3);
-    assert_int_equal((Py+3)->xposition, 2);
+    assert_point_equal((Py + 1)->p, p4);
+    assert_int_equal((Py + 1)->xposition, 1);
+    assert_point_equal((Py + 2)->p, p2);
+    assert_int_equal((Py + 2)->xposition, 3);
+    assert_point_equal((Py + 3)->p, p3);
+    assert_int_equal((Py + 3)->xposition, 2);
 }
 
 void test_quadratic_repeat(void **state)
 {
     struct testcase tc = tc3();
-    points_distance closest_points = quadratic_solution(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = quadratic_solution(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn(void **state)
 {
     struct testcase tc = tc2();
-    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_repeat(void **state)
 {
     struct testcase tc = tc3();
-    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_by_construction(void **state)
 {
     struct testcase tc = tc4();
-    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multiproc_base_case(void **state)
 {
     struct testcase tc = tc1();
-    points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multiproc(void **state)
 {
     struct testcase tc = tc2();
-    points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multithread_base_case(void **state)
-{    
+{
     struct testcase tc = tc1();
-    points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multithread(void **state)
 {
     struct testcase tc = tc2();
-    points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);    
-    assert_points_distance_equal(closest_points, tc.expected, false);
+    points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_vs_quadratic(void **state)
 {
-    compare_solutions(nlogn_solution, quadratic_solution, true);
+    compare_solutions(nlogn_solution, quadratic_solution);
 }
 
 void test_nlogn_vs_multiproc(void **state)
 {
-    compare_solutions(nlogn_solution, nlogn_solution_multiproc, false);
+    compare_solutions(nlogn_solution, nlogn_solution_multiproc);
 }
 
 void test_multiproc_vs_multithread(void **state)
 {
-    compare_solutions(nlogn_solution_multithread, nlogn_solution_multiproc, false);
+    compare_solutions(nlogn_solution_multithread, nlogn_solution_multiproc);
 }
 
 int main(int argc, char const *argv[])
 {
 
-    const struct CMUnitTest tests[] = {        
+    const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_multiproc_vs_multithread),
         cmocka_unit_test(test_nlogn_multithread),
         cmocka_unit_test(test_nlogn_multithread_base_case),
@@ -267,7 +267,6 @@ int main(int argc, char const *argv[])
         cmocka_unit_test(test_nlogn),
         cmocka_unit_test(test_nlogn_repeat),
         cmocka_unit_test(test_nlogn_by_construction),
-        cmocka_unit_test(test_quadratic_repeat)        
-        };
+        cmocka_unit_test(test_quadratic_repeat)};
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

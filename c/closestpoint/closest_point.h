@@ -28,7 +28,7 @@ typedef struct
 } PyElement;
 
 typedef struct
-{
+{ //data structure representing the solution: pair of closest points and their distance
     point p1;
     point p2;
     float distance;
