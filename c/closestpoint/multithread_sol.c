@@ -129,17 +129,21 @@ points_distance nlogn_solution_multithread(point P[], size_t length, int num_pro
 {
     assert(length >= 2);
     int par_threshold = ceil((float)length / num_processes);
-    points_distance *result = (points_distance *)malloc(sizeof(points_distance));
+    points_distance *ptr_result = (points_distance *)malloc(sizeof(points_distance));
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
     sort_points(P, length, Py);
     thread_arg *args = malloc(sizeof(thread_arg));
     args->Px = P;
     args->Py = Py;
     args->length = length;
-    args->result = result;
+    args->result = ptr_result;
     args->par_threshold = par_threshold;
     closest_points_multithread(args);
-    return *result;
+    free(Py);
+    free(args);
+    points_distance result = *ptr_result;
+    free(ptr_result);
+    return result;
 }
 
 #ifdef FAB_MAIN

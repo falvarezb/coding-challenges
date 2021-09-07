@@ -5,7 +5,9 @@ points_distance nlogn_solution(point P[], size_t length, int num_processes)
     assert(length >= 2);
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
     sort_points(P, length, Py);
-    return closest_points(P, Py, length);
+    points_distance result = closest_points(P, Py, length);
+    free(Py);
+    return result;
 }
 
 #ifdef FAB_MAIN

@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [        
         {
-            "name": "gcc - Build and debug active file",
+            "name": "gcc macos - build and debug active file",
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/out/${fileBasenameNoExtension}",
@@ -15,10 +15,23 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "C/C++: gcc build active file"
+            "preLaunchTask": "C/C++ macos: gcc build"
         },
         {
-            "name": "gcc - closest point test",
+            "name": "gcc linux - build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/out/${fileBasenameNoExtension}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "C/C++ linux: gcc build"
+        },
+        {
+            "name": "gcc macos - test",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/closestpoint/out/test.out",
@@ -28,7 +41,20 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",
-            "preLaunchTask": "C/C++: closest point build test"
+            "preLaunchTask": "C/C++ macos: test"
+        },
+        {
+            "name": "gcc linux - test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/closestpoint/out/test.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "C/C++ linux: test"
         }
     ]
 }

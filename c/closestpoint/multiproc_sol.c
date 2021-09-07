@@ -118,11 +118,14 @@ points_distance nlogn_solution_multiproc(point P[], size_t length, int num_proce
     //printf("pid=%d, ppid=%d, main\n", getpid(), getppid());
     assert(length >= 2);
     int par_threshold = ceil((float)length / num_processes);
-    points_distance *result = (points_distance *)malloc(sizeof(points_distance));
+    points_distance *ptr_result = (points_distance *)malloc(sizeof(points_distance));
     PyElement *Py = (PyElement *)malloc(length * sizeof(PyElement));
     sort_points(P, length, Py);
-    closest_points_multiproc(P, Py, length, result, par_threshold);
-    return *result;
+    closest_points_multiproc(P, Py, length, ptr_result, par_threshold);
+    free(Py);
+    points_distance result = *ptr_result;
+    free(ptr_result);
+    return result;
 }
 
 #ifdef FAB_MAIN

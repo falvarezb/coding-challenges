@@ -236,6 +236,7 @@ void perf_test(points_distance (*func)(point P[], size_t length, int num_process
 
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    printf("num_points=%d, num_processes=%d, time=%.4f seconds\n", num_points, num_processes, elapsed); 
-    print_points_distance(closest_points);   
+    printf("num_points=%ld, num_processes=%d, time=%.4f seconds\n", num_points, num_processes, elapsed); 
+    print_points_distance(closest_points); 
+    free(P);  
 }
