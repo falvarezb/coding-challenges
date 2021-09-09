@@ -203,9 +203,10 @@ point* rand_point(int min_value, int max_value)
 
 void print_points_distance(points_distance p)
 {
-    printf("x1=%d, y1=%d\n", p.p1.x, p.p1.y);
-    printf("x2=%d, y2=%d\n", p.p2.x, p.p2.y);
-    printf("d=%.2f\n", p.distance);    
+    pid_t pid = getpid();
+    printf("pid=%d, x1=%d, y1=%d\n", pid, p.p1.x, p.p1.y);
+    printf("pid=%d, x2=%d, y2=%d\n", pid, p.p2.x, p.p2.y);
+    printf("pid=%d, d=%.2f\n", pid, p.distance);    
 }
 
 /**

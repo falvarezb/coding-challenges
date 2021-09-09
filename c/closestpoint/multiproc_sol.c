@@ -20,7 +20,6 @@ void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_
         result->p1 = Px[0];
         result->p2 = Px[1];
         result->distance = distance(result->p1, result->p2);
-        return;
     }
     else if (length > par_threshold)
     {
@@ -47,7 +46,8 @@ void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_
         if (right_result == NULL)
             errExit("malloc right_result");
 
-        switch (fork())
+        pid_t pid = fork();
+        switch (pid)
         {
         case -1: //error
             errExit("fork");
@@ -56,14 +56,13 @@ void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_
             _exit(EXIT_SUCCESS); // we need to exit here to stop the execution of the inherited stack frames
         default: //parent: works the right half
             closest_points_multiproc(Px + right_half_lower_bound, Ry, right_size, right_result, par_threshold);
-            int status;
             pid_t child_pid;
             do
             {
-                child_pid = wait(&status);
+                child_pid = waitpid(pid, NULL, 0);
             } while (child_pid == -1 && errno == EINTR);
-            if (child_pid == -1 && errno != ECHILD)            
-                errExit("error while waiting");                                
+            if (child_pid == -1 && errno != ECHILD)
+                errExit("error while waiting");
 
             float min_left_distance = left_result->distance;
             float min_right_distance = right_result->distance;
@@ -100,7 +99,7 @@ void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_
                 result->distance = right_result->distance;
             }
             free(right_result);
-            munmap(left_result, sizeof(points_distance));                
+            munmap(left_result, sizeof(points_distance));
         }
     }
     else
@@ -115,7 +114,6 @@ void closest_points_multiproc(point Px[], PyElement Py[], size_t length, points_
 
 points_distance nlogn_solution_multiproc(point P[], size_t length, int num_processes)
 {
-    //printf("pid=%d, ppid=%d, main\n", getpid(), getppid());
     assert(length >= 2);
     int par_threshold = ceil((float)length / num_processes);
     points_distance *ptr_result = (points_distance *)malloc(sizeof(points_distance));
@@ -130,8 +128,8 @@ points_distance nlogn_solution_multiproc(point P[], size_t length, int num_proce
 
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
-{    
-    perf_test(nlogn_solution_multiproc, 10000000, 8);       
+{
+    perf_test(nlogn_solution_multiproc, 10000000, 8);
 }
 #endif
 

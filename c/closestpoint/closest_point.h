@@ -60,6 +60,7 @@ void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half
 points_distance closest_points(point Px[], PyElement Py[], size_t length);
 void perf_test(points_distance (*func)(point P[], size_t length, int num_processes), size_t num_points, int num_processes);
 point* rand_point(int min_value, int max_value);
+void print_points_distance(points_distance p);
 
 
 // =====  SOLUTIONS ====
