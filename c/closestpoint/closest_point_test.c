@@ -242,7 +242,7 @@ void test_nlogn_repeat(void **state)
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
-void test_nlogn_by_construction(void **state)
+void test_nlogn_random_number_points(void **state)
 {
     struct testcase tc = randon_number_points();
     points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
@@ -310,7 +310,7 @@ int main(int argc, char const *argv[])
         cmocka_unit_test(test_nlogn_inter_half_solution),
         cmocka_unit_test(test_nlogn_right_half_solution),
         cmocka_unit_test(test_nlogn_repeat),
-        cmocka_unit_test(test_nlogn_by_construction),
+        cmocka_unit_test(test_nlogn_random_number_points),
         cmocka_unit_test(test_quadratic_repeat)
         };
     return cmocka_run_group_tests(tests, NULL, NULL);

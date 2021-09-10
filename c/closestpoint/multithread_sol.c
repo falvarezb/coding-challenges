@@ -149,7 +149,7 @@ points_distance nlogn_solution_multithread(point P[], size_t length, int num_pro
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
 {
-    perf_test(nlogn_solution_multithread, 10000000, 8);    
+    perf_test_random(nlogn_solution_multithread, 10000000, 8);    
 }
 #endif
 

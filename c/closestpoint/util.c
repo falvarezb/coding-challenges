@@ -130,8 +130,8 @@ void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half
 /**
  * Implementation of the algorithm to find the closest points in time nlogn
  * 
- * Note: this function is defined here because is also shared by the parallel versions of the
- * nlogn solution
+ * Note: this function is defined in this module instead of nlogn_sol because is also shared 
+ * by the parallel versions of the nlogn solution
  */
 points_distance closest_points(point Px[], PyElement Py[], size_t length)
 {
@@ -144,10 +144,16 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
         return result;
     }
 
+    // SPLIT IN HALVES:
+    // even number of points => left and right halves are disjoint
+    // odd number of points => left and right halves intersect in the middle point
+    // this is just an implementation detail that is irrelevant for the algorithm
     size_t left_half_upper_bound = ceil(length / 2.);
     size_t right_half_lower_bound = floor(length / 2.);
     size_t left_size = left_half_upper_bound;
     size_t right_size = length - right_half_lower_bound;
+
+    // sorting halves by coordinate y
     PyElement *Ly = (PyElement *)malloc(left_size * sizeof(PyElement));
     if (Ly == NULL)
         errExit("malloc Ly");
@@ -166,6 +172,7 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
     points_distance right_closest_points = closest_points(Px + right_half_lower_bound, Ry, right_size);
     float min_right_distance = right_closest_points.distance;
 
+    //closest points from different halves
     float min_distance_upper_bound = MIN(min_left_distance, min_right_distance);
     size_t *candidates_length = (size_t *)malloc(sizeof(size_t));
     if (candidates_length == NULL)
@@ -210,11 +217,11 @@ void print_points_distance(points_distance p)
 }
 
 /**
- * Function defined to run perf tests
+ * Function to run perf tests
  * It prints out the time taken to run the function "func"
- * The arguments of "func" are hardcoded inside this function
+ * The elements of the array P are generated randomly
  */
-void perf_test(points_distance (*func)(point P[], size_t length, int num_processes), size_t num_points, int num_processes)
+void perf_test_random(points_distance (*func)(point P[], size_t length, int num_processes), size_t num_points, int num_processes)
 {
     srand(time(NULL));    
     point *P = malloc(sizeof(point) * num_points);

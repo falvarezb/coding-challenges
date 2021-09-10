@@ -27,7 +27,7 @@ points_distance quadratic_solution(point P[], size_t length, int num_processes)
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
 {    
-    perf_test(quadratic_solution, 100000, -1);
+    perf_test_random(quadratic_solution, 100000, -1);
 }
 #endif
 
