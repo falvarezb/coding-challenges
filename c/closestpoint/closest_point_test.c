@@ -13,7 +13,7 @@ struct testcase
     int num_processes;
 };
 
-struct testcase tc1()
+struct testcase base_case()
 {
     int num_points = 2;
     point p1 = {1, 0};
@@ -24,7 +24,7 @@ struct testcase tc1()
     return (struct testcase){num_points, P, {p1, p2, 1.0}, 4};
 }
 
-struct testcase tc2()
+struct testcase left_half_solution()
 {
     int num_points = 7;
     point *P = malloc(sizeof(point) * num_points);
@@ -38,7 +38,35 @@ struct testcase tc2()
     return (struct testcase){num_points, P, {{0, 1}, {1, 5}, 4.12}, 4};
 }
 
-struct testcase tc3()
+struct testcase right_half_solution()
+{
+    int num_points = 7;
+    point *P = malloc(sizeof(point) * num_points);
+    P[0] = (point){3, 9};
+    P[1] = (point){1, 5};
+    P[2] = (point){0, 1};
+    P[3] = (point){5, 3};
+    P[4] = (point){8, 6};
+    P[5] = (point){20, 20};
+    P[6] = (point){20, 21};
+    return (struct testcase){num_points, P, {{20, 20}, {20, 21}, 1}, 4};
+}
+
+struct testcase inter_half_solution()
+{
+    int num_points = 7;
+    point *P = malloc(sizeof(point) * num_points);
+    P[0] = (point){2, -100};
+    P[1] = (point){0, 0};
+    P[2] = (point){9, 100};
+    P[3] = (point){10, 0};
+    P[4] = (point){11, 100};
+    P[5] = (point){20, -100};
+    P[6] = (point){20, 0};    
+    return (struct testcase){num_points, P, {{9, 100}, {11, 100}, 2}, 4};
+}
+
+struct testcase repeat_points()
 { // repeat points
     int num_points = 4;
     point *P = malloc(sizeof(point) * num_points);
@@ -49,7 +77,7 @@ struct testcase tc3()
     return (struct testcase){num_points, P, {{3, 9}, {3, 9}, 0}, 4};
 }
 
-struct testcase tc4()
+struct testcase randon_number_points()
 { //by construction, we know the expected result
     int num_points = 10;
     point *P = malloc(sizeof(point) * num_points);
@@ -181,56 +209,70 @@ void test_sort_points(void **state)
 
 void test_quadratic_repeat(void **state)
 {
-    struct testcase tc = tc3();
+    struct testcase tc = repeat_points();
     points_distance closest_points = quadratic_solution(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
-void test_nlogn(void **state)
+void test_nlogn_left_half_solution(void **state)
 {
-    struct testcase tc = tc2();
+    struct testcase tc = left_half_solution();
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
+}
+
+void test_nlogn_right_half_solution(void **state)
+{
+    struct testcase tc = right_half_solution();
+    points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
+    assert_points_distance_equal(closest_points, tc.expected);
+}
+
+void test_nlogn_inter_half_solution(void **state)
+{
+    struct testcase tc = inter_half_solution();
     points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_repeat(void **state)
 {
-    struct testcase tc = tc3();
+    struct testcase tc = repeat_points();
     points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_by_construction(void **state)
 {
-    struct testcase tc = tc4();
+    struct testcase tc = randon_number_points();
     points_distance closest_points = nlogn_solution(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multiproc_base_case(void **state)
 {
-    struct testcase tc = tc1();
+    struct testcase tc = base_case();
     points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multiproc(void **state)
 {
-    struct testcase tc = tc2();
+    struct testcase tc = left_half_solution();
     points_distance closest_points = nlogn_solution_multiproc(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multithread_base_case(void **state)
 {
-    struct testcase tc = tc1();
+    struct testcase tc = base_case();
     points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
 
 void test_nlogn_multithread(void **state)
 {
-    struct testcase tc = tc2();
+    struct testcase tc = left_half_solution();
     points_distance closest_points = nlogn_solution_multithread(tc.P, tc.length, tc.num_processes);
     assert_points_distance_equal(closest_points, tc.expected);
 }
@@ -264,9 +306,12 @@ int main(int argc, char const *argv[])
         cmocka_unit_test(test_nlogn_vs_quadratic),
         cmocka_unit_test(test_get_candidates_from_different_halves),
         cmocka_unit_test(test_get_candidates_from_different_halves_empty),
-        cmocka_unit_test(test_nlogn),
+        cmocka_unit_test(test_nlogn_left_half_solution),
+        cmocka_unit_test(test_nlogn_inter_half_solution),
+        cmocka_unit_test(test_nlogn_right_half_solution),
         cmocka_unit_test(test_nlogn_repeat),
         cmocka_unit_test(test_nlogn_by_construction),
-        cmocka_unit_test(test_quadratic_repeat)};
+        cmocka_unit_test(test_quadratic_repeat)
+        };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
