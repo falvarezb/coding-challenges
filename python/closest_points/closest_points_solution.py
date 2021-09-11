@@ -180,10 +180,15 @@ def closest_points_par(Px, Py, shmem, par_threshold):
     """
     Parallel version of 'closest_points'
 
-    If the number of points is greater than a given threshold, the process spawns 2 new processes to run each half of the input
-    Ideally, the threshold should be such that the number of processes is less or equal than the number of processors
+    Calculate the number of points recursively by splitting the work and starting a new process on each recursion
+    Once the level of parallelism is reached, no more processes are created and the remaining work is delegated to the
+    serial version of this function
+ 
+    Each child proccess calculates the solution corresponding to its input and shares that information with its parent 
+    through shared memory map
 
-    Each child proccess calculates the solution corresponding to its input and shares that information with its parent through shared memory
+    shmem (shared memory) is a tuple of 2 points, where each point is a tuple of 2 Value objects corresponding
+    to coordinates x and y
     """
     if len(Px) == 2:
         copy_solution_to_shared_memory(Px, shmem)
@@ -198,11 +203,9 @@ def closest_points_par(Px, Py, shmem, par_threshold):
         Rx, Ry = right_half_points(Px, Py)
 
         pleft = Process(target=closest_points_par, args=(Lx, Ly, ((lsol1_x, lsol1_y), (lsol2_x, lsol2_y)), par_threshold))
-        pright = Process(target=closest_points_par, args=(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y)), par_threshold))
         pleft.start()
-        pright.start()
-        pleft.join()
-        pright.join()
+        closest_points_par(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y)), par_threshold)                
+        pleft.join()    
         min_left_distance = distance((lsol1_x.value, lsol1_y.value), (lsol2_x.value, lsol2_y.value))
         min_right_distance = distance((rsol1_x.value, rsol1_y.value), (rsol2_x.value, rsol2_y.value))
 
@@ -247,16 +250,16 @@ if __name__ == "__main__":
     import timeit
 
     def main():
-        x = sample(range(10), 5)
-        y = sample(range(10), 5)
+        x = sample(range(10000000), 1000000)
+        y = sample(range(10000000), 1000000)
         P = list(zip(x, y))
-        print(P)
+        # print(P)
         # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
         # print(timeit.repeat(lambda: nlogn_solution_par(P,4), repeat=1, number=1))
         # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
-        result = nlogn_solution(P)
-        print(result)
-        print(distance(*result))
-        # print(nlogn_solution_par(P, 1))
+        # result = nlogn_solution(P)
+        # print(result)
+        # print(distance(*result))
+        print(nlogn_solution_par(P, 8))
 
     main()
