@@ -197,7 +197,7 @@ points_distance closest_points(point Px[], PyElement Py[], size_t length)
 /**
  * Return point with random coordinates whose values vary in the range [min_value, max_value]
  */
-point* rand_point(int min_value, int max_value)
+point *rand_point(int min_value, int max_value)
 {
     point *p = (point *)malloc(sizeof(point));
     if (p == NULL)
@@ -213,7 +213,7 @@ void print_points_distance(points_distance p)
     pid_t pid = getpid();
     printf("pid=%d, x1=%d, y1=%d\n", pid, p.p1.x, p.p1.y);
     printf("pid=%d, x2=%d, y2=%d\n", pid, p.p2.x, p.p2.y);
-    printf("pid=%d, d=%.2f\n", pid, p.distance);    
+    printf("pid=%d, d=%.2f\n", pid, p.distance);
 }
 
 /**
@@ -223,16 +223,16 @@ void print_points_distance(points_distance p)
  */
 void perf_test_random(points_distance (*func)(point P[], size_t length, int num_processes), size_t num_points, int num_processes)
 {
-    srand(time(NULL));    
+    srand(time(NULL));
     point *P = malloc(sizeof(point) * num_points);
     for (size_t i = 0; i < num_points; i++)
     {
         // scale factor to expand coordinates space and make point repetition less likely
         int scale_factor = 100;
-        point* p = rand_point(0, num_points*scale_factor);                        
-        P[i] = *p;        
-        free(p);               
-    }    
+        point *p = rand_point(0, num_points * scale_factor);
+        P[i] = *p;
+        free(p);
+    }
 
     struct timespec start, finish;
     double elapsed;
@@ -244,7 +244,51 @@ void perf_test_random(points_distance (*func)(point P[], size_t length, int num_
 
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    printf("num_points=%ld, num_processes=%d, time=%.4f seconds\n", num_points, num_processes, elapsed); 
-    print_points_distance(closest_points); 
-    free(P);  
+    printf("num_points=%ld, num_processes=%d, time=%.4f seconds\n", num_points, num_processes, elapsed);
+    print_points_distance(closest_points);
+    free(P);
+}
+
+/**
+ * Similar to perf_test_random but elements of the array are read from a binary file generated with generate_test_file.c
+ */
+void perf_test_file(points_distance (*func)(point P[], size_t length, int num_processes), const char *filename, int num_processes)
+{
+    //point *P = malloc(sizeof(point) * num_points);
+
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL)
+        errExit("fopen");
+
+    // obtain file size:
+    fseek(file, 0, SEEK_END);
+    size_t fsize = ftell(file);
+    rewind(file);
+    size_t num_points = fsize/8;
+
+    // allocate memory to contain the whole file:
+    point *P = malloc(sizeof(point) * num_points);
+    if (P == NULL)
+        errExit("malloc P");
+
+    // copy the file into the buffer:
+    size_t result = fread(P, sizeof(point), num_points, file);
+    if (result != (fsize/8))
+        errExit("fread");
+    fclose(file);
+    
+
+    struct timespec start, finish;
+    double elapsed;
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    points_distance closest_points = func(P, num_points, num_processes);
+
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    printf("num_points=%ld, num_processes=%d, time=%.4f seconds\n", num_points, num_processes, elapsed);
+    print_points_distance(closest_points);
+    free(P);   
 }

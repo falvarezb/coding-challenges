@@ -13,7 +13,8 @@ points_distance nlogn_solution(point P[], size_t length, int num_processes)
 #ifdef FAB_MAIN
 int main(int argc, char const *argv[])
 {    
-    perf_test_random(nlogn_solution, 10000000, -1);       
+    //perf_test_random(nlogn_solution, 10000000, -1);  
+    perf_test_file(nlogn_solution, argv[1], -1);     
 }
 #endif
 

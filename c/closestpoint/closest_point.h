@@ -59,6 +59,7 @@ void populateLy(PyElement *Py, size_t Pylength, PyElement *Ly, size_t left_half_
 void populateRy(PyElement *Py, size_t Pylength, PyElement *Ry, size_t right_half_lower_bound);
 points_distance closest_points(point Px[], PyElement Py[], size_t length);
 void perf_test_random(points_distance (*func)(point P[], size_t length, int num_processes), size_t num_points, int num_processes);
+void perf_test_file(points_distance (*func)(point P[], size_t length, int num_processes), const char *filename, int num_processes);
 point* rand_point(int min_value, int max_value);
 void print_points_distance(points_distance p);
 
