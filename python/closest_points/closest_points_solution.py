@@ -229,7 +229,7 @@ def closest_points_par(Px, Py, shmem, par_threshold):
             shmem[1][1].value = rsol2_y.value
     
     else:
-        # DEFAULTING TO SERIAL ALGORITHM
+        # DEFAULTING TO SEQUENTIAL ALGORITHM
         copy_solution_to_shared_memory(closest_points(Px, Py), shmem)
 
 
