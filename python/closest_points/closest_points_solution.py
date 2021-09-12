@@ -182,21 +182,23 @@ def closest_points_par(Px, Py, shmem, par_threshold):
 
     Calculate the number of points recursively by splitting the work and starting a new process on each recursion
     Once the level of parallelism is reached, no more processes are created and the remaining work is delegated to the
-    serial version of this function
+    sequential version of this function
  
     Each child proccess calculates the solution corresponding to its input and shares that information with its parent 
     through shared memory map
 
     shmem (shared memory) is a tuple of 2 points, where each point is a tuple of 2 Value objects corresponding
     to coordinates x and y
+    There is no need to synchronize the access to shared memory as only the child writes to it and the parent waits for
+    the child to finish before reading
     """
     if len(Px) == 2:
         copy_solution_to_shared_memory(Px, shmem)
 
     elif len(Px) > par_threshold:
         # shared memory values to share data with child processes
-        lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
-        rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+        lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
+        rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
 
         # closest points in each half
         Lx, Ly = left_half_points(Px, Py)
@@ -238,7 +240,7 @@ def nlogn_solution_par(points, num_processes):
     num_processes MUST be a power of 2
     """
     # shared memory values: not really needed as no new process is spawned here. However, needed to respect the signature of 'closest_points_par'
-    sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf), Value('d', math.inf), Value('d', math.inf), Value('d', math.inf)
+    sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
     par_threshold = len(points)//num_processes
     closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)), par_threshold)
     return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))

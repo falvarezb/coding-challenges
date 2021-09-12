@@ -4,7 +4,7 @@
  * 
  * Calculate the number of points recursively by splitting the work and starting a new process on each recursion
  * Once the level of parallelism is reached, no more processes are created and the remaining work is delegated to the
- * serial version of this function
+ * sequential version of this function
  * 
  * The result is stored in one of the variables passed as arguments (that may be a region in the heap if the call is made
  * within the same process or a memory mapping if the call is made on a new process)
