@@ -245,6 +245,15 @@ def nlogn_solution_par(points, num_processes):
     closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)), par_threshold)
     return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))
 
+def read_test_file():
+    from array import array
+    import struct
+    data = array('i')
+    with open('./out/mytest', 'rb' ) as f:        
+        data.frombytes(f.read())
+        return list(struct.iter_unpack('ii', data))
+    
+
 
 if __name__ == "__main__":
 
@@ -262,6 +271,7 @@ if __name__ == "__main__":
         # result = nlogn_solution(P)
         # print(result)
         # print(distance(*result))
-        print(nlogn_solution_par(P, 8))
+        print(nlogn_solution_par(read_test_file(), 8))
+        # read_test_file()
 
     main()
