@@ -73,10 +73,8 @@ def left_half_points(Px, Py):
     n = len(Px)
     left_half_upper_bound = math.ceil(n/2)
 
-    newPx, newPy = Px[:left_half_upper_bound], []
-    for pentry in Py:
-        if pentry.x_position < left_half_upper_bound:
-            newPy.append(pentry)
+    newPx = Px[:left_half_upper_bound]
+    newPy = [pentry for pentry in Py if pentry.x_position < left_half_upper_bound]
     return newPx, newPy
 
 
@@ -87,10 +85,8 @@ def right_half_points(Px, Py):
     n = len(Px)
     right_half_lower_bound = math.floor(n/2)
 
-    newPx, newPy = Px[right_half_lower_bound:], []
-    for pentry in Py:
-        if pentry.x_position >= right_half_lower_bound:
-            newPy.append(PyElement(pentry.point, pentry.x_position-right_half_lower_bound))
+    newPx = Px[right_half_lower_bound:]
+    newPy = [PyElement(pentry.point, pentry.x_position-right_half_lower_bound) for pentry in Py if pentry.x_position >= right_half_lower_bound]
     return newPx, newPy
 
 
@@ -103,12 +99,8 @@ def get_candidates_from_different_halves(left_half, Py, min_distance_upper_bound
     the middle point separating the left and right halves
     """
 
-    rightmost_left_point = left_half[-1]    
-    candidates = []
-    for p in Py:
-        if abs(p.point[0]-rightmost_left_point[0]) < min_distance_upper_bound:
-            candidates.append(p)
-    return candidates
+    rightmost_left_point = left_half[-1]  
+    return [p for p in Py if abs(p.point[0]-rightmost_left_point[0]) < min_distance_upper_bound]
 
 
 def closest_points_from_different_halves(candidates):
