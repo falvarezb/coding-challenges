@@ -4,14 +4,20 @@ import org.scalatest.{Assertion, FunSpec}
 import ClosestPoints._
 
 import java.math.MathContext
+import org.scalacheck.Gen
+import org.scalatest.prop.PropertyChecks
 
-class ClosestPointsTest extends FunSpec {
+class ClosestPointsTest extends FunSpec with PropertyChecks {
 
   def assertPointDistance(pd1: PointDistance, pd2: PointDistance): Assertion = {
-    assert(pd1.p1 == pd2.p1)
-    assert(pd1.p2 == pd2.p2)
+    assert(
+      (pd1.p1 == pd2.p1 && pd1.p2 == pd2.p2) ||
+        (pd1.p1 == pd2.p2 && pd1.p2 == pd2.p1)
+    )
     assert(BigDecimal(pd1.d, new MathContext(2)) == BigDecimal(pd2.d, new MathContext(2)))
   }
+
+  //==== FUNCTIONAL TESTING ======
 
   describe("quadratic solution"){
     it("P=[(0, 1), (0, 3), (2, 0), (0, 0)]"){
@@ -109,7 +115,41 @@ class ClosestPointsTest extends FunSpec {
       val P = List(Point(3,9),Point(1,5),Point(10,5),Point(3,9))
       assertPointDistance(nlognSolution(P), PointDistance(Point(3,9),Point(3,9), 0))
     }
+    it("P=[(0, 1), (0, 3), (2, 0), (0, 0)]"){
+      assert(nlognSolution(List(Point(0,1), Point(0,3), Point(2,0), Point(0,0))) == PointDistance(Point(0,0),Point(0,1),1))
+    }
   }
 
+//  describe("Point(477,407), Point(928,105), Point(134,309), Point(437,83)") {
+//    it("nlogn solution"){
+//      val P = List(Point(477,407), Point(928,105), Point(134,309), Point(437,83))
+//      assertPointDistance(nlognSolution(P), PointDistance(Point(437,83),Point(477,407), 330))
+//    }
+//    it("quadratic solution"){
+//      val P = List(Point(477,407), Point(928,105), Point(134,309), Point(437,83))
+//      assertPointDistance(quadratic_solution(P), PointDistance(Point(437,83),Point(477,407), 330))
+//    }
+//  }
+
+  //==== PROPERTY-BASED TESTING ======
+
+  /*
+  Shrinking ignores restrictions of the generator, e.g. shrinking a Gen.choose(1, 10) might try to falsify the
+  property with values such as 0, and -1
+
+  With this statement, shrinking is disabled
+  */
+  import org.scalacheck.Shrink.shrinkAny
+
+  def pointsGenerator(): Gen[Seq[Point]] = for {
+    len <- Gen.choose(2, 100)
+    x <- Gen.pick(len, 1 to 1000)
+    y <- Gen.pick(len, 1 to 1000)
+  } yield x.zip(y).map{case (x,y) => Point(x,y)}
+
+
+  forAll(pointsGenerator()) { P =>
+    assertPointDistance(quadratic_solution(P), nlognSolution(P))
+  }
 
 }

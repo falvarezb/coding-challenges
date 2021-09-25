@@ -18,7 +18,7 @@ object ClosestPoints {
   /**
     * Brute force solution
     */
-  def quadratic_solution(P: List[Point]): PointDistance = {
+  def quadratic_solution(P: Seq[Point]): PointDistance = {
     if(P.length == 2) {
       PointDistance(P(0), P(1), distance(P(0), P(1)))
     }
@@ -38,20 +38,20 @@ object ClosestPoints {
   /**
     * P -> Px, Py
     */
-  def sortPoints(P: List[Point]): (List[Point], List[PyElement]) = {
+  def sortPoints(P: Seq[Point]): (Seq[Point], Seq[PyElement]) = {
     val Px = P.sortBy(_.x)
     val Py = Px.zipWithIndex.map{case (p,idx) => PyElement(p,idx)}.sortBy(_.p.y)
     (Px, Py)
   }
 
-  def leftHalfPoints(Px: List[Point], Py: List[PyElement]): (List[Point], List[PyElement]) = {
+  def leftHalfPoints(Px: Seq[Point], Py: Seq[PyElement]): (Seq[Point], Seq[PyElement]) = {
     val leftHalfUpperBound = ceil(Px.length/2d).toInt
     val newPx = Px.slice(0, leftHalfUpperBound)
     val newPy = Py.filter(_.xPosition < leftHalfUpperBound)
     (newPx, newPy)
   }
 
-  def rightHalfPoints(Px: List[Point], Py: List[PyElement]): (List[Point], List[PyElement]) = {
+  def rightHalfPoints(Px: Seq[Point], Py: Seq[PyElement]): (Seq[Point], Seq[PyElement]) = {
     val n = Px.length
     val rightHalfLowerBound = n/2
     val newPx = Px.slice(rightHalfLowerBound, n)
@@ -59,11 +59,11 @@ object ClosestPoints {
     (newPx, newPy)
   }
 
-  def getCandidatesFromDifferentHalves(rightmostLeftPoint: Point, Py: List[PyElement], minDistanceUpperBound: Double): List[PyElement] = {
+  def getCandidatesFromDifferentHalves(rightmostLeftPoint: Point, Py: Seq[PyElement], minDistanceUpperBound: Double): Seq[PyElement] = {
     Py.filter(py => abs(rightmostLeftPoint.x - py.p.x) < minDistanceUpperBound)
   }
 
-  def closestPointsFromDifferentHalves(candidates: List[PyElement]): Option[PointDistance] = {
+  def closestPointsFromDifferentHalves(candidates: Seq[PyElement]): Option[PointDistance] = {
     var minDistance = Double.MaxValue
     var closestPoints: Option[(Point, Point)] = None
     for(i <- candidates.indices) {
@@ -78,7 +78,7 @@ object ClosestPoints {
     closestPoints.map(x => PointDistance(x._1, x._2, minDistance))
   }
 
-  def closestPoints(Px: List[Point], Py: List[PyElement]): PointDistance = {
+  def closestPoints(Px: Seq[Point], Py: Seq[PyElement]): PointDistance = {
     if(Px.length == 2) {
       PointDistance(Px(0), Px(1), distance(Px(0), Px(1)))
     }
@@ -106,7 +106,7 @@ object ClosestPoints {
     }
   }
 
-  def nlognSolution(P: List[Point]): PointDistance = {
+  def nlognSolution(P: Seq[Point]): PointDistance = {
     (closestPoints _).tupled(sortPoints(P))
   }
 
