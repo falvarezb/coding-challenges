@@ -14,22 +14,13 @@ class ClosestPointTask(Px: Seq[Point], Py: Seq[PyElement], parThreshold: Int) ex
       val (rx,ry) = rightHalfPoints(Px, Py)
 
       val leftClosestPointsTask: ForkJoinTask[PointDistance] = new ClosestPointTask(lx, ly, parThreshold).fork()
-      val rightClosestPoints: PointDistance = new ClosestPointTask(rx, ry, parThreshold).compute()
-      val leftClosestPoints: PointDistance = leftClosestPointsTask.join()
+      val rightSolution: PointDistance = new ClosestPointTask(rx, ry, parThreshold).compute()
+      val leftSolution: PointDistance = leftClosestPointsTask.join()
 
-      val minDistanceUpperBound = min(leftClosestPoints.d, rightClosestPoints.d)
-      val candidates = getCandidatesFromDifferentHalves(lx.last, Py, minDistanceUpperBound)
-      val closestCandidates = closestPointsFromDifferentHalves(candidates)
-
-      if(closestCandidates.exists(_.d < minDistanceUpperBound)) {
-        closestCandidates.get
-      }
-      else if(leftClosestPoints.d < rightClosestPoints.d) {
-        leftClosestPoints
-      }
-      else {
-        rightClosestPoints
-      }
+      val minLeftRightDistance = min(leftSolution.d, rightSolution.d)
+      val candidates = getCandidatesFromDifferentHalves(lx.last, Py, minLeftRightDistance)
+      val solutionFromDifferentHalves = closestPointsFromDifferentHalves(candidates)
+      List(leftSolution, rightSolution, solutionFromDifferentHalves).minBy(_.d)
     }
     else {
       closestPoints(Px, Py)
