@@ -1,7 +1,6 @@
 package challenges.closest_points
 
 import org.scalatest.{Assertion, FunSpec}
-import ClosestPoints._
 
 import java.math.MathContext
 import org.scalacheck.Gen
@@ -21,7 +20,7 @@ class ClosestPointsTest extends FunSpec with PropertyChecks {
 
   describe("quadratic solution"){
     it("P=[(0, 1), (0, 3), (2, 0), (0, 0)]"){
-      assert(quadratic_solution(List(Point(0,1), Point(0,3), Point(2,0), Point(0,0))) == PointDistance(Point(0,1),Point(0,0),1))
+      assert(QuadraticSolution.solution(List(Point(0,1), Point(0,3), Point(2,0), Point(0,0))) == PointDistance(Point(0,1),Point(0,0),1))
     }
   }
 
@@ -101,35 +100,35 @@ class ClosestPointsTest extends FunSpec with PropertyChecks {
   describe("nlogn solution"){
     it("left half solution"){
       val P = List(Point(3,9),Point(1,5),Point(0,1),Point(5,3),Point(8,6),Point(20,20),Point(40,40))
-      assertPointDistance(nlognSolution(P), PointDistance(Point(0,1),Point(1,5), 4.12))
+      assertPointDistance(NlognSolution.solution(P), PointDistance(Point(0,1),Point(1,5), 4.12))
     }
     it("right half solution"){
       val P = List(Point(3,9),Point(1,5),Point(0,1),Point(5,3),Point(8,6),Point(20,20),Point(20,21))
-      assertPointDistance(nlognSolution(P), PointDistance(Point(20,20),Point(20,21), 1))
+      assertPointDistance(NlognSolution.solution(P), PointDistance(Point(20,20),Point(20,21), 1))
     }
     it("inter halves solution"){
       val P = List(Point(2,-100),Point(0,0),Point(9,100),Point(10,0),Point(11,100),Point(20,-100),Point(20,0))
-      assertPointDistance(nlognSolution(P), PointDistance(Point(9,100),Point(11,100), 2))
+      assertPointDistance(NlognSolution.solution(P), PointDistance(Point(9,100),Point(11,100), 2))
     }
     it("repeat points"){
       val P = List(Point(3,9),Point(1,5),Point(10,5),Point(3,9))
-      assertPointDistance(nlognSolution(P), PointDistance(Point(3,9),Point(3,9), 0))
+      assertPointDistance(NlognSolution.solution(P), PointDistance(Point(3,9),Point(3,9), 0))
     }
     it("P=[(0, 1), (0, 3), (2, 0), (0, 0)]"){
-      assert(nlognSolution(List(Point(0,1), Point(0,3), Point(2,0), Point(0,0))) == PointDistance(Point(0,0),Point(0,1),1))
+      assert(NlognSolution.solution(List(Point(0,1), Point(0,3), Point(2,0), Point(0,0))) == PointDistance(Point(0,0),Point(0,1),1))
     }
   }
 
-//  describe("Point(477,407), Point(928,105), Point(134,309), Point(437,83)") {
-//    it("nlogn solution"){
-//      val P = List(Point(477,407), Point(928,105), Point(134,309), Point(437,83))
-//      assertPointDistance(nlognSolution(P), PointDistance(Point(437,83),Point(477,407), 330))
-//    }
-//    it("quadratic solution"){
-//      val P = List(Point(477,407), Point(928,105), Point(134,309), Point(437,83))
-//      assertPointDistance(quadratic_solution(P), PointDistance(Point(437,83),Point(477,407), 330))
-//    }
-//  }
+  describe("multithread solution") {
+    describe("P=[(0, 1), (0, 3), (2, 0), (0, 0)]") {
+      it("single thread behaviour") {
+        assert(MultithreadSolution.nlognSolution(List(Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)), 1) == PointDistance(Point(0, 0), Point(0, 1), 1))
+      }
+      it("multi thread behaviour") {
+        assert(MultithreadSolution.nlognSolution(List(Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)), 4) == PointDistance(Point(0, 0), Point(0, 1), 1))
+      }
+    }
+  }
 
   //==== PROPERTY-BASED TESTING ======
 
@@ -149,7 +148,8 @@ class ClosestPointsTest extends FunSpec with PropertyChecks {
 
 
   forAll(pointsGenerator()) { P =>
-    assertPointDistance(quadratic_solution(P), nlognSolution(P))
+    assertPointDistance(NlognSolution.solution(P), QuadraticSolution.solution(P))
+    assertPointDistance(NlognSolution.solution(P), MultithreadSolution.nlognSolution(P,4))
   }
 
 }
