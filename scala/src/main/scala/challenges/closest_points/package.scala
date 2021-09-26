@@ -43,9 +43,9 @@ package object closest_points {
     Py.filter(py => abs(rightmostLeftPoint.x - py.p.x) < minDistanceUpperBound)
   }
 
-  def closestPointsFromDifferentHalves(candidates: Seq[PyElement]): PointDistance = {
-    var minDistance = Double.MaxValue
-    var closestPoints: (Point, Point) = (Point(0,0), Point(0,0))
+  def globalSolution(candidates: Seq[PyElement], partialSolution: PointDistance): PointDistance = {
+    var minDistance = partialSolution.d
+    var closestPoints: (Point, Point) = (partialSolution.p1, partialSolution.p2)
     for (i <- candidates.indices) {
       for (j <- i + 1 until min(candidates.length, 16)) {
         val d = distance(candidates(i).p, candidates(j).p)
@@ -58,15 +58,6 @@ package object closest_points {
     PointDistance(closestPoints._1, closestPoints._2, minDistance)
   }
 
-//  def mixedSolution(leftSolution: PointDistance, rightSolution: PointDistance)
-//
-//  def determineGlobalSolution(leftSolution: PointDistance, rightSolution: PointDistance, solutionFromDifferentHalves: PointDistance): PointDistance = {
-//    val minLeftRightDistance = min(leftSolution.d, rightSolution.d)
-//    val candidates = getCandidatesFromDifferentHalves(lx.last, Py, minLeftRightDistance)
-//    val solutionFromDifferentHalves = closestPointsFromDifferentHalves(candidates)
-//    List(leftSolution, rightSolution, solutionFromDifferentHalves).minBy(_.d)
-//  }
-
   def closestPoints(Px: Seq[Point], Py: Seq[PyElement]): PointDistance = {
     if (Px.length == 2) {
       PointDistance(Px(0), Px(1), distance(Px(0), Px(1)))
@@ -78,12 +69,8 @@ package object closest_points {
 
       val leftSolution = closestPoints(lx, ly)
       val rightSolution = closestPoints(rx, ry)
-
-
-      val minLeftRightDistance = min(leftSolution.d, rightSolution.d)
-      val candidates = getCandidatesFromDifferentHalves(lx.last, Py, minLeftRightDistance)
-      val solutionFromDifferentHalves = closestPointsFromDifferentHalves(candidates)
-      List(leftSolution, rightSolution, solutionFromDifferentHalves).minBy(_.d)
+      val partialSolution = List(leftSolution, rightSolution).minBy(_.d)
+      globalSolution(getCandidatesFromDifferentHalves(lx.last, Py, partialSolution.d), partialSolution)
     }
   }
 

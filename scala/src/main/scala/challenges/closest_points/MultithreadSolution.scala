@@ -1,8 +1,6 @@
 package challenges.closest_points
 
 import java.util.concurrent.{ForkJoinPool, ForkJoinTask, RecursiveTask}
-import scala.math.min
-
 
 class ClosestPointTask(Px: Seq[Point], Py: Seq[PyElement], parThreshold: Int) extends RecursiveTask[PointDistance] {
   override def compute(): PointDistance = {
@@ -16,11 +14,8 @@ class ClosestPointTask(Px: Seq[Point], Py: Seq[PyElement], parThreshold: Int) ex
       val leftClosestPointsTask: ForkJoinTask[PointDistance] = new ClosestPointTask(lx, ly, parThreshold).fork()
       val rightSolution: PointDistance = new ClosestPointTask(rx, ry, parThreshold).compute()
       val leftSolution: PointDistance = leftClosestPointsTask.join()
-
-      val minLeftRightDistance = min(leftSolution.d, rightSolution.d)
-      val candidates = getCandidatesFromDifferentHalves(lx.last, Py, minLeftRightDistance)
-      val solutionFromDifferentHalves = closestPointsFromDifferentHalves(candidates)
-      List(leftSolution, rightSolution, solutionFromDifferentHalves).minBy(_.d)
+      val partialSolution = List(leftSolution, rightSolution).minBy(_.d)
+      globalSolution(getCandidatesFromDifferentHalves(lx.last, Py, partialSolution.d), partialSolution)
     }
     else {
       closestPoints(Px, Py)

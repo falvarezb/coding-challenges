@@ -90,13 +90,6 @@ class ClosestPointsTest extends FunSpec with PropertyChecks {
     }
   }
 
-  describe("closest points from different halves") {
-    it("there is only 1 candidate") {
-      val candidates = List(PyElement(Point(0,0), 0))
-      assertPointDistance(closestPointsFromDifferentHalves(candidates), PointDistance(Point(0,0),Point(0,0), Double.MaxValue))
-    }
-  }
-
   describe("nlogn solution"){
     it("left half solution"){
       val P = List(Point(3,9),Point(1,5),Point(0,1),Point(5,3),Point(8,6),Point(20,20),Point(40,40))
