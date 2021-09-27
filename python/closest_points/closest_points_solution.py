@@ -7,28 +7,16 @@ Given n points in the plane, find the pair that is closest together.
 import math
 from multiprocessing import Process, Value
 
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-def distance(p1: tuple, p2: tuple) -> float:
-    """
-    each tuple represents a point (x,y) in the plane
-    """
-    return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+    def __eq__(self, o: object) -> bool:
+        return self.x == o.x and self.y == o.y
 
-
-def quadratic_solution(P):
-    """
-    brute force algorithm, O(n^2)
-
-    points: list of tuples, each tuple representing a point (x,y) in the plane
-    """
-    min_distance = math.inf
-    for i in range(len(P)-1):
-        for j in range(i+1, len(P)):
-            d = distance(P[i], P[j])
-            if d < min_distance:
-                min_distance = d
-                min_pair = (P[i], P[j])
-    return min_pair
+    def __hash__(self) -> int:
+        return self.x * 31 + self.y
 
 
 class PyElement:
@@ -57,12 +45,34 @@ class PyElement:
         return self.point == o.point and self.x_position == o.x_position
 
 
+def distance(p1: Point, p2: Point) -> float:
+    """
+    each tuple represents a point (x,y) in the plane
+    """
+    return math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
+
+
+def quadratic_solution(P):
+    """
+    brute force algorithm, O(n^2)
+
+    points: list of Points
+    """
+    min_distance = math.inf
+    for i in range(len(P)-1):
+        for j in range(i+1, len(P)):
+            d = distance(P[i], P[j])
+            if d < min_distance:
+                min_distance = d
+                min_pair = (P[i], P[j])
+    return min_pair
+
 def sort_points(P):
     """
     P -> Px, Py
     """
-    Px = sorted(P, key=lambda p: p[0])
-    Py = sorted([PyElement(p, i) for i, p in enumerate(Px)], key=lambda py: py.point[1])
+    Px = sorted(P, key=lambda p: p.x)
+    Py = sorted([PyElement(p, i) for i, p in enumerate(Px)], key=lambda py: py.point.y)
     return Px, Py
 
 
@@ -100,7 +110,7 @@ def get_candidates_from_different_halves(left_half, Py, min_distance_upper_bound
     """
 
     rightmost_left_point = left_half[-1]  
-    return [p for p in Py if abs(p.point[0]-rightmost_left_point[0]) < min_distance_upper_bound]
+    return [p for p in Py if abs(p.point.x-rightmost_left_point.x) < min_distance_upper_bound]
 
 
 def closest_points_from_different_halves(candidates):
@@ -162,10 +172,10 @@ def nlogn_solution(points):
 
 
 def copy_solution_to_shared_memory(solution, shmem):
-    shmem[0][0].value = solution[0][0]
-    shmem[0][1].value = solution[0][1]
-    shmem[1][0].value = solution[1][0]
-    shmem[1][1].value = solution[1][1]
+    shmem[0][0].value = solution[0].x
+    shmem[0][1].value = solution[0].y
+    shmem[1][0].value = solution[1].x
+    shmem[1][1].value = solution[1].y
 
 
 def closest_points_par(Px, Py, shmem, par_threshold):
@@ -200,8 +210,8 @@ def closest_points_par(Px, Py, shmem, par_threshold):
         pleft.start()
         closest_points_par(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y)), par_threshold)                
         pleft.join()    
-        min_left_distance = distance((lsol1_x.value, lsol1_y.value), (lsol2_x.value, lsol2_y.value))
-        min_right_distance = distance((rsol1_x.value, rsol1_y.value), (rsol2_x.value, rsol2_y.value))
+        min_left_distance = distance(Point(lsol1_x.value, lsol1_y.value), Point(lsol2_x.value, lsol2_y.value))
+        min_right_distance = distance(Point(rsol1_x.value, rsol1_y.value), Point(rsol2_x.value, rsol2_y.value))
 
         min_distance_upper_bound = min(min_left_distance, min_right_distance)
         candidates = get_candidates_from_different_halves(Lx, Py, min_distance_upper_bound)
@@ -235,7 +245,7 @@ def nlogn_solution_par(points, num_processes):
     sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
     par_threshold = len(points)//num_processes
     closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)), par_threshold)
-    return ((sol1_x.value, sol1_y.value), (sol2_x.value, sol2_y.value))
+    return (Point(sol1_x.value, sol1_y.value), Point(sol2_x.value, sol2_y.value))
 
 def read_test_file(fileName):
     from array import array
