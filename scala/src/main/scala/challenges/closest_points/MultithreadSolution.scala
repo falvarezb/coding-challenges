@@ -8,6 +8,7 @@ class ClosestPointTask(Px: Seq[Point], Py: Seq[PyElement], parThreshold: Int) ex
       PointDistance(Px(0), Px(1), distance(Px(0), Px(1)))
     }
     else if(Px.length > parThreshold) {
+      //https://stackoverflow.com/questions/44713728/why-cant-we-have-capital-letters-in-tuple-variable-declaration-in-scala
       val (lx, ly) = leftHalfPoints(Px, Py)
       val (rx,ry) = rightHalfPoints(Px, Py)
 

@@ -1,5 +1,11 @@
 package challenges
 
+import java.io.RandomAccessFile
+import java.nio.ByteOrder
+import java.nio.channels.FileChannel
+import java.nio.file.{Paths, StandardOpenOption}
+import scala.collection.mutable.ListBuffer
+
 package object closest_points {
 
   import math._
@@ -24,6 +30,9 @@ package object closest_points {
     (Px, Py)
   }
 
+  /**
+    * Px, Py -> Lx, Ly
+    */
   def leftHalfPoints(Px: Seq[Point], Py: Seq[PyElement]): (Seq[Point], Seq[PyElement]) = {
     val leftHalfUpperBound = ceil(Px.length / 2d).toInt
     val newPx = Px.slice(0, leftHalfUpperBound)
@@ -31,6 +40,9 @@ package object closest_points {
     (newPx, newPy)
   }
 
+  /**
+    * Px, Py -> Rx, Ry
+    */
   def rightHalfPoints(Px: Seq[Point], Py: Seq[PyElement]): (Seq[Point], Seq[PyElement]) = {
     val n = Px.length
     val rightHalfLowerBound = n / 2
@@ -72,6 +84,26 @@ package object closest_points {
       val partialSolution = List(leftSolution, rightSolution).minBy(_.d)
       globalSolution(getCandidatesFromDifferentHalves(lx.last, Py, partialSolution.d), partialSolution)
     }
+  }
+
+  def readTestFile(fileName: String): Seq[Point] = {
+//    val file = new RandomAccessFile(fileName, "r")
+//    val channel = file.getChannel
+    val channel = FileChannel.open(Paths.get(fileName), StandardOpenOption.READ)
+    import java.nio.ByteBuffer
+    // allocate memory to contain the whole file: downcasting!!
+    val fileSize = channel.size().toInt
+    val byteBuffer = ByteBuffer.allocate(fileSize)
+    byteBuffer.order(ByteOrder.nativeOrder())
+    channel.read(byteBuffer)
+    byteBuffer.flip()
+    val intBuffer = byteBuffer.asIntBuffer()
+    val numPoints =  fileSize/8
+    val P: ListBuffer[Point] = ListBuffer()
+    for(_ <- 0.until(numPoints)) {
+      P.append(Point(intBuffer.get(), intBuffer.get()))
+    }
+    P
   }
 
 }
