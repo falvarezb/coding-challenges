@@ -77,10 +77,10 @@ def test_right_half_odd(split_odd_number_points_fixture):
     assert newPy == [PyElement(p3, 0), PyElement(p4, 1), PyElement(p5, 2)]
 
 
-@given(st.lists(st.tuples(st.integers(0,100), st.integers(0,100)), min_size=2, max_size=100, unique=True))
+@given(st.lists(st.tuples(st.integers(0,1000), st.integers(0,1000)), min_size=2, max_size=100, unique=True))
 def test_quadratic_vs_nlogn(P):
     assert distance(*quadratic_solution(P)) == distance(*nlogn_solution(P))
 
-@given(st.lists(st.tuples(st.integers(0,100), st.integers(0,100)), min_size=2, max_size=100, unique=True))
+@given(st.lists(st.tuples(st.integers(0,1000), st.integers(0,1000)), min_size=2, max_size=100, unique=True))
 def test_nlogn_vs_nlogn_par(P):
     assert distance(*nlogn_solution_par(P,2)) == distance(*nlogn_solution(P))
