@@ -21,28 +21,28 @@ def split_odd_number_points_fixture():
 
 def test_quadratic_solution():
     P=[Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)]
-    assert quadratic_solution(P) == (Point(0,1),Point(0,0))
+    assert quadratic_solution(P) == PointDistance(Point(0,1),Point(0,0),1)
 
 def test_nlogn_left_half_solution():
-    P=[Point(3,9),Point(1,5),Point(0,1),Point(5,3),Point(8,6),Point(20,20),Point(40,40)]
-    assert nlogn_solution(P) == (Point(0,1),Point(1,5))
+    P=[Point(3,9),Point(1,5),Point(0,1),Point(5,3),Point(8,6),Point(20,20),Point(40,40)]    
+    assert nlogn_solution(P) == PointDistance(Point(0,1),Point(1,5),4.123105625617661)
 
 def test_nlogn_right_half_solution():
     P=[Point(3,9),Point(1,5),Point(0,1),Point(5,3),Point(8,6),Point(20,20),Point(20,21)]
-    assert nlogn_solution(P) == (Point(20,20),Point(20,21))
+    assert nlogn_solution(P) == PointDistance(Point(20,20),Point(20,21),1)
 
 def test_nlogn_inter_half_solution():
     P=[Point(2,-100),Point(0,0),Point(9,100),Point(10,0),Point(11,100),Point(20,-100),Point(20,0)]
-    assert nlogn_solution(P) == (Point(9,100),Point(11,100))
+    assert nlogn_solution(P) == PointDistance(Point(9,100),Point(11,100),2)
 
 def test_nlogn_repeat_points():
     P=[Point(3,9),Point(1,5),Point(10,5),Point(3,9)]
-    assert nlogn_solution(P) == (Point(3,9),Point(3,9))
+    assert nlogn_solution(P) == PointDistance(Point(3,9),Point(3,9),0)
 
 
 def test_nlogn_solution_par():
     P=[Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)]
-    assert nlogn_solution_par(P,1) == (Point(0,0),Point(0,1))
+    assert nlogn_solution_par(P,1) == PointDistance(Point(0,0),Point(0,1),1)
 
 
 def test_sort_points():
@@ -81,9 +81,9 @@ def point_strategy(x,y):
     return Point(x,y)
 
 @given(st.lists(st.builds(point_strategy, st.integers(0,1000), st.integers(0,1000)), min_size=2, max_size=100, unique=True))
-def test_quadratic_vs_nlogn(P):
-    assert distance(*quadratic_solution(P)) == distance(*nlogn_solution(P))
+def test_quadratic_vs_nlogn(P):       
+    assert quadratic_solution(P).d == nlogn_solution(P).d
 
 @given(st.lists(st.builds(point_strategy, st.integers(0,1000), st.integers(0,1000)), min_size=2, max_size=100, unique=True))
 def test_nlogn_vs_nlogn_par(P):
-    assert distance(*nlogn_solution_par(P,2)) == distance(*nlogn_solution(P))
+    assert nlogn_solution_par(P,4) == nlogn_solution(P)    

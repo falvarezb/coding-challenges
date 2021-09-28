@@ -18,6 +18,20 @@ class Point:
     def __hash__(self) -> int:
         return self.x * 31 + self.y
 
+    def __repr__(self) -> str:
+        return f"({self.x}, {self.y})"
+
+class PointDistance:
+    def __init__(self, p1, p2, d):
+        self.p1 = p1
+        self.p2 = p2
+        self.d = d
+    
+    def __eq__(self, o: object) -> bool:
+        return self.p1 == o.p1 and self.p2 == o.p2 and self.d == o.d
+
+    def __repr__(self) -> str:
+        return f"PointDistance({self.p1}, {self.p2}, {self.d})"
 
 class PyElement:
     """
@@ -52,7 +66,7 @@ def distance(p1: Point, p2: Point) -> float:
     return math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2)
 
 
-def quadratic_solution(P):
+def quadratic_solution(P) -> PointDistance:
     """
     brute force algorithm, O(n^2)
 
@@ -65,7 +79,7 @@ def quadratic_solution(P):
             if d < min_distance:
                 min_distance = d
                 min_pair = (P[i], P[j])
-    return min_pair
+    return PointDistance(min_pair[0], min_pair[1], min_distance)
 
 def sort_points(P):
     """
@@ -100,7 +114,7 @@ def right_half_points(Px, Py):
     return newPx, newPy
 
 
-def get_candidates_from_different_halves(left_half, Py, min_distance_upper_bound):
+def get_candidates_from_different_halves(rightmost_left_point, Py, min_distance_upper_bound):
     """
     Once the closest points in each half have been determined, we need to consider if the closest
     points overall belong to different halves.
@@ -108,28 +122,27 @@ def get_candidates_from_different_halves(left_half, Py, min_distance_upper_bound
     The potential candidates must lie within 'min_distance_upper_bound' of
     the middle point separating the left and right halves
     """
-
-    rightmost_left_point = left_half[-1]  
+    
     return [p for p in Py if abs(p.point.x-rightmost_left_point.x) < min_distance_upper_bound]
 
 
-def closest_points_from_different_halves(candidates):
+def closest_points_from_different_halves(candidates, partial_solution):
     """
     Obtain the closest points among the previously selected candidates
     Returns the closest points and their distance to each other
     """
-    min_distance = math.inf
-    closest_candidates = None
+    min_distance = partial_solution.d
+    closest_candidates = (partial_solution.p1, partial_solution.p2)
     for i in range(len(candidates)-1):
         for j in range(i+1, min(len(candidates), i+16)):
             d = distance(candidates[i].point, candidates[j].point)
             if d < min_distance:
                 min_distance = d
                 closest_candidates = (candidates[i].point, candidates[j].point)
-    return min_distance, closest_candidates
+    return PointDistance(closest_candidates[0], closest_candidates[1], min_distance)
 
 
-def closest_points(Px, Py):
+def closest_points(Px, Py) -> PointDistance:
     """
     Px: list of points sorted by coordinate x
     Py: list of points sorted by coordinate y
@@ -137,28 +150,17 @@ def closest_points(Px, Py):
     Recursive function, each iteration halves the input, therefore this recursive function is O(log n)
     """
     if len(Px) == 2:
-        return Px[0], Px[1]
+        return PointDistance(Px[0], Px[1], distance(Px[0], Px[1]))
 
     Lx, Ly = left_half_points(Px, Py)
     Rx, Ry = right_half_points(Px, Py)
 
-    # closest points in the left half
-    left_closest_points = closest_points(Lx, Ly)
-    min_left_distance = distance(*left_closest_points)
-    # closest points in the right half
-    right_closest_points = closest_points(Rx, Ry)
-    min_right_distance = distance(*right_closest_points)
-
-    min_distance_upper_bound = min(min_left_distance, min_right_distance)
-    candidates = get_candidates_from_different_halves(Lx, Py, min_distance_upper_bound)
-    min_distance, closest_candidates = closest_points_from_different_halves(candidates)
-
-    if min_distance < min_distance_upper_bound:
-        return closest_candidates
-    elif min_left_distance < min_right_distance:
-        return left_closest_points
-    else:
-        return right_closest_points
+    left_solution = closest_points(Lx, Ly)        
+    right_solution = closest_points(Rx, Ry)    
+    partial_solution = min(left_solution, right_solution, key=lambda pointDistance: pointDistance.d)
+    
+    candidates = get_candidates_from_different_halves(Lx[-1], Py, partial_solution.d)
+    return closest_points_from_different_halves(candidates, partial_solution)
 
 
 def nlogn_solution(points):
@@ -171,11 +173,12 @@ def nlogn_solution(points):
     return closest_points(*sort_points(points))
 
 
-def copy_solution_to_shared_memory(solution, shmem):
-    shmem[0][0].value = solution[0].x
-    shmem[0][1].value = solution[0].y
-    shmem[1][0].value = solution[1].x
-    shmem[1][1].value = solution[1].y
+def copy_solution_to_shared_memory(pd, shmem):
+    shmem.p1.x.value = pd.p1.x
+    shmem.p1.y.value = pd.p1.y
+    shmem.p2.x.value = pd.p2.x
+    shmem.p2.y.value = pd.p2.y
+    shmem.d.value = pd.d
 
 
 def closest_points_par(Px, Py, shmem, par_threshold):
@@ -195,41 +198,26 @@ def closest_points_par(Px, Py, shmem, par_threshold):
     the child to finish before reading
     """
     if len(Px) == 2:
-        copy_solution_to_shared_memory(Px, shmem)
+        copy_solution_to_shared_memory(PointDistance(Px[0], Px[1], distance(Px[0], Px[1])), shmem)
 
     elif len(Px) > par_threshold:
-        # shared memory values to share data with child processes
-        lsol1_x, lsol1_y, lsol2_x, lsol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
-        rsol1_x, rsol1_y, rsol2_x, rsol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
+        # shared memory values to share data with child processes        
+        left_solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
+        right_solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
 
         # closest points in each half
         Lx, Ly = left_half_points(Px, Py)
         Rx, Ry = right_half_points(Px, Py)
 
-        pleft = Process(target=closest_points_par, args=(Lx, Ly, ((lsol1_x, lsol1_y), (lsol2_x, lsol2_y)), par_threshold))
+        pleft = Process(target=closest_points_par, args=(Lx, Ly, left_solution, par_threshold))
         pleft.start()
-        closest_points_par(Rx, Ry, ((rsol1_x, rsol1_y), (rsol2_x, rsol2_y)), par_threshold)                
+        closest_points_par(Rx, Ry, right_solution, par_threshold)                
         pleft.join()    
-        min_left_distance = distance(Point(lsol1_x.value, lsol1_y.value), Point(lsol2_x.value, lsol2_y.value))
-        min_right_distance = distance(Point(rsol1_x.value, rsol1_y.value), Point(rsol2_x.value, rsol2_y.value))
+        partial_solution = min(left_solution, right_solution, key=lambda pointDistance: pointDistance.d.value)
 
-        min_distance_upper_bound = min(min_left_distance, min_right_distance)
-        candidates = get_candidates_from_different_halves(Lx, Py, min_distance_upper_bound)
-        min_distance, closest_candidates = closest_points_from_different_halves(candidates)
-
-        if min_distance < min_distance_upper_bound:
-            copy_solution_to_shared_memory(closest_candidates, shmem)
-        elif min_left_distance < min_right_distance:
-            shmem[0][0].value = lsol1_x.value
-            shmem[0][1].value = lsol1_y.value
-            shmem[1][0].value = lsol2_x.value
-            shmem[1][1].value = lsol2_y.value
-        else:
-            shmem[0][0].value = rsol1_x.value
-            shmem[0][1].value = rsol1_y.value
-            shmem[1][0].value = rsol2_x.value
-            shmem[1][1].value = rsol2_y.value
-    
+        candidates = get_candidates_from_different_halves(Lx[-1], Py, partial_solution.d.value)
+        global_solution = closest_points_from_different_halves(candidates, PointDistance(Point(partial_solution.p1.x.value, partial_solution.p1.y.value), Point(partial_solution.p2.x.value, partial_solution.p2.y.value), partial_solution.d.value))
+        copy_solution_to_shared_memory(global_solution, shmem)
     else:
         # DEFAULTING TO SEQUENTIAL ALGORITHM
         copy_solution_to_shared_memory(closest_points(Px, Py), shmem)
@@ -242,10 +230,10 @@ def nlogn_solution_par(points, num_processes):
     num_processes MUST be a power of 2
     """
     # shared memory values: not really needed as no new process is spawned here. However, needed to respect the signature of 'closest_points_par'
-    sol1_x, sol1_y, sol2_x, sol2_y = Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)
+    solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
     par_threshold = len(points)//num_processes
-    closest_points_par(*sort_points(points), ((sol1_x, sol1_y), (sol2_x, sol2_y)), par_threshold)
-    return (Point(sol1_x.value, sol1_y.value), Point(sol2_x.value, sol2_y.value))
+    closest_points_par(*sort_points(points), solution, par_threshold)
+    return PointDistance(Point(solution.p1.x.value, solution.p1.y.value), Point(solution.p2.x.value, solution.p2.y.value), solution.d.value)
 
 def read_test_file(fileName):
     from array import array
