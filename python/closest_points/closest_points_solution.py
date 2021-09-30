@@ -7,6 +7,7 @@ Given n points in the plane, find the pair that is closest together.
 import math
 from multiprocessing import Process, Value
 
+
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -21,17 +22,19 @@ class Point:
     def __repr__(self) -> str:
         return f"({self.x}, {self.y})"
 
+
 class PointDistance:
     def __init__(self, p1, p2, d):
         self.p1 = p1
         self.p2 = p2
         self.d = d
-    
+
     def __eq__(self, o: object) -> bool:
         return self.p1 == o.p1 and self.p2 == o.p2 and self.d == o.d
 
     def __repr__(self) -> str:
         return f"PointDistance({self.p1}, {self.p2}, {self.d})"
+
 
 class PyElement:
     """
@@ -81,6 +84,7 @@ def quadratic_solution(P) -> PointDistance:
                 min_pair = (P[i], P[j])
     return PointDistance(min_pair[0], min_pair[1], min_distance)
 
+
 def sort_points(P):
     """
     P -> Px, Py
@@ -122,7 +126,7 @@ def get_candidates_from_different_halves(rightmost_left_point, Py, min_distance_
     The potential candidates must lie within 'min_distance_upper_bound' of
     the middle point separating the left and right halves
     """
-    
+
     return [p for p in Py if abs(p.point.x-rightmost_left_point.x) < min_distance_upper_bound]
 
 
@@ -155,10 +159,10 @@ def closest_points(Px, Py) -> PointDistance:
     Lx, Ly = left_half_points(Px, Py)
     Rx, Ry = right_half_points(Px, Py)
 
-    left_solution = closest_points(Lx, Ly)        
-    right_solution = closest_points(Rx, Ry)    
+    left_solution = closest_points(Lx, Ly)
+    right_solution = closest_points(Rx, Ry)
     partial_solution = min(left_solution, right_solution, key=lambda pointDistance: pointDistance.d)
-    
+
     candidates = get_candidates_from_different_halves(Lx[-1], Py, partial_solution.d)
     return closest_points_from_different_halves(candidates, partial_solution)
 
@@ -188,7 +192,7 @@ def closest_points_par(Px, Py, shmem, par_threshold):
     Calculate the number of points recursively by splitting the work and starting a new process on each recursion
     Once the level of parallelism is reached, no more processes are created and the remaining work is delegated to the
     sequential version of this function
- 
+
     Each child proccess calculates the solution corresponding to its input and shares that information with its parent 
     through shared memory map
 
@@ -201,9 +205,11 @@ def closest_points_par(Px, Py, shmem, par_threshold):
         copy_solution_to_shared_memory(PointDistance(Px[0], Px[1], distance(Px[0], Px[1])), shmem)
 
     elif len(Px) > par_threshold:
-        # shared memory values to share data with child processes        
-        left_solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
-        right_solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
+        # shared memory values to share data with child processes
+        left_solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(
+            Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
+        right_solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(
+            Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
 
         # closest points in each half
         Lx, Ly = left_half_points(Px, Py)
@@ -211,12 +217,13 @@ def closest_points_par(Px, Py, shmem, par_threshold):
 
         pleft = Process(target=closest_points_par, args=(Lx, Ly, left_solution, par_threshold))
         pleft.start()
-        closest_points_par(Rx, Ry, right_solution, par_threshold)                
-        pleft.join()    
+        closest_points_par(Rx, Ry, right_solution, par_threshold)
+        pleft.join()
         partial_solution = min(left_solution, right_solution, key=lambda pointDistance: pointDistance.d.value)
 
         candidates = get_candidates_from_different_halves(Lx[-1], Py, partial_solution.d.value)
-        global_solution = closest_points_from_different_halves(candidates, PointDistance(Point(partial_solution.p1.x.value, partial_solution.p1.y.value), Point(partial_solution.p2.x.value, partial_solution.p2.y.value), partial_solution.d.value))
+        global_solution = closest_points_from_different_halves(candidates, PointDistance(
+            Point(partial_solution.p1.x.value, partial_solution.p1.y.value), Point(partial_solution.p2.x.value, partial_solution.p2.y.value), partial_solution.d.value))
         copy_solution_to_shared_memory(global_solution, shmem)
     else:
         # DEFAULTING TO SEQUENTIAL ALGORITHM
@@ -226,23 +233,24 @@ def closest_points_par(Px, Py, shmem, par_threshold):
 def nlogn_solution_par(points, num_processes):
     """
     Parallel version of 'nlogn_solution' where num_processes is the number of processes to spawn
-    
+
     num_processes MUST be a power of 2
     """
     # shared memory values: not really needed as no new process is spawned here. However, needed to respect the signature of 'closest_points_par'
-    solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
+    solution = PointDistance(Point(Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Point(
+        Value('d', math.inf, lock=False), Value('d', math.inf, lock=False)), Value('d', math.inf, lock=False))
     par_threshold = len(points)//num_processes
     closest_points_par(*sort_points(points), solution, par_threshold)
     return PointDistance(Point(solution.p1.x.value, solution.p1.y.value), Point(solution.p2.x.value, solution.p2.y.value), solution.d.value)
 
-def read_test_file(fileName):
+
+def read_test_file(file_name):
     from array import array
     import struct
     data = array('i')
-    with open(fileName, 'rb' ) as f:        
-        data.frombytes(f.read())
-        return list(struct.iter_unpack('ii', data))
-    
+    with open(file_name, 'rb') as f:
+        data.frombytes(f.read())        
+        return [Point(x,y) for x,y in list(struct.iter_unpack('ii', data))]
 
 
 if __name__ == "__main__":
@@ -251,18 +259,18 @@ if __name__ == "__main__":
     import timeit
     import sys
 
+    def random_sample_test():
+        x = sample(range(100000), 100000)
+        y = sample(range(100000), 100000)
+        return [Point(x,y) for x,y in list(zip(x, y))]
+
+    def file_test(file_name):        
+        return read_test_file(file_name)
+
     def main():
-        x = sample(range(10000000), 1000000)
-        y = sample(range(10000000), 1000000)
-        P = list(zip(x, y))
-        # print(P)
-        # print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
-        # print(timeit.repeat(lambda: nlogn_solution_par(P,4), repeat=1, number=1))
-        # P = [(0, 0), (3, 4), (2, 5), (1, 4)]
-        # result = nlogn_solution(P)
-        # print(result)
-        # print(distance(*result))        
-        print(nlogn_solution_par(read_test_file(sys.argv[1]), 8))
-        # read_test_file()
+        P = file_test(sys.argv[1])
+        # P = random_sample_test()
+        print(timeit.repeat(lambda: nlogn_solution(P), repeat=1, number=1))
+        print(timeit.repeat(lambda: nlogn_solution_par(P, 4), repeat=1, number=1))
 
     main()
