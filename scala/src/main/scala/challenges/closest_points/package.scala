@@ -1,10 +1,13 @@
 package challenges
 
+import org.scalameter.{Key, config}
+
 import java.io.RandomAccessFile
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
 import java.nio.file.{Paths, StandardOpenOption}
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 package object closest_points {
 
@@ -87,8 +90,6 @@ package object closest_points {
   }
 
   def readTestFile(fileName: String): Seq[Point] = {
-//    val file = new RandomAccessFile(fileName, "r")
-//    val channel = file.getChannel
     val channel = FileChannel.open(Paths.get(fileName), StandardOpenOption.READ)
     import java.nio.ByteBuffer
     // allocate memory to contain the whole file: downcasting!!
@@ -104,6 +105,14 @@ package object closest_points {
       P.append(Point(intBuffer.get(), intBuffer.get()))
     }
     P
+  }
+
+  def randomSample(size: Int): Seq[Point] = {
+    val rand = new Random
+    val sample_space_size = size * 100
+    val x = Range(0,size).map(_ => rand.nextInt(sample_space_size))
+    val y = Range(0,size).map(_ => rand.nextInt(sample_space_size))
+    x.zip(y).map{case (x,y) => Point(x,y)}
   }
 
 }

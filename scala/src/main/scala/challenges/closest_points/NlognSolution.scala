@@ -1,5 +1,8 @@
 package challenges.closest_points
 
+import challenges.standardConfig
+import org.scalameter.Warmer
+
 object NlognSolution {
 
   def solution(P: Seq[Point]): PointDistance = {
@@ -7,8 +10,10 @@ object NlognSolution {
   }
 
   def main(args: Array[String]): Unit = {
-    val P = readTestFile(args(0))
-    println(solution(P))
+    //val P = readTestFile(args(0))
+    val P = randomSample(100000)
+    println(standardConfig withWarmer new Warmer.Default measure {solution(P)})
+    //println(solution(P))
   }
 
 }

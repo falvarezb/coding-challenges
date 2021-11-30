@@ -25,7 +25,7 @@ class ClosestPointTask(Px: Seq[Point], Py: Seq[PyElement], parThreshold: Int) ex
 }
 
 object MultithreadSolution {
-  def nlognSolution(P: Seq[Point], numProcesses: Int): PointDistance = {
+  def solution(P: Seq[Point], numProcesses: Int): PointDistance = {
     val (px, py) = sortPoints(P)
     val parThreshold = P.length / numProcesses
     val task = new ClosestPointTask(px, py, parThreshold)

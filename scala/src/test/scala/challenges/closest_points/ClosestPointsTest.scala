@@ -115,10 +115,10 @@ class ClosestPointsTest extends FunSpec with PropertyChecks {
   describe("multithread solution") {
     describe("P=[(0, 1), (0, 3), (2, 0), (0, 0)]") {
       it("single thread behaviour") {
-        assert(MultithreadSolution.nlognSolution(List(Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)), 1) == PointDistance(Point(0, 0), Point(0, 1), 1))
+        assert(MultithreadSolution.solution(List(Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)), 1) == PointDistance(Point(0, 0), Point(0, 1), 1))
       }
       it("multi thread behaviour") {
-        assert(MultithreadSolution.nlognSolution(List(Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)), 4) == PointDistance(Point(0, 0), Point(0, 1), 1))
+        assert(MultithreadSolution.solution(List(Point(0, 1), Point(0, 3), Point(2, 0), Point(0, 0)), 4) == PointDistance(Point(0, 0), Point(0, 1), 1))
       }
     }
   }
@@ -142,7 +142,7 @@ class ClosestPointsTest extends FunSpec with PropertyChecks {
 
   forAll(pointsGenerator()) { P =>
     assertPointDistance(NlognSolution.solution(P), QuadraticSolution.solution(P))
-    assertPointDistance(NlognSolution.solution(P), MultithreadSolution.nlognSolution(P,4))
+    assertPointDistance(NlognSolution.solution(P), MultithreadSolution.solution(P,4))
   }
 
 }
