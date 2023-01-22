@@ -1,4 +1,4 @@
-from pascal_triangle import galton_board_concentration, binomial_coefficient_def, binomial_coefficient_recursive, binomial_coefficient_row
+from pascal_triangle import galton_board_concentration, binomial_coefficient_def, binomial_coefficient_recursive, binomial_coefficient_row,pascal_triangle
 from hypothesis import given
 import hypothesis.strategies as st
 from  scipy.special import comb
@@ -6,6 +6,10 @@ from  scipy.special import comb
 
 def test_galton_board_concentration():
     assert abs(galton_board_concentration(1000, range(400,601)) - 1) < 0.001
+
+
+def test_pascal_triangle():
+    assert pascal_triangle(4) == [[1],[1,1],[1,2,1],[1,3,3,1]]
 
 
 # ==== PROPERTY-BASED TESTING ======

@@ -22,12 +22,20 @@ Pnk = (Pn-1k-1 + Pn-1k)/2
 
 """
 
+def pascal_triangle(n):
+    """
+    Generation of Pascal's triangle up to the row 'n'
+    """
+    if n == 1:
+        return [[1]]
 
-# def factorial(n):
-#     f = 1
-#     for j in range(2, n+1):
-#         f *= j
-#     return f
+    triangle = pascal_triangle(n-1)
+    previous_row = triangle[n-2]
+    new_row = [1]*n
+    for i in range(1, n-1):
+        new_row[i] = previous_row[i-1]+previous_row[i]
+    triangle.append(new_row)
+    return triangle
 
 
 def binomial_coefficient_def(n, k):
