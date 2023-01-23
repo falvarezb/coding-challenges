@@ -13,7 +13,7 @@ Therefore, according to the frequency interpretation of probability, an event's 
 frequency of the event as the number of trials approaches infinity.
 """
 
-def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_experiment, wanted_result):
+def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_experiment):
 
     """
     Calculates the frequentist probability by simulating trials of a random experiment until the relative frequency converges.
@@ -39,7 +39,7 @@ def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_ex
 
     """
 
-    gen = freq_generator(initial_num_trials, random_experiment, wanted_result)
+    gen = freq_generator(initial_num_trials, random_experiment)
     last_result = next(gen)
     num_iter = 1
 
@@ -52,9 +52,9 @@ def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_ex
     return (-1, last_result[1])
 
 
-def freq_generator(initial_num_trials, random_experiment, wanted_result):
+def freq_generator(initial_num_trials, random_experiment):
     num_trials = initial_num_trials
 
     while True:
-        yield (random_experiment(num_trials, wanted_result), num_trials)
+        yield (random_experiment(num_trials), num_trials)
         num_trials = num_trials + initial_num_trials
