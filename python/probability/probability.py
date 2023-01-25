@@ -25,10 +25,8 @@ def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_ex
     The function keeps on running simulations until the resulting series of relative frequencies converges or the maximum number of
     iterations, 'max_num_iter' is reached.
 
-    'random_experiment' is a function that takes as parameters:
-        - the number of trials to simulate
-        - the wanted result
-    and returns the relative frequency of the wanted result
+    'random_experiment' is a function that takes as parameter the number of trials to simulate and returns the relative frequency 
+    of the success of the experiment
 
     Returns
     -------
@@ -36,6 +34,8 @@ def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_ex
 
         first element of the tuple is the probability as limit of the relative frequencies
         second element is the number of trials used to reach the limit
+
+        If 'max_num_iter' is hit without the sequence of relative frequencies having converged, None is returned
 
     """
 
@@ -49,7 +49,7 @@ def freq_prob(convergence_tolerance, initial_num_trials, max_num_iter, random_ex
             return new_result
         last_result = new_result
         num_iter += 1
-    return (-1, last_result[1])
+    return None
 
 
 def freq_generator(initial_num_trials, random_experiment):
