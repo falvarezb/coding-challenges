@@ -9,11 +9,16 @@ public class InsertionSort {
      * Average case: O(n^2)
      * Stable and adaptive
      */
-    public static void sort(int[] arr) {
+    public static void auxSort(int[] arr) {
         for (int i = 1; i < arr.length; i++) {
             for (int j = i; j > 0 && arr[j-1] > arr[j]; j--) {
                 Util.swap(arr, j, j-1);
             }
         }
+    }
+
+    public static int[] sort(int[] arr) {
+        auxSort(arr);
+        return arr;
     }
 }

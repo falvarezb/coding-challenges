@@ -1,5 +1,6 @@
 package falvarezb;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -24,6 +25,13 @@ public class RadixSort {
     public static Integer[] sort(Integer[] arr, int d, int k) {
         Function<Integer, Function<Integer, Integer>> keyExtractor = currentPosition -> (t -> (t / (int) Math.pow(10, currentPosition)) % 10);
         return recursiveF(arr, d, k, 0, keyExtractor, Objects::equals, currentPosition -> currentPosition+1);
+    }
+
+    public static int[] sort(int[] arr, int d, int k) {
+        Integer[] arrInteger = Arrays.stream(arr).boxed().toArray(Integer[]::new);
+        Function<Integer, Function<Integer, Integer>> keyExtractor = currentPosition -> (t -> (t / (int) Math.pow(10, currentPosition)) % 10);
+        Integer[] sortedInteger = recursiveF(arrInteger, d, k, 0, keyExtractor, Objects::equals, currentPosition -> currentPosition+1);
+        return Arrays.stream(sortedInteger).mapToInt(Integer::intValue).toArray();
     }
 
     public static String[] sort(String[] arr, int d, int k) {

@@ -8,41 +8,34 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SortTest {
 
-    int[] expected = {1,2,3,4,6,7};
+    //int[] expected = {1,2,3,4,6,7};
+    Sort[] sorters = {BubbleSort::sort, SelectionSort::sort, InsertionSort::sort, QuickSort::sort, MergeSort::sort};
+    String[] sorterNames = {"BubbleSort", "SelectionSort", "InsertionSort", "QuickSort", "MergeSort"};
+    String[] sorterLambdaNames = Arrays.stream(sorters).map(sorter -> sorter.getClass().getSimpleName()).toArray(String[]::new);
 
-    @Test
-    public void bubbleSortTest() {
-        int[] arr = {1,3,4,7,2,6};
-        BubbleSort.sort(arr);
-        assertArrayEquals(expected, arr);
+    private int[] runTest(int[] arr, Sort sorter) {
+        int[] temp = Arrays.copyOf(arr, arr.length);
+        int[] sorted = sorter.sort(temp);
+        return sorted;
     }
 
     @Test
-    public void selectionSortTest() {
+    public void manualTest() {
         int[] arr = {1,3,4,7,2,6};
-        SelectionSort.sort(arr);
-        assertArrayEquals(expected, arr);
+        int[] expected = {1,2,3,4,6,7};
+
+        for (Sort sorter: sorters) {
+            int[] sorted = runTest(arr, sorter);
+            if(!Arrays.equals(expected, sorted)) {
+                System.out.println(sorterNames[Arrays.binarySearch(sorterLambdaNames, sorter.getClass().getSimpleName())]);
+                System.out.println(Arrays.toString(sorted));
+            }
+            assertArrayEquals(expected, sorted);
+        }
+        int[] sorted = RadixSort.sort(arr, 1, 7);
+        assertArrayEquals(expected, sorted);
     }
 
-    @Test
-    public void insertionSortTest() {
-        int[] arr = {1,3,4,7,2,6};
-        InsertionSort.sort(arr);
-        assertArrayEquals(expected, arr);
-    }
-
-    @Test
-    public void mergeSortTest() {
-        int[] arr = {1,3,4,7,2,6};
-        assertArrayEquals(expected, MergeSort.sort(arr));
-    }
-
-    @Test
-    public void quickSortTest() {
-        int[] arr = {1,3,4,7,2,6};
-        QuickSort.sort(arr);
-        assertArrayEquals(expected, arr);
-    }
 
     @Test
     public void quickSortTestRepeat() {
@@ -60,6 +53,7 @@ class SortTest {
 
     @Test
     public void countSortTest() {
+        int[] expected = {1,2,3,4,6,7};
         int[] arr = {1,3,4,7,2,6};
         CountingSort.sort_not_stable(arr, Arrays.stream(arr).max().getAsInt());
         assertArrayEquals(expected, arr);
