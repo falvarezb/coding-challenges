@@ -36,6 +36,26 @@ class SortTest {
         assertArrayEquals(expected, sorted);
     }
 
+    @Test
+    public void randomTest() {
+        for (int i = 0; i < 50; i++) {
+            int[] arr = RandomDataGen.generateRandomArray(10000);
+            int[] expected = Arrays.copyOf(arr, arr.length);
+            Arrays.sort(expected);
+
+            for (Sort sorter : sorters) {
+                int[] sorted = runTest(arr, sorter);
+                if (!Arrays.equals(expected, sorted)) {
+                    System.out.println(sorterNames[Arrays.binarySearch(sorterLambdaNames, sorter.getClass().getSimpleName())]);
+                    System.out.println(Arrays.toString(sorted));
+                }
+                assertArrayEquals(expected, sorted);
+            }
+            int[] sorted = RadixSort.sort(arr, 2, 99);
+            assertArrayEquals(expected, sorted);
+        }
+    }
+
 
     @Test
     public void quickSortTestRepeat() {
