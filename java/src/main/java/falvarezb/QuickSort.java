@@ -15,13 +15,8 @@ public class QuickSort {
      *  This can happen if the "pivot" element is the smallest or largest element in the array (the array is already
      *  sorted in ascending or descending order).
      */
-    public static void auxSort(int[] arr) {
+    public static void sort(int[] arr) {
         quicksort(arr, 0, arr.length-1);
-    }
-
-    public static int[] sort(int[] arr) {
-        auxSort(arr);
-        return arr;
     }
 
     static void quicksort(int[] arr, int left, int right) {

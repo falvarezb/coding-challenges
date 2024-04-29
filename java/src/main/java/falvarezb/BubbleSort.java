@@ -21,9 +21,4 @@ public class BubbleSort {
             if (!swapped) break;
         }
     }
-
-//    public static int[] sort(int[] arr) {
-//        auxSort(arr);
-//        return arr;
-//    }
 }
