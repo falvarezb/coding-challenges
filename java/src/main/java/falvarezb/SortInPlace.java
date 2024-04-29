@@ -1,6 +1,6 @@
 package falvarezb;
 
 @FunctionalInterface
-public interface SortInPlace extends Sort {
+public non-sealed interface SortInPlace extends Sort {
     void sort(int[] arr);
 }

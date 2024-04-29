@@ -51,7 +51,6 @@ class SortTest {
                 yield temp;
             }
             case SortNotInPlace notInPlaceSorter -> notInPlaceSorter.sort(temp);
-            case Object obj -> throw new IllegalStateException("Unexpected value: " + obj);
         };
         if(!Arrays.equals(expected, sorted)) {
             System.out.println(getSorterName(sorter));
@@ -66,7 +65,6 @@ class SortTest {
         switch (sorter) {
             case SortInPlace inPlaceSorter -> inPlaceSorter.sort(temp);
             case SortNotInPlace notInPlaceSorter -> notInPlaceSorter.sort(temp);
-            case Object obj -> throw new IllegalStateException("Unexpected value: " + obj);
         }
         long endTime = System.currentTimeMillis();
         System.out.println(getSorterName(sorter) + ": " + (endTime - startTime) + " ms");
