@@ -14,29 +14,24 @@ class SortTest {
     int k = (int) (0.9 * Math.pow(10, this.d));
     SortInPlace[] inPlaceSorters = {BubbleSort::sort, SelectionSort::sort, InsertionSort::sort, QuickSort::sort, Arrays::sort};
     SortNotInPlace[] notInPlaceSorters = {MergeSort::sort, RadixSort.sort(d, k)};
-    List<Sort> sorterList = new ArrayList<>() {{
-        addAll(Arrays.asList(inPlaceSorters));
-        addAll(Arrays.asList(notInPlaceSorters));
-    }};
+    Sort[] sorters = mergeArrays(inPlaceSorters, notInPlaceSorters);
+    String[] sorterClassNames = Arrays.stream(sorters).map(sorter -> sorter.getClass().getSimpleName()).toArray(String[]::new);
+    String[] sorterNames = {"BubbleSort", "SelectionSort", "InsertionSort", "QuickSort", "Arrays.sort", "MergeSort", "RadixSort"};
 
-    List<String> sorterNames = new ArrayList<>() {{
-        add("BubbleSort");
-        add("SelectionSort");
-        add("InsertionSort");
-        add("QuickSort");
-        add("Library sort");
-        add("MergeSort");
-        add("RadixSort");
-    }};
 
-    List<String> sorterClassNames = sorterList.stream().map(sorter -> sorter.getClass().getSimpleName()).toList();
+    private Sort[] mergeArrays(Sort[] arr1, Sort[] arr2) {
+        Sort[] arr = new Sort[arr1.length + arr2.length];
+        System.arraycopy(arr1, 0, arr, 0, arr1.length);
+        System.arraycopy(arr2, 0, arr, arr1.length, arr2.length);
+        return arr;
+    }
 
     private String getSorterName(Sort sorter) {
         String sorterName = sorter.getClass().getSimpleName();
         int j=0;
         for (String s: sorterClassNames) {
             if(s.equals(sorterName))
-                return sorterNames.get(j);
+                return sorterNames[j];
             j++;
         }
         return "Unknown sorter: " + sorterName;
@@ -92,7 +87,7 @@ class SortTest {
             int[] expected = Arrays.copyOf(arr, arr.length);
             Arrays.sort(expected);
 
-            for (Sort sorter : sorterList) {
+            for (Sort sorter : sorters) {
                 runTest(arr, expected, sorter);
             }
         }
@@ -104,7 +99,7 @@ class SortTest {
         int arrSize = 10000;
             int[] arr = RandomDataGen.generateRandomArray(arrSize, this.d);
         System.out.println("Array size: " + arrSize);
-            for (Sort sorter : sorterList) {
+            for (Sort sorter : sorters) {
                 runPerfTest(arr, sorter);
             }
         //}
