@@ -1,6 +1,3 @@
 package falvarezb;
 
-@FunctionalInterface
-public interface Sort {
-    int[] sort(int[] arr);
-}
+public interface Sort {}

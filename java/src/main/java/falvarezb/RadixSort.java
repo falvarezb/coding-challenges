@@ -34,6 +34,15 @@ public class RadixSort {
         return Arrays.stream(sortedInteger).mapToInt(Integer::intValue).toArray();
     }
 
+    public static SortNotInPlace sort(int d, int k) {
+        return arr -> {
+            Integer[] arrInteger = Arrays.stream(arr).boxed().toArray(Integer[]::new);
+            Function<Integer, Function<Integer, Integer>> keyExtractor = currentPosition -> (t -> (t / (int) Math.pow(10, currentPosition)) % 10);
+            Integer[] sortedInteger = recursiveF(arrInteger, d, k, 0, keyExtractor, Objects::equals, currentPosition -> currentPosition + 1);
+            return Arrays.stream(sortedInteger).mapToInt(Integer::intValue).toArray();
+        };
+    }
+
     public static String[] sort(String[] arr, int d, int k) {
         // with this extractor, given two strings with the same prefix, the one with the shorter length will be considered smaller
         Function<Integer, Function<String, Integer>> keyExtractor = currentPosition -> (t -> (int) (currentPosition < t.length() ? t.charAt(currentPosition) : 0));

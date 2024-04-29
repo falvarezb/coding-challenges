@@ -9,7 +9,7 @@ public class BubbleSort {
      * Average case: O(n^2)
      * Stable and not adaptive
      */
-    public static void auxSort(int[] arr) {
+    public static void sort(int[] arr) {
         for (int i = 1; i < arr.length; i++) {
             boolean swapped = false; //optimization to achieve O(n) for best case
             for (int j = 0; j < arr.length-1; j++) {
@@ -22,8 +22,8 @@ public class BubbleSort {
         }
     }
 
-    public static int[] sort(int[] arr) {
-        auxSort(arr);
-        return arr;
-    }
+//    public static int[] sort(int[] arr) {
+//        auxSort(arr);
+//        return arr;
+//    }
 }
