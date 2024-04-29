@@ -57,17 +57,10 @@ public class RadixSort {
     public static void main(String[] args) {
         Integer[] arr = {170, 485, 775, 900, 180, 124, 1521, 666};
         Integer[] sortedArr = sort(arr, 4, 9);
-        printArray(sortedArr);
+        System.out.println(Arrays.toString(sortedArr));
 
-        System.out.println();
         String[] arr2 = {"cexa","kilo","mega","giga","tera","peta","exa","zetta","yotta","cex"};
         String[] sortedArr2 = sort(arr2, 10, 255);
-        printArray(sortedArr2);
-    }
-
-    private static <T> void printArray(T[] arr) {
-        for (T e : arr) {
-            System.out.print(e + " ");
-        }
+        System.out.println(Arrays.toString(sortedArr2));
     }
 }

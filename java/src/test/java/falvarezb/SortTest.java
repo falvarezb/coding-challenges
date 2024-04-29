@@ -2,11 +2,9 @@ package falvarezb;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class SortTest {
 
@@ -28,9 +26,9 @@ class SortTest {
 
     private String getSorterName(Sort sorter) {
         String sorterName = sorter.getClass().getSimpleName();
-        int j=0;
-        for (String s: sorterClassNames) {
-            if(s.equals(sorterName))
+        int j = 0;
+        for (String s : sorterClassNames) {
+            if (s.equals(sorterName))
                 return sorterNames[j];
             j++;
         }
@@ -47,7 +45,7 @@ class SortTest {
             }
             case SortNotInPlace notInPlaceSorter -> notInPlaceSorter.sort(temp);
         };
-        if(!Arrays.equals(expected, sorted)) {
+        if (!Arrays.equals(expected, sorted)) {
             System.out.println(getSorterName(sorter));
             System.out.println(Arrays.toString(sorted));
         }
@@ -67,17 +65,12 @@ class SortTest {
 
     @Test
     public void manualTest() {
-        int[] arr = {1,3,4,7,2,6};
-        int[] expected = {1,2,3,4,6,7};
+        int[] arr = {1, 3, 4, 7, 2, 6};
+        int[] expected = {1, 2, 3, 4, 6, 7};
 
-        for (Sort sorter: inPlaceSorters) {
+        for (Sort sorter : sorters) {
             runTest(arr, expected, sorter);
         }
-        for (Sort sorter: notInPlaceSorters) {
-            runTest(arr, expected, sorter);
-        }
-        int[] sorted = RadixSort.sort(arr, 1, 7);
-        assertArrayEquals(expected, sorted);
     }
 
     @Test
@@ -97,19 +90,19 @@ class SortTest {
     public void perfTest() {
         //for (int i = 0; i < 50; i++) {
         int arrSize = 10000;
-            int[] arr = RandomDataGen.generateRandomArray(arrSize, this.d);
+        int[] arr = RandomDataGen.generateRandomArray(arrSize, this.d);
         System.out.println("Array size: " + arrSize);
-            for (Sort sorter : sorters) {
-                runPerfTest(arr, sorter);
-            }
+        for (Sort sorter : sorters) {
+            runPerfTest(arr, sorter);
+        }
         //}
     }
 
 
     @Test
     public void countSortTest() {
-        int[] expected = {1,2,3,4,6,7};
-        int[] arr = {1,3,4,7,2,6};
+        int[] expected = {1, 2, 3, 4, 6, 7};
+        int[] arr = {1, 3, 4, 7, 2, 6};
         CountingSort.sort_not_stable(arr, Arrays.stream(arr).max().getAsInt());
         assertArrayEquals(expected, arr);
     }
