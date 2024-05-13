@@ -1,3 +1,3 @@
 package falvarezb;
 
-public sealed interface Sort permits SortInPlace, SortNotInPlace {}
+public sealed interface Sort permits InPlaceSort, NotInPlaceSort {}

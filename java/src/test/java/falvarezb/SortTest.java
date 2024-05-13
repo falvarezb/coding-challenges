@@ -10,8 +10,8 @@ class SortTest {
 
     int d = 2;
     int k = (int) (0.9 * Math.pow(10, this.d));
-    SortInPlace[] inPlaceSorters = {BubbleSort::sort, SelectionSort::sort, InsertionSort::sort, QuickSort::sort, Arrays::sort};
-    SortNotInPlace[] notInPlaceSorters = {MergeSort::sort, RadixSort.sort(d, k)};
+    InPlaceSort[] inPlaceSorters = {BubbleSort::sort, SelectionSort::sort, InsertionSort::sort, QuickSort::sort, Arrays::sort};
+    NotInPlaceSort[] notInPlaceSorters = {MergeSort::sort, RadixSort.sort(d, k)};
     Sort[] sorters = mergeArrays(inPlaceSorters, notInPlaceSorters);
     String[] sorterClassNames = Arrays.stream(sorters).map(sorter -> sorter.getClass().getSimpleName()).toArray(String[]::new);
     String[] sorterNames = {"BubbleSort", "SelectionSort", "InsertionSort", "QuickSort", "Arrays.sort", "MergeSort", "RadixSort"};
@@ -39,11 +39,11 @@ class SortTest {
         int[] temp = Arrays.copyOf(arr, arr.length);
 
         int[] sorted = switch (sorter) {
-            case SortInPlace inPlaceSorter -> {
+            case InPlaceSort inPlaceSorter -> {
                 inPlaceSorter.sort(temp);
                 yield temp;
             }
-            case SortNotInPlace notInPlaceSorter -> notInPlaceSorter.sort(temp);
+            case NotInPlaceSort notInPlaceSorter -> notInPlaceSorter.sort(temp);
         };
         if (!Arrays.equals(expected, sorted)) {
             System.out.println(getSorterName(sorter));
@@ -56,8 +56,8 @@ class SortTest {
         int[] temp = Arrays.copyOf(arr, arr.length);
         long startTime = System.currentTimeMillis();
         switch (sorter) {
-            case SortInPlace inPlaceSorter -> inPlaceSorter.sort(temp);
-            case SortNotInPlace notInPlaceSorter -> notInPlaceSorter.sort(temp);
+            case InPlaceSort inPlaceSorter -> inPlaceSorter.sort(temp);
+            case NotInPlaceSort notInPlaceSorter -> notInPlaceSorter.sort(temp);
         }
         long endTime = System.currentTimeMillis();
         System.out.println(getSorterName(sorter) + ": " + (endTime - startTime) + " ms");

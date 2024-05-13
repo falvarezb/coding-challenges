@@ -34,7 +34,7 @@ public class RadixSort {
         return Arrays.stream(sortedInteger).mapToInt(Integer::intValue).toArray();
     }
 
-    public static SortNotInPlace sort(int d, int k) {
+    public static NotInPlaceSort sort(int d, int k) {
         return arr -> {
             Integer[] arrInteger = Arrays.stream(arr).boxed().toArray(Integer[]::new);
             Function<Integer, Function<Integer, Integer>> keyExtractor = currentPosition -> (t -> (t / (int) Math.pow(10, currentPosition)) % 10);
