@@ -3,19 +3,29 @@ package falvarezb;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class SortTest {
 
-    int d = 2;
-    int k = (int) (0.9 * Math.pow(10, this.d));
-    InPlaceSort[] inPlaceSorters = {BubbleSort::sort, SelectionSort::sort, InsertionSort::sort, QuickSort::sort, Arrays::sort};
-    NotInPlaceSort[] notInPlaceSorters = {MergeSort::sort, RadixSort.sort(d, k)};
-    Sort[] sorters = mergeArrays(inPlaceSorters, notInPlaceSorters);
-    String[] sorterClassNames = Arrays.stream(sorters).map(sorter -> sorter.getClass().getSimpleName()).toArray(String[]::new);
-    String[] sorterNames = {"BubbleSort", "SelectionSort", "InsertionSort", "QuickSort", "Arrays.sort", "MergeSort", "RadixSort"};
+    // ** PARAMETERS TO CREATE THE RADIX SORTER **
+    // In the radix sort algorithm, each sort key is regarded as a d-digit number, where each digit is in the range 0...k.
+    private int d = 2;
+    private int k = 9;
+    private Map<Sort, String> sorters = getSorters();
 
+    private Map<Sort, String> getSorters() {
+        InPlaceSort[] inPlaceSorters = {BubbleSort::sort, SelectionSort::sort, InsertionSort::sort, QuickSort::sort, Arrays::sort};
+        NotInPlaceSort[] notInPlaceSorters = {MergeSort::sort, RadixSort.sort(d, k)};
+        Sort[] sorters = mergeArrays(inPlaceSorters, notInPlaceSorters);
+        String[] sorterNames = {"BubbleSort", "SelectionSort", "InsertionSort", "QuickSort", "Arrays.sort", "MergeSort", "RadixSort"};
+        return IntStream.range(0, sorters.length)
+                .boxed()
+                .collect(Collectors.toMap(i -> sorters[i], i -> sorterNames[i]));
+    }
 
     private Sort[] mergeArrays(Sort[] arr1, Sort[] arr2) {
         Sort[] arr = new Sort[arr1.length + arr2.length];
@@ -26,11 +36,9 @@ class SortTest {
 
     private String getSorterName(Sort sorter) {
         String sorterName = sorter.getClass().getSimpleName();
-        int j = 0;
-        for (String s : sorterClassNames) {
-            if (s.equals(sorterName))
-                return sorterNames[j];
-            j++;
+        for (Sort s : sorters.keySet()) {
+            if (s.getClass().getSimpleName().equals(sorterName))
+                return sorters.get(s);
         }
         return "Unknown sorter: " + sorterName;
     }
@@ -68,7 +76,7 @@ class SortTest {
         int[] arr = {1, 3, 4, 7, 2, 6};
         int[] expected = {1, 2, 3, 4, 6, 7};
 
-        for (Sort sorter : sorters) {
+        for (Sort sorter : sorters.keySet()) {
             runTest(arr, expected, sorter);
         }
     }
@@ -80,7 +88,7 @@ class SortTest {
             int[] expected = Arrays.copyOf(arr, arr.length);
             Arrays.sort(expected);
 
-            for (Sort sorter : sorters) {
+            for (Sort sorter : sorters.keySet()) {
                 runTest(arr, expected, sorter);
             }
         }
@@ -92,7 +100,7 @@ class SortTest {
         int arrSize = 10000;
         int[] arr = RandomDataGen.generateRandomArray(arrSize, this.d);
         System.out.println("Array size: " + arrSize);
-        for (Sort sorter : sorters) {
+        for (Sort sorter : sorters.keySet()) {
             runPerfTest(arr, sorter);
         }
         //}
