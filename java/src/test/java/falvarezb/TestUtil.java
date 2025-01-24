@@ -3,6 +3,7 @@ package falvarezb;
 import java.lang.reflect.Array;
 
 public class TestUtil {
+
     public static int[] generateRandomArray(int size, int digits) {
         int[] arr = new int[size];
         for (int i = 0; i < size; i++) {

@@ -1,4 +1,6 @@
-package falvarezb;
+package falvarezb.sort;
+
+import falvarezb.Util;
 
 public class QuickSort {
 

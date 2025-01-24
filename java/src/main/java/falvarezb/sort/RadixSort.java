@@ -1,11 +1,11 @@
-package falvarezb;
+package falvarezb.sort;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static falvarezb.CountingSort.sort_with_satellite_data;
+import static falvarezb.sort.CountingSort.sort_with_satellite_data;
 
 public class RadixSort {
 

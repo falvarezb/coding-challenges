@@ -1,5 +1,6 @@
-package falvarezb;
+package falvarezb.sort;
 
+import falvarezb.TestUtil;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

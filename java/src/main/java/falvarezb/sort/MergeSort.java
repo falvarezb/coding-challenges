@@ -1,4 +1,4 @@
-package falvarezb;
+package falvarezb.sort;
 
 import java.util.Arrays;
 
