@@ -84,7 +84,7 @@ class SortTest {
     @Test
     public void randomTest() {
         for (int i = 0; i < 50; i++) {
-            int[] arr = RandomDataGen.generateRandomArray(1000, this.d);
+            int[] arr = TestUtil.generateRandomArray(1000, this.d);
             int[] expected = Arrays.copyOf(arr, arr.length);
             Arrays.sort(expected);
 
@@ -98,7 +98,7 @@ class SortTest {
     public void perfTest() {
         //for (int i = 0; i < 50; i++) {
         int arrSize = 10000;
-        int[] arr = RandomDataGen.generateRandomArray(arrSize, this.d);
+        int[] arr = TestUtil.generateRandomArray(arrSize, this.d);
         System.out.println("Array size: " + arrSize);
         for (Sort sorter : sorters.keySet()) {
             runPerfTest(arr, sorter);
