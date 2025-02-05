@@ -7,7 +7,7 @@ public class SelectionSort {
     /**
      * https://www.youtube.com/watch?v=g-PGLbMth_g <br>
      * O(n^2) <br>
-     * Not stable and not adaptive
+     * Not stable and not adaptive <br>
      * It's not stable because it swaps non-adjacent elements, e.g. 5, 5, 2
      */
     public static void sort(int[] arr) {

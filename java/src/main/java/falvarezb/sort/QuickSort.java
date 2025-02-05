@@ -9,13 +9,13 @@ public class QuickSort {
      *  https://algorithmist.com/wiki/Quicksort <br>
      *  Best case: O(n*logn) <br>
      *  Worst case: O(n^2) when list is sorted <br>
-     *  Average case: O(n*logn) when pivot is selected correctly
+     *  Average case: O(n*logn) when pivot is selected correctly <br>
      *
-     *  The worst-case scenario for QuickSort occurs when the partitioning routine produces one subproblem
-     *  with n-1 elements and one with 0 elements, leading to the most unbalanced partitions possible, 'logn' becomes 'n'.
+     *  <p>The worst-case scenario for QuickSort occurs when the partitioning routine produces one subproblem
+     *  with n-1 elements and one with 0 elements, leading to the most unbalanced partitions possible, 'logn' becomes 'n'. <br>
      *
      *  This can happen if the "pivot" element is the smallest or largest element in the array (the array is already
-     *  sorted in ascending or descending order).
+     *  sorted in ascending or descending order).</p>
      */
     public static void sort(int[] arr) {
         quicksort(arr, 0, arr.length-1);

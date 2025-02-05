@@ -8,7 +8,7 @@ public class CountingSort {
     /**
      * values of the elements in the array must be in the range 0...k <br>
      * https://www.youtube.com/watch?v=OKd534EWcdk <br>
-     * O(n)
+     * O(n) <br>
      * Stable
      *
      * Elements are never compared between them but used to index an array containing the number of occurrences

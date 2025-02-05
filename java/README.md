@@ -1,5 +1,3 @@
-# java-template
-Template for Java projects: maven, junit5
 
 https://www.geeksforgeeks.org/introduction-to-sorting-algorithm/?ref=outind
 

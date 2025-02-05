@@ -6,7 +6,7 @@ public class MergeSort {
 
     /**
      * https://www.youtube.com/watch?v=4VqmGXwpLqc <br>
-     * O(n*logn)
+     * O(n*logn) <br>
      * Stable and not adaptive
      */
     public static int[] sort(int[] arr) {
